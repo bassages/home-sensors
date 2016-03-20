@@ -1,0 +1,3 @@
+Other parsers:
+- https://github.com/matthijskooijman/arduino-dsmr/blob/master/examples/parse/parse.ino
+- https://github.com/robertklep/node-dsmr-parser/blob/master/index.js

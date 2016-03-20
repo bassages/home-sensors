@@ -30,9 +30,6 @@ public class Dsmr {
 
     private String[] linesInMessage;
 
-    // https://github.com/matthijskooijman/arduino-dsmr/blob/master/examples/parse/parse.ino
-    // https://github.com/robertklep/node-dsmr-parser/blob/master/index.js
-
     public Dsmr(String message) throws InvalidChecksumException {
         this.linesInMessage = message.split("\n|\r\n");
         verifyChecksum();
@@ -157,24 +154,14 @@ public class Dsmr {
         return result;
     }
 
-
     private void verifyChecksum() throws InvalidChecksumException {
-        System.out.println("CRC from message text: " + Integer.toHexString(getCrc()));
-
         String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
 
-//        CRC16 crc16 = new CRC16();
-//        for (byte b : message.getBytes()) {
-//            crc16.update(b);
-//        }
-//        System.out.println("sun_misc CRC: " + Integer.toHexString(crc16.value));
-//
-//        // using the polynomial: x16+x15+x2+1
-//        int c1 = new Crc16_1(Crc16_1.stdPoly).calculate(message.getBytes(), 0xFFFF);
-//        System.out.println("Crc16_1 CRC: " + Integer.toHexString(c1));
+        // Both seems to be correct:
+//        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
+        int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
 
-        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
-        System.out.println("Calculated CRC: " + Integer.toHexString(calculatedCrc16));
+        System.out.println("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
 
         if (getCrc() != calculatedCrc16) {
             throw new InvalidChecksumException();
