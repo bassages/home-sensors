@@ -1,15 +1,11 @@
-package nl.wiegman.dsmr;
+package nl.wiegman.smartmeter;
 
 import org.apache.commons.lang3.ArrayUtils;
-import sun.misc.CRC16;
+import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Dsmr {
 
@@ -32,6 +28,11 @@ public class Dsmr {
 
     public Dsmr(String message) throws InvalidChecksumException {
         this.linesInMessage = message.split("\n|\r\n");
+        verifyChecksum();
+    }
+
+    public Dsmr(String[] linesInMessage) throws InvalidChecksumException {
+        this.linesInMessage = linesInMessage;
         verifyChecksum();
     }
 
@@ -94,36 +95,24 @@ public class Dsmr {
     private String getSingleStringValue(String key) {
         String result = null;
 
-        String regex = "^" + key + "\\((.*)\\)$";
-
-        Pattern pattern = Pattern.compile(regex);
-
         for (String line : linesInMessage) {
-            Matcher m = pattern.matcher(line.trim());
-            if (m.matches()) {
-                result = m.group(1);
-                break;
+            if (line.startsWith(key)) {
+                result = StringUtils.substringBetween(line, "(", ")");
             }
         }
-
         return result;
     }
 
     private String[] getMultipleStringValue(String key) {
-        List<String> result = new ArrayList<>();
+        String[] result = null;
 
         for (String line : linesInMessage) {
             if (line.startsWith(key)) {
-
-                Pattern pattern = Pattern.compile(".*?\\((.*?)\\)", Pattern.DOTALL);
-                Matcher matcher = pattern.matcher(line);
-
-                while(matcher.find()) {
-                    result.add(matcher.group(1));
-                }
+                result = StringUtils.substringsBetween(line, "(", ")");
+                break;
             }
         }
-        return result.toArray(new String[] {});
+        return result;
     }
 
 
@@ -166,6 +155,11 @@ public class Dsmr {
         if (getCrc() != calculatedCrc16) {
             throw new InvalidChecksumException();
         }
+    }
+
+    @Override
+    public String toString() {
+        return String.join("\r\n", linesInMessage);
     }
 
     public static class InvalidChecksumException extends Exception { }

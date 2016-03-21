@@ -1,4 +1,4 @@
-package nl.wiegman.dsmr;
+package nl.wiegman.smartmeter;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.jodatime.api.Assertions;

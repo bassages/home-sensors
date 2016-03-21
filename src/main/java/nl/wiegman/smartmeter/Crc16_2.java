@@ -1,4 +1,4 @@
-package nl.wiegman.dsmr;
+package nl.wiegman.smartmeter;
 
 public class Crc16_2 {
 

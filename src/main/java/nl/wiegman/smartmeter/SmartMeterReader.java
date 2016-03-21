@@ -5,12 +5,17 @@ import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class SmartMeterReader {
@@ -18,34 +23,45 @@ public class SmartMeterReader {
     private final Logger logger = LoggerFactory.getLogger(SmartMeterReader.class);
 
     private static final String SMART_METER_PORT_NAME = "cu.usbserial-AI02DX8V";
-//    private static final String SMART_METER_PORT_NAME = "cu.Bluetooth-Incoming-Port";
+
+    @Autowired
+    private MessageBuffer messageBuffer;
 
     @PostConstruct
     public void start() {
-        SerialPort smartMeterPort = findSmartMeterPort();
+        readDayaByNativeConnection();
 
-        if (smartMeterPort == null) {
-            logger.error("Failed to connect to port " + SMART_METER_PORT_NAME);
-            logAvailablePorts();
-        } else {
-            smartMeterPort.setComPortParameters(115200, 7, SerialPort.ONE_STOP_BIT, SerialPort.EVEN_PARITY);
-            smartMeterPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
-
-            boolean isPortOpened = smartMeterPort.openPort();
-
-            if (isPortOpened) {
-                logger.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
-
-                // Uncomment one of the following:
+//        SerialPort smartMeterPort = findSmartMeterPort();
+//
+//        if (smartMeterPort == null) {
+//            logger.error("Failed to connect to port " + SMART_METER_PORT_NAME);
+//            logAvailablePorts();
+//        } else {
+//            smartMeterPort.setComPortParameters(115200, 7, SerialPort.ONE_STOP_BIT, SerialPort.EVEN_PARITY);
+//            smartMeterPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+//
+//            boolean isPortOpened = smartMeterPort.openPort();
+//
+//            if (isPortOpened) {
+//                logger.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
+//
+//                // Uncomment one of the following:
 //                smartMeterPort.addDataListener(new DataListener());
-                pollForData(smartMeterPort);
-
-            } else {
-                logger.error("Failed to open port " + SMART_METER_PORT_NAME);
-                logAvailablePorts();
-            }
-        }
+////                pollForData(smartMeterPort);
+//
+//            } else {
+//                logger.error("Failed to open port " + SMART_METER_PORT_NAME);
+//                logAvailablePorts();
+//            }
+//        }
     }
+
+    private void gatherData(SerialPort comPort) {
+        comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
+        handleInputStream(comPort.getInputStream());
+        comPort.closePort();
+    }
+
 
     private SerialPort findSmartMeterPort() {
         SerialPort result = null;
@@ -60,12 +76,14 @@ public class SmartMeterReader {
     }
 
     private void logAvailablePorts() {
-        logger.info("---------------------------------------------------------------------");
-        logger.info("The following ports are available:");
-        for (SerialPort serialPort : SerialPort.getCommPorts()) {
-            logger.info(serialPort.getSystemPortName() + ": " + serialPort.getDescriptivePortName());
+        logger.info("--------------------------------------------------------------------------------------");
+        logger.info("-- The following ports are available:");
+        List<SerialPort> availableCommPorts = Arrays.asList(SerialPort.getCommPorts());
+        Collections.sort(availableCommPorts, (SerialPort p1, SerialPort p2) -> p1.getSystemPortName().compareTo(p2.getSystemPortName()));
+        for (SerialPort serialPort : availableCommPorts) {
+            logger.info("-- * " + serialPort.getSystemPortName() + ": " + serialPort.getDescriptivePortName());
         }
-        logger.info("---------------------------------------------------------------------");
+        logger.info("--------------------------------------------------------------------------------------");
     }
 
     private void pollForData(SerialPort smartMeterPort) {
@@ -75,10 +93,9 @@ public class SmartMeterReader {
 
                 byte[] readBuffer = new byte[smartMeterPort.bytesAvailable()];
                 int numRead = smartMeterPort.readBytes(readBuffer, readBuffer.length);
-                logger.info("Read " + numRead + " bytes.");
+                String string = new String(readBuffer);
 
-                String s = new String(readBuffer);
-                logger.info("Read: " + s);
+                logger.info("Read " + numRead + " bytes: " + string);
             }
         } catch (Exception e) {
             logger.error("Exception while reading data from smart meter", e);
@@ -107,46 +124,51 @@ public class SmartMeterReader {
 
         @Override
         public void serialEvent(SerialPortEvent serialPortEvent) {
+            logger.info("SerialportEvent of type: " + serialPortEvent.getEventType());
+
             if (serialPortEvent.getEventType() != SerialPort.LISTENING_EVENT_DATA_RECEIVED) {
                 return;
             }
-            byte[] newData = serialPortEvent.getReceivedData();
-            String s = new String(newData);
-            logger.info("Read: " + s);
+
+            String data = new String(serialPortEvent.getReceivedData());
+            logger.info("Read: " + data);
         }
 
         @Override
         public int getPacketSize() {
-            return 100;
+            return 10;
         }
     }
 
-    private void nativeConnection() {
-
+    private void readDayaByNativeConnection() {
         try {
-
-            Process process = Runtime.getRuntime().exec("sudo cu -l /dev/" + SMART_METER_PORT_NAME + " --speed 115200 --parity=even");
+//            Process process = Runtime.getRuntime().exec("sudo cu -l /dev/" + SMART_METER_PORT_NAME + " --speed 115200 --parity=even");
+            Process process = Runtime.getRuntime().exec("tail -F /Users/robwiegman/test");
 
             final Thread ioThread = new Thread() {
                 @Override
                 public void run() {
-                    try {
-                        final BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                        String line = null;
-                        while ((line = reader.readLine()) != null) {
-                            logger.info(line);
-                        }
-                        reader.close();
-                    } catch (IOException e) {
-                        logger.error("", e);
-                    }
+                    handleInputStream(process.getInputStream());
                 }
             };
             ioThread.start();
-
             process.waitFor();
         } catch (IOException | InterruptedException e) {
             logger.error("", e);
         }
+    }
+
+    private void handleInputStream(InputStream inputStream) {
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                messageBuffer.addLine(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+            logger.error("IOException", e);
+        }
+
     }
 }

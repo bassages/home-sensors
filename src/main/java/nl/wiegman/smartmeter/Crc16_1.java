@@ -1,4 +1,4 @@
-package nl.wiegman.dsmr;
+package nl.wiegman.smartmeter;
 
 // Fast byte-wise CRC16 calculation.
 // Author: Christian d'Heureuse, www.source-code.biz
