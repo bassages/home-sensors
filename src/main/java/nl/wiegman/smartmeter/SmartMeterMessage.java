@@ -159,7 +159,7 @@ public class SmartMeterMessage {
 //        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
         int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
 
-        LOG.info("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
+        LOG.debug("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
 
         if (getCrc() != calculatedCrc16) {
             throw new InvalidSmartMeterMessageException();
