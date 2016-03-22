@@ -2,12 +2,17 @@ package nl.wiegman.smartmeter;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Dsmr {
+public class SmartMeterMessage {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReader.class);
 
     // OBIS codes
     public static final String VERSION_INFORMATION_FOR_P1_OUTPUT = "1-3:0.2.8";
@@ -26,12 +31,12 @@ public class Dsmr {
 
     private String[] linesInMessage;
 
-    public Dsmr(String message) throws InvalidChecksumException {
+    public SmartMeterMessage(String message) throws InvalidSmartMeterMessageException {
         this.linesInMessage = message.split("\n|\r\n");
         verifyChecksum();
     }
 
-    public Dsmr(String[] linesInMessage) throws InvalidChecksumException {
+    public SmartMeterMessage(String[] linesInMessage) throws InvalidSmartMeterMessageException {
         this.linesInMessage = linesInMessage;
         verifyChecksum();
     }
@@ -44,37 +49,41 @@ public class Dsmr {
         return getSingleStringValue(EQUIPMENT_IDENTIFIER);
     }
 
-    public Date getDatetimestamp() throws ParseException {
-        return stringToDate(getSingleStringValue(DATETIMESTAMP_OF_THE_P1_MESSAGE));
+    public Date getDatetimestamp() {
+        try {
+            return stringToDate(getSingleStringValue(DATETIMESTAMP_OF_THE_P1_MESSAGE));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Double getMeterReadingElectricityDeliveredToClientTariff1() {
-        return kwhStringToDouble(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1));
+    public BigDecimal getMeterReadingElectricityDeliveredToClientTariff1() {
+        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1));
     }
 
-    public Double getMeterReadingElectricityDeliveredToClientTariff2() {
-        return kwhStringToDouble(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2));
+    public BigDecimal getMeterReadingElectricityDeliveredToClientTariff2() {
+        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2));
     }
 
-    public Double getMeterReadingElectricityDeliveredByClientTariff1() {
-        return kwhStringToDouble(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1));
+    public BigDecimal getMeterReadingElectricityDeliveredByClientTariff1() {
+        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1));
     }
 
-    public Double getMeterReadingElectricityDeliveredByClientTariff2() {
-        return kwhStringToDouble(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2));
+    public BigDecimal getMeterReadingElectricityDeliveredByClientTariff2() {
+        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2));
     }
 
     public String getTariffIndicatorElectricity() {
         return getSingleStringValue(TARIFF_INDICATOR_ELECTRICITY);
     }
 
-    public Double getActualElectricityPowerDelivered() {
-        return kwStringToDouble(getSingleStringValue(ACTUAL_ELECTRICITY_POWER_DELIVERED));
+    public BigDecimal getActualElectricityPowerDelivered() {
+        return kwStringToBigDecimal(getSingleStringValue(ACTUAL_ELECTRICITY_POWER_DELIVERED));
     }
 
-    public Double getLastHourlyValueGasDeliveredToClient() {
+    public BigDecimal getLastHourlyValueGasDeliveredToClient() {
         String[] stringValues = getMultipleStringValue(LAST_HOURLY_VALUE_GAS_DELIVERED_TO_CLIENT);
-        return m3StringToDouble(stringValues[1]);
+        return m3StringToBigDecimal(stringValues[1]);
     }
 
     private int getCrc() {
@@ -116,44 +125,44 @@ public class Dsmr {
     }
 
 
-    private Double kwhStringToDouble(String value) {
-        Double result = null;
+    private BigDecimal kwhStringToBigDecimal(String value) {
+        BigDecimal result = null;
 
         if (value != null) {
-            result = Double.parseDouble(value.replace("*kWh", ""));
+            result = new BigDecimal(value.replace("*kWh", ""));
         }
         return result;
     }
 
-    private Double kwStringToDouble(String value) {
-        Double result = null;
+    private BigDecimal kwStringToBigDecimal(String value) {
+        BigDecimal result = null;
 
         if (value != null) {
-            result = Double.parseDouble(value.replace("*kW", ""));
+            result = new BigDecimal(value.replace("*kW", ""));
         }
         return result;
     }
 
-    private Double m3StringToDouble(String value) {
-        Double result = null;
+    private BigDecimal m3StringToBigDecimal(String value) {
+        BigDecimal result = null;
 
         if (value != null) {
-            result = Double.parseDouble(value.replace("*m3", ""));
+            result = new BigDecimal(value.replace("*m3", ""));
         }
         return result;
     }
 
-    private void verifyChecksum() throws InvalidChecksumException {
+    private void verifyChecksum() throws InvalidSmartMeterMessageException {
         String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
 
         // Both seems to be correct:
 //        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
         int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
 
-        System.out.println("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
+        LOG.info("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
 
         if (getCrc() != calculatedCrc16) {
-            throw new InvalidChecksumException();
+            throw new InvalidSmartMeterMessageException();
         }
     }
 
@@ -162,5 +171,5 @@ public class Dsmr {
         return String.join("\r\n", linesInMessage);
     }
 
-    public static class InvalidChecksumException extends Exception { }
+    public static class InvalidSmartMeterMessageException extends Exception { }
 }

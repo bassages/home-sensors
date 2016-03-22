@@ -1,17 +1,29 @@
 package nl.wiegman.smartmeter;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
-import static org.assertj.core.api.Assertions.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+@RunWith(MockitoJUnitRunner.class)
 public class MessageBufferTest {
 
-    private MessageBuffer messageBuffer = new MessageBuffer();
+    @Mock
+    private SmartMeterMessagePersister smartMeterMessagePersisterMock;
+
+    @InjectMocks
+    private MessageBuffer messageBuffer;
 
     @Test
     public void happyFlow() throws Exception {
@@ -23,6 +35,16 @@ public class MessageBufferTest {
         try (Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-2.txt").toURI()), Charset.defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
         }
+
+        assertThat(messageBuffer.getPendingLinesSize()).isEqualTo(0);
+
+        verify(smartMeterMessagePersisterMock, times(2)).persist((SmartMeterMessage) Matchers.anyObject());
+    }
+
+    @Test
+    public void linesNotAcceptedWhenNoProperHeaderHasBeenSent() throws Exception {
+        messageBuffer.addLine("Hello this is not a valid header");
         assertThat(messageBuffer.getPendingLinesSize()).isEqualTo(0);
     }
+
 }
