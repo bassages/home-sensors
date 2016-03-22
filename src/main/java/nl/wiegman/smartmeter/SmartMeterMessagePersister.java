@@ -2,16 +2,23 @@ package nl.wiegman.smartmeter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 
 @Component
 public class SmartMeterMessagePersister {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterMessagePersister.class);
+    private static final String SERVER_ENDPOINT = "http://bassagesbassages.com";
 
     public void persist(SmartMeterMessage smartMeterMessage) {
 
@@ -20,10 +27,44 @@ public class SmartMeterMessagePersister {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonString = mapper.writeValueAsString(jsonMessage);
-            LOG.info("Send json to cloud: " + jsonString);
+
+            try {
+                sendToServer(jsonString);
+            } catch (RuntimeException e) {
+
+            }
 
         } catch (JsonProcessingException e) {
             LOG.error("Failed to map message to json. Message=" + smartMeterMessage, e);
+        }
+    }
+
+    private void sendToServer(String jsonString) {
+        LOG.info("Send json to cloud: " + jsonString);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            HttpPost request = new HttpPost(SERVER_ENDPOINT);
+
+            StringEntity params = new StringEntity(jsonString);
+
+            request.addHeader("content-type", "application/json");
+            request.setEntity(params);
+            CloseableHttpResponse response = httpClient.execute(request);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 201) {
+                throw new RuntimeException("Upload to cloud failed");
+            }
+        } catch (Exception ex) {
+            // handle exception here
+            throw new RuntimeException("Upload to cloud failed");
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                throw new RuntimeException("Upload to cloud failed");
+            }
         }
     }
 
