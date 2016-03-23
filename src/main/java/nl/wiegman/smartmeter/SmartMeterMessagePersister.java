@@ -3,6 +3,7 @@ package nl.wiegman.smartmeter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
@@ -11,38 +12,37 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
 
 @Component
 public class SmartMeterMessagePersister {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterMessagePersister.class);
 
-    // TODO: inject property...
-    private static final String SERVER_ENDPOINT = "http://homecontrol-bassages.rhcloud.com/homecontrol/rest/meterstanden";
+    @Value("${home-server-rest-service-meterstanden-url}")
+    private String homeServerRestServiceMeterstandenUrl = null;
 
     public void persist(SmartMeterMessage smartMeterMessage) {
 
-        SmartMeterJsonMessage jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
-
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            String jsonString = mapper.writeValueAsString(jsonMessage);
+            String jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
 
             try {
+                postToHomeServer(jsonMessage);
 
-                sendToServer(jsonString);
-
-            } catch (RuntimeException e) {
-                LOG.warn("Failed send message to " + SERVER_ENDPOINT + ". Message=" + smartMeterMessage, e);
+            } catch (Exception e) {
+                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
 
                 try {
-
-                    FileUtils.writeStringToFile(new File(System.currentTimeMillis() + ".txt"), jsonString);
+                    // TODO: directory
+                    File file = new File(System.currentTimeMillis() + ".txt");
+                    FileUtils.writeStringToFile(file, jsonMessage);
 
                 } catch (IOException e1) {
                     LOG.error("Failed to save file. Message=" + smartMeterMessage, e1);
@@ -54,36 +54,31 @@ public class SmartMeterMessagePersister {
         }
     }
 
-    private void sendToServer(String jsonString) {
-        LOG.info("Send json to cloud: " + jsonString);
+    private void postToHomeServer(String jsonString) throws Exception {
+        LOG.debug("Post to home-server: " + jsonString);
 
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 
-            HttpPost request = new HttpPost(SERVER_ENDPOINT);
+            HttpPost request = new HttpPost(homeServerRestServiceMeterstandenUrl);
             StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
             CloseableHttpResponse response = httpClient.execute(request);
 
-            int statusCode = response.getStatusLine().getStatusCode();
-
-            if (statusCode != 204) {
-                throw new RuntimeException("Upload to cloud failed. Statuscode = " + statusCode);
+            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                throw new RuntimeException("Unexpected statusline: " + response.getStatusLine());
             }
-
-        } catch (Exception ex) {
-            throw new RuntimeException("Upload to cloud failed", ex);
         }
     }
 
-    private SmartMeterJsonMessage createSmartMeterJsonMessage(SmartMeterMessage smartMeterMessage) {
+    private String createSmartMeterJsonMessage(SmartMeterMessage smartMeterMessage) throws JsonProcessingException {
         SmartMeterJsonMessage jsonMessage = new SmartMeterJsonMessage();
         jsonMessage.setDatumtijd(smartMeterMessage.getDatetimestamp().getTime());
         jsonMessage.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
         jsonMessage.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         jsonMessage.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
         jsonMessage.setGas(smartMeterMessage.getLastHourlyValueGasDeliveredToClient());
-        return jsonMessage;
+        return new ObjectMapper().writeValueAsString(jsonMessage);
     }
 
     private static class SmartMeterJsonMessage {
