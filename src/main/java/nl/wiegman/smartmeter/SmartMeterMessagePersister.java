@@ -2,8 +2,10 @@ package nl.wiegman.smartmeter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 
@@ -18,7 +21,9 @@ import java.math.BigDecimal;
 public class SmartMeterMessagePersister {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterMessagePersister.class);
-    private static final String SERVER_ENDPOINT = "http://bassagesbassages.com";
+
+    // TODO: inject property...
+    private static final String SERVER_ENDPOINT = "http://homecontrol-bassages.rhcloud.com/homecontrol/rest/meterstanden";
 
     public void persist(SmartMeterMessage smartMeterMessage) {
 
@@ -29,9 +34,19 @@ public class SmartMeterMessagePersister {
             String jsonString = mapper.writeValueAsString(jsonMessage);
 
             try {
-                sendToServer(jsonString);
-            } catch (RuntimeException e) {
 
+                sendToServer(jsonString);
+
+            } catch (RuntimeException e) {
+                LOG.warn("Failed send message to " + SERVER_ENDPOINT + ". Message=" + smartMeterMessage, e);
+
+                try {
+
+                    FileUtils.writeStringToFile(new File(System.currentTimeMillis() + ".txt"), jsonString);
+
+                } catch (IOException e1) {
+                    LOG.error("Failed to save file. Message=" + smartMeterMessage, e1);
+                }
             }
 
         } catch (JsonProcessingException e) {
@@ -42,29 +57,22 @@ public class SmartMeterMessagePersister {
     private void sendToServer(String jsonString) {
         LOG.info("Send json to cloud: " + jsonString);
 
-        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 
-        try {
             HttpPost request = new HttpPost(SERVER_ENDPOINT);
-
-            StringEntity params = new StringEntity(jsonString);
-
-            request.addHeader("content-type", "application/json");
+            StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
+
             CloseableHttpResponse response = httpClient.execute(request);
+
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != 201) {
-                throw new RuntimeException("Upload to cloud failed");
+
+            if (statusCode != 204) {
+                throw new RuntimeException("Upload to cloud failed. Statuscode = " + statusCode);
             }
+
         } catch (Exception ex) {
-            // handle exception here
-            throw new RuntimeException("Upload to cloud failed");
-        } finally {
-            try {
-                httpClient.close();
-            } catch (IOException e) {
-                throw new RuntimeException("Upload to cloud failed");
-            }
+            throw new RuntimeException("Upload to cloud failed", ex);
         }
     }
 
