@@ -1,5 +1,6 @@
 package nl.wiegman.smartmeter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class SmartMeterReaderNative {
     @Autowired
     private MessageBuffer messageBuffer;
 
-    @PostConstruct
+//    @PostConstruct
     public void start() {
         connectAndListenForData();
     }
@@ -32,21 +33,22 @@ public class SmartMeterReaderNative {
         try {
             String command = "sudo cu -l /dev/" + smartMeterPort + " --speed 115200 --parity=even";
 
-            LOG.info("Connecting to smart-meter using command=[" + command + "]");
+            LOG.info("Connecting to smart meter using command=[" + command + "]");
 
             Process process = Runtime.getRuntime().exec(command);
 
             final Thread ioThread = new Thread() {
                 @Override
                 public void run() {
+                    handleErrorStream(process.getErrorStream());
                     handleInputStream(process.getInputStream());
                 }
             };
             ioThread.start();
-            process.waitFor();
 
-            if (process.exitValue() != 0) {
-                LOG.warn("Unexpected exit value from command. Exit value=[" + process.exitValue() + "]");
+            int exitValue = process.waitFor();
+            if (exitValue != 0) {
+                LOG.warn("Unexpected exit value from command. Exit value=[" + exitValue + "]");
             }
 
         } catch (IOException | InterruptedException e) {
@@ -60,11 +62,31 @@ public class SmartMeterReaderNative {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                messageBuffer.addLine(line);
+                if (messageBuffer.getPendingLinesSize() == 0 && StringUtils.startsWithIgnoreCase(line, "connected")) {
+                    LOG.info("Successfully connected to smart meter");
+                } else {
+                    messageBuffer.addLine(line);
+                }
+
             }
             reader.close();
         } catch (IOException e) {
             LOG.error("Oops, and unexpected error occurred.", e);
         }
     }
+
+    private void handleErrorStream(InputStream inputStream) {
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                LOG.error(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+            LOG.error("Oops, and unexpected error occurred.", e);
+        }
+    }
+
 }

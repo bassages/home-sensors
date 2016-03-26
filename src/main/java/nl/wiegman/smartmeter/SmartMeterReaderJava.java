@@ -29,7 +29,7 @@ public class SmartMeterReaderJava {
     @Autowired
     private MessageBuffer messageBuffer;
 
-//    @PostConstruct
+    @PostConstruct
     public void start() {
         SerialPort smartMeterPort = findSmartMeterPort();
 
