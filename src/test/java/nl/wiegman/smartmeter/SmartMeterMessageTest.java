@@ -19,13 +19,13 @@ public class SmartMeterMessageTest {
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
         Assertions.assertThat(new DateTime(smartMeterMessage.getDatetimestamp())).isEqualTo("2016-03-18T15:06:54.000+01:00");
         assertThat(smartMeterMessage.getEquipmentIdentifier()).isEqualTo("4530303235303030303438343736313135");
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1()).isEqualTo(23.153);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2()).isEqualTo(61.306);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(0.0);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1().doubleValue()).isEqualTo(23.153);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2().doubleValue()).isEqualTo(61.306);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1().doubleValue()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2().doubleValue()).isEqualTo(0.0);
         assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo("0002");
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(0.334);
-        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient()).isEqualTo(62.956);
+        assertThat(smartMeterMessage.getActualElectricityPowerDelivered().doubleValue()).isEqualTo(0.334);
+        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient().doubleValue()).isEqualTo(62.956);
     }
 
     @Test
@@ -36,13 +36,13 @@ public class SmartMeterMessageTest {
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
         Assertions.assertThat(new DateTime(smartMeterMessage.getDatetimestamp())).isEqualTo("2016-03-18T15:07:04.000+01:00");
         assertThat(smartMeterMessage.getEquipmentIdentifier()).isEqualTo("4530303235303030303438343736313135");
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1()).isEqualTo(23.153);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2()).isEqualTo(61.307);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(0.0);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1().doubleValue()).isEqualTo(23.153);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2().doubleValue()).isEqualTo(61.307);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1().doubleValue()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2().doubleValue()).isEqualTo(0.0);
         assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo("0002");
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(0.337);
-        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient()).isEqualTo(62.956);
+        assertThat(smartMeterMessage.getActualElectricityPowerDelivered().doubleValue()).isEqualTo(0.337);
+        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient().doubleValue()).isEqualTo(62.956);
     }
 
     @Test
@@ -53,13 +53,13 @@ public class SmartMeterMessageTest {
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
         Assertions.assertThat(new DateTime(smartMeterMessage.getDatetimestamp())).isEqualTo("2016-03-18T14:31:34.000+01:00");
         assertThat(smartMeterMessage.getEquipmentIdentifier()).isEqualTo("4530303235303030303438343736313135");
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1()).isEqualTo(23.153);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2()).isEqualTo(61.099);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(0.0);
-        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1().doubleValue()).isEqualTo(23.153);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2().doubleValue()).isEqualTo(61.099);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1().doubleValue()).isEqualTo(0.0);
+        assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2().doubleValue()).isEqualTo(0.0);
         assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo("0002");
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(0.453);
-        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient()).isEqualTo(62.191);
+        assertThat(smartMeterMessage.getActualElectricityPowerDelivered().doubleValue()).isEqualTo(0.453);
+        assertThat(smartMeterMessage.getLastHourlyValueGasDeliveredToClient().doubleValue()).isEqualTo(62.191);
     }
 
     @Test

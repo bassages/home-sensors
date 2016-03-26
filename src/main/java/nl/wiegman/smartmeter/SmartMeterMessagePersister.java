@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
 
 @Component
 public class SmartMeterMessagePersister {
@@ -26,7 +26,21 @@ public class SmartMeterMessagePersister {
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterMessagePersister.class);
 
     @Value("${home-server-rest-service-meterstanden-url}")
-    private String homeServerRestServiceMeterstandenUrl = null;
+    private String homeServerRestServiceMeterstandenUrl;
+
+    @Value("${buffer-directory}")
+    private File bufferDirectory;
+
+    @PostConstruct
+    public void start() {
+        if (bufferDirectory.exists()) {
+            LOG.info("Using messagebuffer directory: " + bufferDirectory.getAbsolutePath());
+        } else {
+            String message = "buffer-directory [" + bufferDirectory + "] does not exist";
+            LOG.error(message);
+            throw new IllegalArgumentException(message);
+        }
+    }
 
     public void persist(SmartMeterMessage smartMeterMessage) {
 
@@ -40,8 +54,7 @@ public class SmartMeterMessagePersister {
                 LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
 
                 try {
-                    // TODO: directory
-                    File file = new File(System.currentTimeMillis() + ".txt");
+                    File file = new File(bufferDirectory, System.currentTimeMillis() + ".txt");
                     FileUtils.writeStringToFile(file, jsonMessage);
 
                 } catch (IOException e1) {
@@ -72,16 +85,16 @@ public class SmartMeterMessagePersister {
     }
 
     private String createSmartMeterJsonMessage(SmartMeterMessage smartMeterMessage) throws JsonProcessingException {
-        SmartMeterJsonMessage jsonMessage = new SmartMeterJsonMessage();
-        jsonMessage.setDatumtijd(smartMeterMessage.getDatetimestamp().getTime());
-        jsonMessage.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
-        jsonMessage.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
-        jsonMessage.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
-        jsonMessage.setGas(smartMeterMessage.getLastHourlyValueGasDeliveredToClient());
-        return new ObjectMapper().writeValueAsString(jsonMessage);
+        HomeServerMeterstand homeServerMeterstand = new HomeServerMeterstand();
+        homeServerMeterstand.setDatumtijd(smartMeterMessage.getDatetimestamp().getTime());
+        homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
+        homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
+        homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
+        homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueGasDeliveredToClient());
+        return new ObjectMapper().writeValueAsString(homeServerMeterstand);
     }
 
-    private static class SmartMeterJsonMessage {
+    private static class HomeServerMeterstand {
         private long datumtijd;
         private int stroomOpgenomenVermogenInWatt;
         private BigDecimal stroomTarief1;

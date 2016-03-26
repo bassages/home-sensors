@@ -6,6 +6,7 @@ import com.fazecast.jSerialComm.SerialPortPacketListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -18,42 +19,41 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-public class SmartMeterReader {
+public class SmartMeterReaderJava {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderJava.class);
 
-    private static final String SMART_METER_PORT_NAME = "cu.usbserial-AI02DX8V";
+    @Value("${smart-meter-port-name}")
+    private String smartMeterPortName;
 
     @Autowired
     private MessageBuffer messageBuffer;
 
-    @PostConstruct
+//    @PostConstruct
     public void start() {
-        readDataByNativeConnection();
+        SerialPort smartMeterPort = findSmartMeterPort();
 
-//        SerialPort smartMeterPort = findSmartMeterPort();
-//
-//        if (smartMeterPort == null) {
-//            LOG.error("Failed to connect to port " + SMART_METER_PORT_NAME);
-//            logAvailablePorts();
-//        } else {
-//            smartMeterPort.setComPortParameters(115200, 7, SerialPort.ONE_STOP_BIT, SerialPort.EVEN_PARITY);
-//            smartMeterPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
-//
-//            boolean isPortOpened = smartMeterPort.openPort();
-//
-//            if (isPortOpened) {
-//                LOG.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
-//
-//                // Uncomment one of the following:
-//                smartMeterPort.addDataListener(new DataListener());
-////                pollForData(smartMeterPort);
-//
-//            } else {
-//                LOG.error("Failed to open port " + SMART_METER_PORT_NAME);
-//                logAvailablePorts();
-//            }
-//        }
+        if (smartMeterPort == null) {
+            LOG.error("Failed to connect to port " + smartMeterPortName);
+            logAvailablePorts();
+        } else {
+            smartMeterPort.setComPortParameters(115200, 7, SerialPort.ONE_STOP_BIT, SerialPort.EVEN_PARITY);
+            smartMeterPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
+
+            boolean isPortOpened = smartMeterPort.openPort();
+
+            if (isPortOpened) {
+                LOG.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
+
+                // Uncomment one of the following:
+                smartMeterPort.addDataListener(new DataListener());
+//                pollForData(smartMeterPort);
+
+            } else {
+                LOG.error("Failed to open port " + smartMeterPortName);
+                logAvailablePorts();
+            }
+        }
     }
 
     private void gatherData(SerialPort comPort) {
@@ -62,13 +62,12 @@ public class SmartMeterReader {
         comPort.closePort();
     }
 
-
     private SerialPort findSmartMeterPort() {
         SerialPort result = null;
 
         SerialPort[] comPorts = SerialPort.getCommPorts();
         for (SerialPort serialPort : comPorts) {
-            if (SMART_METER_PORT_NAME.equals(serialPort.getSystemPortName())) {
+            if (smartMeterPortName.equals(serialPort.getSystemPortName())) {
                 result = serialPort;
             }
         }
@@ -140,28 +139,11 @@ public class SmartMeterReader {
         }
     }
 
-    private void readDataByNativeConnection() {
-        try {
-//            Process process = Runtime.getRuntime().exec("sudo cu -l /dev/" + SMART_METER_PORT_NAME + " --speed 115200 --parity=even");
-            Process process = Runtime.getRuntime().exec("tail -F /Users/robwiegman/test");
-
-            final Thread ioThread = new Thread() {
-                @Override
-                public void run() {
-                    handleInputStream(process.getInputStream());
-                }
-            };
-            ioThread.start();
-            process.waitFor();
-        } catch (IOException | InterruptedException e) {
-            LOG.error("", e);
-        }
-    }
-
     private void handleInputStream(InputStream inputStream) {
         try {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = null;
+
+            String line;
             while ((line = reader.readLine()) != null) {
                 messageBuffer.addLine(line);
             }

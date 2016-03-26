@@ -30,7 +30,7 @@ public class MessageBuffer {
                     smartMeterMessagePersister.persist(message);
                     lines.clear();
                 } catch (SmartMeterMessage.InvalidSmartMeterMessageException e) {
-                    LOG.error("Invalid CRC for message: " + String.join("\n", lines));
+                    LOG.error("Invalid CRC for smartmetermessage: " + String.join("\n", lines));
                 }
             }
         }

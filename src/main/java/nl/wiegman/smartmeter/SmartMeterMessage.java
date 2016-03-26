@@ -12,7 +12,7 @@ import java.util.Date;
 
 public class SmartMeterMessage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
 
     // OBIS codes
     public static final String VERSION_INFORMATION_FOR_P1_OUTPUT = "1-3:0.2.8";
@@ -156,8 +156,8 @@ public class SmartMeterMessage {
         String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
 
         // Both seems to be correct:
-//        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
-        int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
+        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
+//        int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
 
         LOG.debug("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
 
