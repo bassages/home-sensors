@@ -3,6 +3,7 @@ package nl.wiegman.smartmeter;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import com.fazecast.jSerialComm.SerialPortPacketListener;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,9 @@ import java.util.Collections;
 import java.util.List;
 
 @Component
-public class SmartMeterReaderJava {
+public class SmartMeterReaderJSerialComm {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderJava.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderJSerialComm.class);
 
     @Value("${smart-meter-port-name}")
     private String smartMeterPortName;
@@ -29,7 +30,7 @@ public class SmartMeterReaderJava {
     @Autowired
     private MessageBuffer messageBuffer;
 
-    @PostConstruct
+//    @PostConstruct
     public void start() {
         SerialPort smartMeterPort = findSmartMeterPort();
 
@@ -37,28 +38,44 @@ public class SmartMeterReaderJava {
             LOG.error("Failed to connect to port " + smartMeterPortName);
             logAvailablePorts();
         } else {
-            smartMeterPort.setComPortParameters(115200, 7, SerialPort.ONE_STOP_BIT, SerialPort.EVEN_PARITY);
+            smartMeterPort.setBaudRate(115200);
+            smartMeterPort.setParity(SerialPort.EVEN_PARITY);
+            smartMeterPort.setNumStopBits(SerialPort.ONE_STOP_BIT);
+            smartMeterPort.setNumDataBits(7);
             smartMeterPort.setFlowControl(SerialPort.FLOW_CONTROL_DISABLED);
 
-            boolean isPortOpened = smartMeterPort.openPort();
+            try {
+                boolean isPortOpened = smartMeterPort.openPort();
 
-            if (isPortOpened) {
-                LOG.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
+                if (isPortOpened) {
+                    LOG.info("Connected to port " + smartMeterPort.getDescriptivePortName() + " on " + smartMeterPort.getSystemPortName());
 
-                // Uncomment one of the following:
-                smartMeterPort.addDataListener(new DataListener());
+                    // Uncomment one of the following:
+                    gatherData(smartMeterPort);
+//                    smartMeterPort.addDataListener(new DataListener());
 //                pollForData(smartMeterPort);
 
-            } else {
-                LOG.error("Failed to open port " + smartMeterPortName);
-                logAvailablePorts();
+                } else {
+                    LOG.error("Failed to open port " + smartMeterPortName);
+                    logAvailablePorts();
+                }
+
+            } finally {
+//                if (smartMeterPort.isOpen()) {
+//                    smartMeterPort.closePort();
+//                }
             }
         }
     }
 
     private void gatherData(SerialPort comPort) {
-        comPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 100, 0);
-        handleInputStream(comPort.getInputStream());
+        InputStream in = comPort.getInputStream();
+        try
+        {
+            for (int j = 0; j < 1000; ++j)
+                System.out.print((char)in.read());
+            in.close();
+        } catch (Exception e) { e.printStackTrace(); }
         comPort.closePort();
     }
 
@@ -85,32 +102,31 @@ public class SmartMeterReaderJava {
         LOG.info("--------------------------------------------------------------------------------------");
     }
 
-    private void pollForData(SerialPort smartMeterPort) {
-        try {
-            while (true) {
-                waitForAvailableBytes(smartMeterPort);
-
-                byte[] readBuffer = new byte[smartMeterPort.bytesAvailable()];
-                int numRead = smartMeterPort.readBytes(readBuffer, readBuffer.length);
-                String string = new String(readBuffer);
-
-                LOG.info("Read " + numRead + " bytes: " + string);
-            }
-        } catch (Exception e) {
-            LOG.error("Exception while reading data from smart meter", e);
-        } finally {
-            if (smartMeterPort != null && smartMeterPort.isOpen()) {
-                smartMeterPort.closePort();
-            }
-        }
-    }
-
-    private void waitForAvailableBytes(SerialPort smartMeterPort) throws InterruptedException {
-        while (smartMeterPort.bytesAvailable() == 0) {
-            LOG.info("Waiting for bytes...");
-            Thread.sleep(1000);
-        }
-    }
+//    private void pollForData(SerialPort smartMeterPort) {
+//        try {
+//            while (true) {
+//                waitForAvailableBytes(smartMeterPort);
+//
+//                byte[] readBuffer = new byte[smartMeterPort.bytesAvailable()];
+//                String string = new String(readBuffer);
+//
+//                LOG.info(string);
+//            }
+//        } catch (Exception e) {
+//            LOG.error("Oops, and unexpected error occurred.", e);
+//        } finally {
+//            if (smartMeterPort != null && smartMeterPort.isOpen()) {
+//                smartMeterPort.closePort();
+//            }
+//        }
+//    }
+//
+//    private void waitForAvailableBytes(SerialPort smartMeterPort) throws InterruptedException {
+//        while (smartMeterPort.bytesAvailable() == 0) {
+////            LOG.info("Waiting for bytes...");
+//            Thread.sleep(500);
+//        }
+//    }
 
     private static class DataListener implements SerialPortPacketListener {
 
@@ -123,33 +139,27 @@ public class SmartMeterReaderJava {
 
         @Override
         public void serialEvent(SerialPortEvent serialPortEvent) {
-            LOG.info("SerialportEvent of type: " + serialPortEvent.getEventType());
 
             if (serialPortEvent.getEventType() != SerialPort.LISTENING_EVENT_DATA_RECEIVED) {
+                LOG.warn("Ignoring serialportevent of type: " + serialPortEvent.getEventType());
                 return;
             }
 
             String data = new String(serialPortEvent.getReceivedData());
-            LOG.info("Read: " + data);
+            LOG.info(data);
         }
 
         @Override
         public int getPacketSize() {
-            return 10;
+            return 100;
         }
     }
 
     private void handleInputStream(InputStream inputStream) {
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                messageBuffer.addLine(line);
-            }
-            reader.close();
+            IOUtils.copy(inputStream, System.out);
         } catch (IOException e) {
-            LOG.error("IOException", e);
+            LOG.error("Oops, and unexpected error occurred.", e);
         }
     }
 }
