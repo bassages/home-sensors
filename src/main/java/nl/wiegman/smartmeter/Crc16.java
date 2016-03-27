@@ -1,6 +1,6 @@
 package nl.wiegman.smartmeter;
 
-public class Crc16_2 {
+public class Crc16 {
 
     /******************************************************************************
      * Compilation:  javac CRC16.java

@@ -156,8 +156,7 @@ public class SmartMeterMessage {
         String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
 
         // Both seems to be correct:
-        int calculatedCrc16 = Crc16_2.calculate(messageForCalculatingCrc);
-//        int calculatedCrc16 = (new Crc16_1(Crc16_1.stdPoly)).calculate(messageForCalculatingCrc.getBytes(), 0x0000);
+        int calculatedCrc16 = Crc16.calculate(messageForCalculatingCrc);
 
         LOG.debug("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
 
