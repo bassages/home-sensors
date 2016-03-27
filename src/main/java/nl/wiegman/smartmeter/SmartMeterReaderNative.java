@@ -37,6 +37,7 @@ public class SmartMeterReaderNative {
                 @Override
                 public void run() {
                     handleInputStream(process.getInputStream());
+                    handleErrorStream(process.getErrorStream());
                 }
             };
             ioThread.start();
@@ -63,4 +64,18 @@ public class SmartMeterReaderNative {
             IOUtils.closeQuietly(in);
         }
     }
+
+    private void handleErrorStream(InputStream inputStream) {
+        InputStreamReader in = new InputStreamReader(inputStream);
+        try {
+            LineIterator it = IOUtils.lineIterator(in);
+            while (it.hasNext()) {
+                String line = it.nextLine();
+                LOG.error(line);
+            }
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+    }
+
 }
