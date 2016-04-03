@@ -1,38 +1,32 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.sensortag;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 
 @Component
-public class SmartMeterReaderNative {
+public class SensorTagReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
-
-    @Value("${smart-meter-port-name}")
-    private String smartMeterPort;
+    private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
     @Autowired
-    private MessageBuffer messageBuffer;
+    private SensortagPersister sensortagPersister;
 
-//    @PostConstruct
-    public void start() {
-        connectAndListenForData();
-    }
-
+    @PostConstruct
     private void connectAndListenForData() {
-        LOG.info("Starting SmartMeterReaderNative");
+        LOG.info("Starting SensorTagReader");
 
         try {
-            String command = "cu -l /dev/" + smartMeterPort + " --speed 115200 --parity=even";
+            String command = "sh /home/pi/sensortag/ambienttemperature.sh 60";
 
             Process process = Runtime.getRuntime().exec(command);
 
@@ -60,8 +54,7 @@ public class SmartMeterReaderNative {
         try {
             LineIterator it = IOUtils.lineIterator(in);
             while (it.hasNext()) {
-                String line = it.nextLine();
-                messageBuffer.addLine(line);
+                persist(it.nextLine());
             }
         } finally {
             IOUtils.closeQuietly(in);
@@ -81,4 +74,18 @@ public class SmartMeterReaderNative {
         }
     }
 
+    private void persist(String line) {
+        try {
+            BigDecimal bigDecimal = new BigDecimal(line);
+            if (!BigDecimal.ZERO.equals(bigDecimal)) {
+                LOG.info(line);
+                sensortagPersister.persist(bigDecimal);
+            } else {
+                LOG.warn("Ignoring invalid temperature: " + line);
+            }
+
+        } catch (NumberFormatException e) {
+            LOG.warn("Ignoring invalid temperature: " + line);
+        }
+    }
 }
