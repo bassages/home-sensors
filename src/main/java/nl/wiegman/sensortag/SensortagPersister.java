@@ -33,7 +33,7 @@ public class SensortagPersister {
                 postToHomeServer(jsonMessage);
 
             } catch (Exception e) {
-                LOG.warn("Post to " + homeServerRestServiceKlimaatUrl + " failed. Writing message to disk", e);
+                LOG.warn("Post to " + homeServerRestServiceKlimaatUrl + " failed.", e);
             }
 
         } catch (JsonProcessingException e) {
