@@ -26,7 +26,7 @@ public class SensorTagReader {
         LOG.info("Starting SensorTagReader");
 
         try {
-            String command = "sh /home/pi/sensortag/ambienttemperature.sh 60";
+            String command = "sh /home/pi/sensortag/ambienttemperature.sh 120";
 
             Process process = Runtime.getRuntime().exec(command);
 
