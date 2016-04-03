@@ -60,8 +60,7 @@ public class SmartMeterReaderNative {
         try {
             LineIterator it = IOUtils.lineIterator(in);
             while (it.hasNext()) {
-                String line = it.nextLine();
-                messageBuffer.addLine(line);
+                messageBuffer.addLine(it.nextLine());
             }
         } finally {
             IOUtils.closeQuietly(in);
@@ -73,12 +72,10 @@ public class SmartMeterReaderNative {
         try {
             LineIterator it = IOUtils.lineIterator(in);
             while (it.hasNext()) {
-                String line = it.nextLine();
-                LOG.error(line);
+                LOG.error(it.nextLine());
             }
         } finally {
             IOUtils.closeQuietly(in);
         }
     }
-
 }

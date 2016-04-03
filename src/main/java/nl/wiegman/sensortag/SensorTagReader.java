@@ -66,8 +66,7 @@ public class SensorTagReader {
         try {
             LineIterator it = IOUtils.lineIterator(in);
             while (it.hasNext()) {
-                String line = it.nextLine();
-                LOG.error(line);
+                LOG.error(it.nextLine());
             }
         } finally {
             IOUtils.closeQuietly(in);
