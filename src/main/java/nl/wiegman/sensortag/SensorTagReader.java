@@ -26,18 +26,25 @@ public class SensorTagReader {
         LOG.info("Starting SensorTagReader");
 
         try {
-            String command = "sh /home/pi/sensortag/ambienttemperature.sh 120";
+            String command = "sh /home/pi/sensortag/ambienttemperature.sh 180";
 
             Process process = Runtime.getRuntime().exec(command);
 
-            final Thread ioThread = new Thread() {
+            final Thread inputStreamThread = new Thread() {
                 @Override
                 public void run() {
                     handleInputStream(process.getInputStream());
+                }
+            };
+            inputStreamThread.start();
+
+            final Thread errorStreamThread = new Thread() {
+                @Override
+                public void run() {
                     handleErrorStream(process.getErrorStream());
                 }
             };
-            ioThread.start();
+            errorStreamThread.start();
 
             int exitValue = process.waitFor();
             if (exitValue != 0) {
@@ -61,8 +68,8 @@ public class SensorTagReader {
         }
     }
 
-    private void handleErrorStream(InputStream inputStream) {
-        InputStreamReader in = new InputStreamReader(inputStream);
+    private void handleErrorStream(InputStream errorStream) {
+        InputStreamReader in = new InputStreamReader(errorStream);
         try {
             LineIterator it = IOUtils.lineIterator(in);
             while (it.hasNext()) {
@@ -76,7 +83,9 @@ public class SensorTagReader {
     private void persist(String line) {
         try {
             BigDecimal bigDecimal = new BigDecimal(line);
-            if (!BigDecimal.ZERO.equals(bigDecimal)) {
+
+            // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
+            if (bigDecimal.doubleValue() != 0.0d) {
                 LOG.info(line);
                 sensortagPersister.persist(bigDecimal);
             } else {
