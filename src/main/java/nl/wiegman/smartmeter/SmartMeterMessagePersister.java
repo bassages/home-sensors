@@ -28,20 +28,6 @@ public class SmartMeterMessagePersister {
     @Value("${home-server-rest-service-meterstanden-url}")
     private String homeServerRestServiceMeterstandenUrl;
 
-    @Value("${buffer-directory}")
-    private File bufferDirectory;
-
-    @PostConstruct
-    public void start() {
-        if (bufferDirectory.exists()) {
-            LOG.info("Using messagebuffer directory: " + bufferDirectory.getAbsolutePath());
-        } else {
-            String message = "buffer-directory [" + bufferDirectory + "] does not exist";
-            LOG.error(message);
-            throw new IllegalArgumentException(message);
-        }
-    }
-
     public void persist(SmartMeterMessage smartMeterMessage) {
 
         try {
@@ -51,15 +37,15 @@ public class SmartMeterMessagePersister {
                 postToHomeServer(jsonMessage);
 
             } catch (Exception e) {
-                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
-
-                try {
-                    File file = new File(bufferDirectory, System.currentTimeMillis() + ".txt");
-                    FileUtils.writeStringToFile(file, jsonMessage);
-
-                } catch (IOException e1) {
-                    LOG.error("Failed to save file. Message=" + smartMeterMessage, e1);
-                }
+//                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
+//
+//                try {
+//                    File file = new File(bufferDirectory, System.currentTimeMillis() + ".txt");
+//                    FileUtils.writeStringToFile(file, jsonMessage);
+//
+//                } catch (IOException e1) {
+//                    LOG.error("Failed to save file. Message=" + smartMeterMessage, e1);
+//                }
             }
 
         } catch (JsonProcessingException e) {
