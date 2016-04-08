@@ -29,6 +29,7 @@ public class SensorTagReader {
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
     private static String GATTOOL_RESULTLINE_PREFIX = "Characteristic value/descriptor: ";
+    private static String SENSORTAG_ID = "BC:6A:29:AC:7D:31";
 
     @Autowired
     private SensortagPersister sensortagPersister;
@@ -38,6 +39,9 @@ public class SensorTagReader {
     @Value("${installation-directory}")
     private String installationDirectory;
 
+    @Value("${sensortag.probetime.seconds}")
+    private int sensortagProbeTimeInSeconds;
+
     @PostConstruct
     private void connectAndListenForData() throws Exception {
         LOG.info("Starting SensorTagReader");
@@ -45,7 +49,7 @@ public class SensorTagReader {
         setupPythonInterpreter();
 
         try {
-            String command = "sh " + installationDirectory+ "/ambienttemperature.sh 180";
+            String command = "sh " + installationDirectory+ "/ambienttemperature.sh " + sensortagProbeTimeInSeconds;
 
             LOG.info("Running command: " + command);
 
@@ -83,7 +87,7 @@ public class SensorTagReader {
             LOG.debug("Unpacked jython jar directory already exists: " + jythonLibDir.getPath());
         } else {
             LOG.debug("Unpacked jython jar directory does not exist yet: " + jythonLibDir.getPath());
-            extractJythonJar(jythonLibDir);
+            extractJarWhichContainsClass(jythonLibDir, PythonInterpreter.class);
         }
 
         Properties props = new Properties();
@@ -96,8 +100,8 @@ public class SensorTagReader {
         pythonInterpreter = new PythonInterpreter();
     }
 
-    private void extractJythonJar(File destinationDirectory) throws IOException {
-        URL urlOfJythonJar = PythonInterpreter.class.getProtectionDomain().getCodeSource().getLocation();
+    private void extractJarWhichContainsClass(File destinationDirectory, Class<?> classInJar) throws IOException {
+        URL urlOfJythonJar = classInJar.getProtectionDomain().getCodeSource().getLocation();
         JarURLConnection jarURLConnection = (JarURLConnection)urlOfJythonJar.openConnection();
         JarFile jarFile = jarURLConnection.getJarFile();
 
