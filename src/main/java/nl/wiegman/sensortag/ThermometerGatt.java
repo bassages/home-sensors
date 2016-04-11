@@ -36,8 +36,12 @@ public class ThermometerGatt {
 
     public static double fromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
-        int rawAmbient = Integer.parseInt(hexValues[3] + hexValues[2], 16);
-        return getAmbientTemperature(rawAmbient);
+        if (hexValues.length == 4) {
+            int rawAmbient = Integer.parseInt(hexValues[3] + hexValues[2], 16);
+            return getAmbientTemperature(rawAmbient);
+        } else {
+            return 0.0;
+        }
     }
 
     private static double getAmbientTemperature(int rawAmbient) {
