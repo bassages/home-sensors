@@ -1,12 +1,6 @@
 package nl.wiegman.sensortag;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
-import org.python.core.PyFloat;
-import org.python.core.PyInstance;
-import org.python.core.PyObject;
-import org.python.core.PyString;
-import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class SensorTagReader {
@@ -34,8 +23,6 @@ public class SensorTagReader {
     @Autowired
     private SensortagPersister sensortagPersister;
 
-    private PythonInterpreter pythonInterpreter;
-
     @Value("${installation-directory}")
     private String installationDirectory;
 
@@ -46,156 +33,89 @@ public class SensorTagReader {
     private void connectAndListenForData() throws Exception {
         LOG.info("Starting SensorTagReader");
 
-        setupPythonInterpreter();
-
         try {
-            String command = "sh " + installationDirectory+ "/ambienttemperature.sh " + sensortagProbeTimeInSeconds;
-
-            LOG.info("Running command: " + command);
-
-            Process process = Runtime.getRuntime().exec(command);
-
-            final Thread inputStreamThread = new Thread() {
-                @Override
-                public void run() {
-                    handleInputStream(process.getInputStream());
-                }
-            };
-            inputStreamThread.start();
-
-            final Thread errorStreamThread = new Thread() {
-                @Override
-                public void run() {
-                    handleErrorStream(process.getErrorStream());
-                }
-            };
-            errorStreamThread.start();
-
-            process.waitFor();
-
+            while (true) {
+                takeSnapshotOfSensorValues();
+                TimeUnit.SECONDS.sleep(sensortagProbeTimeInSeconds);
+            }
         } catch (InterruptedException | IOException e) {
             LOG.error("Oops, and unexpected error occurred.", e);
         }
     }
 
-    private void setupPythonInterpreter() throws Exception {
-        LOG.debug("Setting up Python interpreter");
+    private void takeSnapshotOfSensorValues() throws IOException, InterruptedException {
+        Process process = new ProcessBuilder()
+                .command("sh", installationDirectory + "/get-sensortag-values.sh")
+                .redirectErrorStream(true)
+                .start();
 
-        File jythonLibDir = new File(installationDirectory, "jython-2.7.0");
+        process.waitFor();
 
-        if (jythonLibDir.exists()) {
-            LOG.debug("Unpacked jython jar directory already exists: " + jythonLibDir.getPath());
-        } else {
-            LOG.debug("Unpacked jython jar directory does not exist yet: " + jythonLibDir.getPath());
-            extractJarWhichContainsClass(jythonLibDir, PythonInterpreter.class);
-        }
-
-        Properties props = new Properties();
-        String lib = new File(jythonLibDir, "Lib").getPath();
-        LOG.debug("Setting python.home to: " + lib);
-
-        props.put("python.home", lib);
-        props.put("python.import.site", "false");
-        PythonInterpreter.initialize(System.getProperties(), props, new String[0]);
-        pythonInterpreter = new PythonInterpreter();
+        String output = IOUtils.toString(process.getInputStream());
+        processGatttoolOutput(output);
     }
 
-    private void extractJarWhichContainsClass(File destinationDirectory, Class<?> classInJar) throws IOException {
-        URL urlOfJythonJar = classInJar.getProtectionDomain().getCodeSource().getLocation();
-        JarURLConnection jarURLConnection = (JarURLConnection)urlOfJythonJar.openConnection();
-        JarFile jarFile = jarURLConnection.getJarFile();
+    private void processGatttoolOutput(String gatttoolOutput) {
 
-        Enumeration<JarEntry> entries = jarFile.entries();
-        for(JarEntry je = entries.nextElement(); entries.hasMoreElements(); je = entries.nextElement()) {
+        try {
+            String[] lines = gatttoolOutput.split("\n");
 
-            File entryFile = new File(destinationDirectory, je.getName());
-            LOG.debug("Extracting " + entryFile.getPath());
+            BigDecimal ambientTemperature = null;
+            BigDecimal humidity = null;
 
-            if (je.isDirectory()) {
-                entryFile.mkdirs();
-            } else {
-                InputStream in = jarFile.getInputStream(je);
+            for (String line : lines) {
 
-                try (FileOutputStream out = new FileOutputStream(entryFile)) {
-                    byte[] buffer = new byte[4096];
-                    int length = 0;
-                    while ((length = in.read(buffer)) > 0) {
-                        out.write(buffer, 0, length);
-                        out.flush();
+                if (gatttoolOutput.endsWith("00 00 00 00")) {
+                    LOG.warn("Invalid line (ends with zeros): " + line);
+
+                } else {
+
+                    if (line.startsWith("THERMOMETER: ")) {
+                        ambientTemperature = getAmbientTemperature(line);
+                    } else if (line.startsWith("HYGROMETER: ")) {
+                        humidity = getHumidity(line);
+                    } else {
+                        LOG.warn("Invalid result from gattool: " + gatttoolOutput);
                     }
                 }
             }
-        }
-    }
 
-    private void handleInputStream(InputStream inputStream) {
-        InputStreamReader in = new InputStreamReader(inputStream);
-        try {
-            LineIterator it = IOUtils.lineIterator(in);
-            while (it.hasNext()) {
-                processGatttoolOutputAmbientTemperature(it.nextLine());
-            }
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
-    }
-
-    private void handleErrorStream(InputStream errorStream) {
-        InputStreamReader in = new InputStreamReader(errorStream);
-        try {
-            LineIterator it = IOUtils.lineIterator(in);
-            while (it.hasNext()) {
-                LOG.error(it.nextLine());
-            }
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
-    }
-
-    private void processGatttoolOutputAmbientTemperature(String gatttoolOutputLine) {
-        try {
-            if (gatttoolOutputLine.startsWith(GATTOOL_RESULTLINE_PREFIX) && !gatttoolOutputLine.endsWith("00 00 00 00")) {
-                String hexValuesFromGattoolOutput = gatttoolOutputLine.replace(GATTOOL_RESULTLINE_PREFIX, "");
-                BigDecimal bigDecimal = convertAmbientTemperature(hexValuesFromGattoolOutput);
-
-                // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
-                if (bigDecimal != null && bigDecimal.doubleValue() != 0.0d) {
-                    bigDecimal = bigDecimal.setScale(2, BigDecimal.ROUND_CEILING);
-                    LOG.info("Temperature: " + bigDecimal.doubleValue());
-                    sensortagPersister.persist(bigDecimal);
-                } else {
-                    LOG.warn("Ignoring invalid output from gattool: " + gatttoolOutputLine);
-                }
-
-            } else {
-                LOG.warn("Invalid result from gattool: " + gatttoolOutputLine);
+            LOG.info("Temperature = " + ambientTemperature + " Humidity = " + humidity);
+            if (ambientTemperature != null && humidity != null) {
+                sensortagPersister.persist(ambientTemperature, humidity);
             }
 
         } catch (NumberFormatException e) {
-            LOG.warn("Ignoring invalid temperature: " + gatttoolOutputLine);
+            LOG.warn("Ignoring invalid output: " + gatttoolOutput);
         }
     }
 
-    private BigDecimal convertAmbientTemperature(String hexString) {
-        BigDecimal result = null;
-
-        execPythonfile("ambientTemperatureConverter.py");
-
-        PyInstance converter = createPythonClass("AmbientTemperatureConverter");
-        PyObject convertResult = converter.invoke("fromHex", new PyString(hexString));
-        if (convertResult instanceof PyFloat) {
-            result = new BigDecimal(((PyFloat)convertResult).getValue());
+    private BigDecimal getAmbientTemperature(String line) {
+        BigDecimal ambientTemperature = null;
+        String thermometerHexValues = line.replace("THERMOMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
+        BigDecimal converted = BigDecimal.valueOf(ThermometerGatt.fromHex(thermometerHexValues));
+        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
+        if (converted.doubleValue() != 0.0d) {
+            ambientTemperature = converted;
+            ambientTemperature = ambientTemperature.setScale(2, BigDecimal.ROUND_CEILING);
         } else {
-            LOG.warn("Unexpected result from AmbientTemperatureConverter: " + result);
+            LOG.warn("Ignoring invalid output from gattool: " + line);
         }
-        return result;
+        return ambientTemperature;
     }
 
-    private void execPythonfile(String fileName) {
-        pythonInterpreter.execfile(this.getClass().getResourceAsStream(fileName));
+    private BigDecimal getHumidity(String line) {
+        BigDecimal humidity = null;
+        String hygrometerHexValues = line.replace("HYGROMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
+        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.fromHex(hygrometerHexValues));
+        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
+        if (converted.doubleValue() != 0.0d) {
+            humidity = converted;
+            humidity = humidity.setScale(1, BigDecimal.ROUND_CEILING);
+        } else {
+            LOG.warn("Ignoring invalid output from gattool: " + line);
+        }
+        return humidity;
     }
 
-    private PyInstance createPythonClass(String className) {
-        return (PyInstance) this.pythonInterpreter.eval(className + "()");
-    }
 }

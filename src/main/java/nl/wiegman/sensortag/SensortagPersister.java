@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Component
 public class SensortagPersister {
@@ -24,10 +25,10 @@ public class SensortagPersister {
     @Value("${home-server-rest-service-klimaat-url}")
     private String homeServerRestServiceKlimaatUrl;
 
-    public void persist(BigDecimal temperatuur) {
+    public void persist(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
 
         try {
-            String jsonMessage = createSmartMeterJsonMessage(temperatuur);
+            String jsonMessage = createSmartMeterJsonMessage(temperatuur, luchtvochtigheid);
 
             try {
                 postToHomeServer(jsonMessage);
@@ -58,15 +59,18 @@ public class SensortagPersister {
         }
     }
 
-    private String createSmartMeterJsonMessage(BigDecimal temperatuur) throws JsonProcessingException {
+    private String createSmartMeterJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
         HomeServerKlimaat homeServerKlimaat = new HomeServerKlimaat();
+        homeServerKlimaat.setDatumtijd(new Date().getTime());
         homeServerKlimaat.setTemperatuur(temperatuur);
+        homeServerKlimaat.setLuchtvochtigheid(luchtvochtigheid);
         return new ObjectMapper().writeValueAsString(homeServerKlimaat);
     }
 
     private static class HomeServerKlimaat {
         private long datumtijd;
         private BigDecimal temperatuur;
+        private BigDecimal luchtvochtigheid;
 
         public long getDatumtijd() {
             return datumtijd;
@@ -82,6 +86,14 @@ public class SensortagPersister {
 
         public void setTemperatuur(BigDecimal temperatuur) {
             this.temperatuur = temperatuur;
+        }
+
+        public BigDecimal getLuchtvochtigheid() {
+            return luchtvochtigheid;
+        }
+
+        public void setLuchtvochtigheid(BigDecimal luchtvochtigheid) {
+            this.luchtvochtigheid = luchtvochtigheid;
         }
     }
 }
