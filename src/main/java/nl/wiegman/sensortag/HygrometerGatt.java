@@ -34,8 +34,12 @@ public class HygrometerGatt {
 
     public static double fromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
-        int rawHumidity = Integer.parseInt(hexValues[3] + hexValues[2], 16);
-        return getHumidity(rawHumidity);
+        if (hexValues.length == 4) {
+            int rawHumidity = Integer.parseInt(hexValues[3] + hexValues[2], 16);
+            return getHumidity(rawHumidity);
+        } else {
+            return 0.0;
+        }
     }
 
     private static float getAmbientTemperature(int temperatureRaw) {

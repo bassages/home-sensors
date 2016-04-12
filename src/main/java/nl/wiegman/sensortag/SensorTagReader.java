@@ -64,19 +64,12 @@ public class SensorTagReader {
             BigDecimal humidity = null;
 
             for (String line : lines) {
-
-                if (gatttoolOutput.endsWith("00 00 00 00")) {
-                    LOG.warn("Invalid line (ends with zeros): " + line);
-
+                if (line.startsWith("THERMOMETER")) {
+                    ambientTemperature = getAmbientTemperature(line);
+                } else if (line.startsWith("HYGROMETER")) {
+                    humidity = getHumidity(line);
                 } else {
-
-                    if (line.startsWith("THERMOMETER: ")) {
-                        ambientTemperature = getAmbientTemperature(line);
-                    } else if (line.startsWith("HYGROMETER: ")) {
-                        humidity = getHumidity(line);
-                    } else {
-                        LOG.warn("Invalid result from gattool: " + gatttoolOutput);
-                    }
+                    LOG.warn("Invalid line from gattool: " + line);
                 }
             }
 
@@ -99,7 +92,7 @@ public class SensorTagReader {
             ambientTemperature = converted;
             ambientTemperature = ambientTemperature.setScale(2, BigDecimal.ROUND_CEILING);
         } else {
-            LOG.warn("Ignoring invalid output from gattool: " + line);
+            LOG.warn("Ignoring invalid line from gattool: " + line);
         }
         return ambientTemperature;
     }
@@ -113,7 +106,7 @@ public class SensorTagReader {
             humidity = converted;
             humidity = humidity.setScale(1, BigDecimal.ROUND_CEILING);
         } else {
-            LOG.warn("Ignoring invalid output from gattool: " + line);
+            LOG.warn("Ignoring invalid line from gattool: " + line);
         }
         return humidity;
     }
