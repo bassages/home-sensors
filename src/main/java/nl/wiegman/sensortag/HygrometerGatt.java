@@ -22,7 +22,7 @@ package nl.wiegman.sensortag;
  */
 public class HygrometerGatt {
 
-    public static double convertTemperature(String hexValue) {
+    public static double temperatureFromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawTemperature = Integer.parseInt(hexValues[1] + hexValues[0], 16);
@@ -32,7 +32,7 @@ public class HygrometerGatt {
         }
     }
 
-    public static double fromHex(String hexValue) {
+    public static double humidityFromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawHumidity = Integer.parseInt(hexValues[3] + hexValues[2], 16);

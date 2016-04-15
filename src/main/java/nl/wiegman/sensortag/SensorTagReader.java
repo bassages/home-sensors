@@ -67,7 +67,8 @@ public class SensorTagReader {
                 if (line.startsWith("THERMOMETER")) {
                     ambientTemperature = getAmbientTemperature(line);
                 } else if (line.startsWith("HYGROMETER")) {
-                    humidity = getHumidity(line);
+                    humidity = getHygrometerHumidity(line);
+//                    ambientTemperature = getHygrometerTemperature(line);
                 } else {
                     LOG.warn("Invalid line from gattool: " + line);
                 }
@@ -81,6 +82,20 @@ public class SensorTagReader {
         } catch (NumberFormatException e) {
             LOG.warn("Ignoring invalid output: " + gatttoolOutput);
         }
+    }
+
+    private BigDecimal getHygrometerTemperature(String line) {
+        BigDecimal temperature = null;
+        String hygrometerHexValues = line.replace("HYGROMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
+        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.temperatureFromHex(hygrometerHexValues));
+        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
+        if (converted.doubleValue() != 0.0d) {
+            temperature = converted;
+            temperature = temperature.setScale(2, BigDecimal.ROUND_CEILING);
+        } else {
+            LOG.warn("Ignoring invalid line from gattool: " + line);
+        }
+        return temperature;
     }
 
     private BigDecimal getAmbientTemperature(String line) {
@@ -97,10 +112,10 @@ public class SensorTagReader {
         return ambientTemperature;
     }
 
-    private BigDecimal getHumidity(String line) {
+    private BigDecimal getHygrometerHumidity(String line) {
         BigDecimal humidity = null;
         String hygrometerHexValues = line.replace("HYGROMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
-        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.fromHex(hygrometerHexValues));
+        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(hygrometerHexValues));
         // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
         if (converted.doubleValue() != 0.0d) {
             humidity = converted;
