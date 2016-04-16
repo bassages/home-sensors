@@ -1,6 +1,8 @@
 package nl.wiegman.sensortag;
 
-import org.apache.commons.io.IOUtils;
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,118 +14,136 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
+import static net.sf.expectit.filter.Filters.removeColors;
+import static net.sf.expectit.filter.Filters.removeNonPrintable;
+import static net.sf.expectit.matcher.Matchers.*;
+
 @Component
 public class SensorTagReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
-
-    private static String GATTOOL_RESULTLINE_PREFIX = "Characteristic value/descriptor: ";
-    private static String SENSORTAG_ID = "BC:6A:29:AC:7D:31";
+    private static final Logger LOG = LoggerFactory.getLogger(OldSensorTagReader.class);
 
     @Autowired
     private SensortagPersister sensortagPersister;
 
-    @Value("${installation-directory}")
-    private String installationDirectory;
+    @Value("${sensortag.bluetooth.address}")
+    private String SENSORTAG_BLUETOOTH_ADDRESS;
 
     @Value("${sensortag.probetime.seconds}")
     private int sensortagProbeTimeInSeconds;
 
     @PostConstruct
-    private void connectAndListenForData() throws Exception {
+    private void connectAndListenForData() throws IOException, InterruptedException {
         LOG.info("Starting SensorTagReader");
 
-        try {
-            while (true) {
-                takeSnapshotOfSensorValues();
+        Process process = getShellProcess();
+
+        try (Expect expect = getExpectBuilder(process).build()) {
+            connectToSensortag(expect);
+            setConnectionParameters();
+
+            /**
+             * From the TI Sensortag Guide:
+             *
+             * The most power efficient way to obtain measurements for a sensor is to
+             * 1. Enable notification
+             * 2. Enable Sensor
+             * 3. When notification with data is obtained at the Master side, disable the sensor (notification still on though)
+             */
+
+            enableNotifications(expect);
+
+            while (1 == 1) {
+                readAndPersistValues(expect);
                 TimeUnit.SECONDS.sleep(sensortagProbeTimeInSeconds);
             }
-        } catch (InterruptedException | IOException e) {
-            LOG.error("Oops, and unexpected error occurred.", e);
+
+//            disableNotifications(expect);
+//            expect.sendLine("disconnect");
+//
+//            expect.sendLine("exit");
+//            expect.expect(eof());
+//
+//            process.waitFor();
         }
     }
 
-    private void takeSnapshotOfSensorValues() throws IOException, InterruptedException {
-        Process process = new ProcessBuilder()
-                .command("sh", installationDirectory + "/get-sensortag-values.sh")
-                .redirectErrorStream(true)
-                .start();
+    private void readAndPersistValues(Expect expect) throws IOException {
+        String temperatureHex = readTemperature(expect);
+        String humidityHex = readHumidity(expect);
 
-        process.waitFor();
+        BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
+        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
 
-        String output = IOUtils.toString(process.getInputStream());
-        processGatttoolOutput(output);
+        sensortagPersister.persist(temperature, humidity);
     }
 
-    private void processGatttoolOutput(String gatttoolOutput) {
+    private void setConnectionParameters() throws IOException {
+        Process process = getShellProcess();
 
-        try {
-            String[] lines = gatttoolOutput.split("\n");
+        try (Expect expect = getExpectBuilder(process).build()) {
 
-            BigDecimal ambientTemperature = null;
-            BigDecimal humidity = null;
+            expect.sendLine("sudo hcitool con");
+            Result result = expect.expect(regexp("handle (\\d+) state 1 lm MASTER"));
+            String handle = result.group(1);
 
-            for (String line : lines) {
-                if (line.startsWith("THERMOMETER")) {
-                    ambientTemperature = getAmbientTemperature(line);
-                } else if (line.startsWith("HYGROMETER")) {
-                    humidity = getHygrometerHumidity(line);
-//                    ambientTemperature = getHygrometerTemperature(line);
-                } else {
-                    LOG.warn("Invalid line from gattool: " + line);
-                }
-            }
+            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 200 --max 230");
 
-            LOG.info("Temperature = " + ambientTemperature + " Humidity = " + humidity);
-            if (ambientTemperature != null && humidity != null) {
-                sensortagPersister.persist(ambientTemperature, humidity);
-            }
-
-        } catch (NumberFormatException e) {
-            LOG.warn("Ignoring invalid output: " + gatttoolOutput);
+            expect.sendLine("exit");
+            expect.expect(eof());
         }
     }
 
-    private BigDecimal getHygrometerTemperature(String line) {
-        BigDecimal temperature = null;
-        String hygrometerHexValues = line.replace("HYGROMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
-        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.temperatureFromHex(hygrometerHexValues));
-        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
-        if (converted.doubleValue() != 0.0d) {
-            temperature = converted;
-            temperature = temperature.setScale(2, BigDecimal.ROUND_CEILING);
-        } else {
-            LOG.warn("Ignoring invalid line from gattool: " + line);
-        }
-        return temperature;
+    private Process getShellProcess() throws IOException {
+        return Runtime.getRuntime().exec("/bin/bash");
     }
 
-    private BigDecimal getAmbientTemperature(String line) {
-        BigDecimal ambientTemperature = null;
-        String thermometerHexValues = line.replace("THERMOMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
-        BigDecimal converted = BigDecimal.valueOf(ThermometerGatt.fromHex(thermometerHexValues));
-        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
-        if (converted.doubleValue() != 0.0d) {
-            ambientTemperature = converted;
-            ambientTemperature = ambientTemperature.setScale(2, BigDecimal.ROUND_CEILING);
-        } else {
-            LOG.warn("Ignoring invalid line from gattool: " + line);
-        }
-        return ambientTemperature;
+    private ExpectBuilder getExpectBuilder(Process process) throws IOException {
+        return new ExpectBuilder()
+                    .withOutput(process.getOutputStream())
+                    .withInputs(process.getInputStream(), process.getErrorStream())
+                    .withEchoOutput(System.out)
+                    .withEchoInput(System.out)
+                    .withInputFilters(removeColors(), removeNonPrintable())
+                    .withExceptionOnFailure()
+                    .withTimeout(5, TimeUnit.SECONDS);
     }
 
-    private BigDecimal getHygrometerHumidity(String line) {
-        BigDecimal humidity = null;
-        String hygrometerHexValues = line.replace("HYGROMETER: " + GATTOOL_RESULTLINE_PREFIX, "");
-        BigDecimal converted = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(hygrometerHexValues));
-        // Sometimes the meter reading is 0.0, which is strange and probably caused by a false reading. Ignore these values.
-        if (converted.doubleValue() != 0.0d) {
-            humidity = converted;
-            humidity = humidity.setScale(1, BigDecimal.ROUND_CEILING);
-        } else {
-            LOG.warn("Ignoring invalid line from gattool: " + line);
-        }
-        return humidity;
+    private void connectToSensortag(Expect expect) throws IOException {
+        expect.sendLine("gatttool -b " + SENSORTAG_BLUETOOTH_ADDRESS + " --interactive");
+        expect.expect(contains("[LE]>"));
+
+        expect.sendLine("connect");
+        expect.expect(contains("Connection successful"));
     }
 
+    private void enableNotifications(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x26 0100"); // Enable temperature sensor notifications
+        expect.sendLine("char-write-cmd 0x3c 0100"); // Enable humidity sensor notifications
+    }
+
+    private void disableNotifications(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x3c 0000"); // Disable humidity sensor notifications
+        expect.sendLine("char-write-cmd 0x26 0000"); // Disable temperature sensor notifications
+    }
+
+    private String readTemperature(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x29 01"); // Enable temperature sensor
+
+        Result result = expect.expect(regexp("Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})"));
+        String value = result.group(1);
+        expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
+
+        return value;
+    }
+
+    private String readHumidity(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x3f 01"); // Enable humidity sensor
+
+        Result result = expect.expect(regexp("Notification handle = 0x003b value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})"));
+        String value = result.group(1);
+        expect.sendLine("char-write-cmd 0x3f 00"); // Disable humidity sensor
+
+        return value;
+    }
 }

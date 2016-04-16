@@ -34,7 +34,7 @@ package nl.wiegman.sensortag;
  */
 public class ThermometerGatt {
 
-    public static double fromHex(String hexValue) {
+    public static double ambientTemperatureFromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawAmbient = Integer.parseInt(hexValues[3] + hexValues[2], 16);
