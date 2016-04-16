@@ -24,21 +24,33 @@ public class SensorTagReader {
     private static final Logger LOG = LoggerFactory.getLogger(OldSensorTagReader.class);
 
     @Autowired
-    private SensortagPersister sensortagPersister;
+    private KlimaatReadingPersister klimaatReadingPersister;
 
     @Value("${sensortag.bluetooth.address}")
-    private String SENSORTAG_BLUETOOTH_ADDRESS;
+    private String sensortagBluetoothAddress;
 
     @Value("${sensortag.probetime.seconds}")
     private int sensortagProbeTimeInSeconds;
 
     @PostConstruct
-    private void connectAndListenForData() throws IOException, InterruptedException {
+    private void reconnectToSensorTagOnException() throws InterruptedException {
         LOG.info("Starting SensorTagReader");
 
-        Process process = getShellProcess();
+        while (1 == 1) {
+            try {
+                connectAndListenForSensorValues();
+            } catch (IOException e) {
+                LOG.error("Error occurred, trying to reconnect in 3 seconds...", e);
+                TimeUnit.SECONDS.sleep(3);
+            }
+        }
+    }
 
-        try (Expect expect = getExpectBuilder(process).build()) {
+    private void connectAndListenForSensorValues() throws IOException, InterruptedException {
+        Process process = getShellProcess();
+        Expect expect = getExpectBuilder(process).build();
+
+        try {
             connectToSensortag(expect);
             setConnectionParameters();
 
@@ -58,13 +70,12 @@ public class SensorTagReader {
                 TimeUnit.SECONDS.sleep(sensortagProbeTimeInSeconds);
             }
 
-//            disableNotifications(expect);
-//            expect.sendLine("disconnect");
-//
-//            expect.sendLine("exit");
-//            expect.expect(eof());
-//
-//            process.waitFor();
+        } finally {
+            disableNotifications(expect);
+            expect.sendLine("disconnect");
+            expect.sendLine("exit");
+            expect.expect(eof());
+            process.destroyForcibly();
         }
     }
 
@@ -75,7 +86,7 @@ public class SensorTagReader {
         BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
         BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
 
-        sensortagPersister.persist(temperature, humidity);
+        klimaatReadingPersister.persist(temperature, humidity);
     }
 
     private void setConnectionParameters() throws IOException {
@@ -106,11 +117,11 @@ public class SensorTagReader {
                     .withEchoInput(System.out)
                     .withInputFilters(removeColors(), removeNonPrintable())
                     .withExceptionOnFailure()
-                    .withTimeout(5, TimeUnit.SECONDS);
+                    .withTimeout(15, TimeUnit.SECONDS);
     }
 
     private void connectToSensortag(Expect expect) throws IOException {
-        expect.sendLine("gatttool -b " + SENSORTAG_BLUETOOTH_ADDRESS + " --interactive");
+        expect.sendLine("gatttool -b " + sensortagBluetoothAddress + " --interactive");
         expect.expect(contains("[LE]>"));
 
         expect.sendLine("connect");

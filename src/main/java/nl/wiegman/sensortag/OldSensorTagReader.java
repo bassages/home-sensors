@@ -19,7 +19,7 @@ public class OldSensorTagReader {
     private static String SENSORTAG_ID = "BC:6A:29:AC:7D:31";
 
     @Autowired
-    private SensortagPersister sensortagPersister;
+    private KlimaatReadingPersister klimaatReadingPersister;
 
 //    @Value("${installation-directory}")
 //    private String installationDirectory;
@@ -74,7 +74,7 @@ public class OldSensorTagReader {
 
             LOG.info("Temperature = " + ambientTemperature + " Humidity = " + humidity);
             if (ambientTemperature != null && humidity != null) {
-                sensortagPersister.persist(ambientTemperature, humidity);
+                klimaatReadingPersister.persist(ambientTemperature, humidity);
             }
 
         } catch (NumberFormatException e) {
