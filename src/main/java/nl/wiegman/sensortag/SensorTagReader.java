@@ -33,20 +33,21 @@ public class SensorTagReader {
     private int sensortagProbeTimeInSeconds;
 
     @PostConstruct
-    private void reconnectToSensorTagOnException() throws InterruptedException {
+    private void reconnectToSensorTagOnException() throws InterruptedException, IOException {
         LOG.info("Starting SensorTagReader");
 
         while (1 == 1) {
             try {
                 connectAndListenForSensorValues();
-            } catch (IOException e) {
-                LOG.error("Error occurred, trying to reconnect in 3 seconds...", e);
-                TimeUnit.SECONDS.sleep(3);
+            } catch (SensortagException e) {
+                LOG.error("Error occurred: " + e.getMessage());
+                LOG.error("Trying to reconnect in 10 seconds...");
+                TimeUnit.SECONDS.sleep(10);
             }
         }
     }
 
-    private void connectAndListenForSensorValues() throws IOException, InterruptedException {
+    private void connectAndListenForSensorValues() throws IOException, InterruptedException, SensortagException {
         Process process = getShellProcess();
         Expect expect = getExpectBuilder(process).build();
 
@@ -71,22 +72,27 @@ public class SensorTagReader {
             }
 
         } finally {
-            disableNotifications(expect);
             expect.sendLine("disconnect");
-            expect.sendLine("exit");
+            TimeUnit.SECONDS.sleep(1);
+
+            expect.sendLine("exit"); // Exit from gattool
+            TimeUnit.SECONDS.sleep(1);
+
+            expect.sendLine("exit"); // Exit from terminal
             expect.expect(eof());
-            process.destroyForcibly();
+
+            process.waitFor();
         }
     }
 
-    private void readAndPersistValues(Expect expect) throws IOException {
+    private void readAndPersistValues(Expect expect) throws IOException, SensortagException {
         String temperatureHex = readTemperature(expect);
-        String humidityHex = readHumidity(expect);
+//        String humidityHex = readHumidity(expect);
 
         BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
-        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
+//        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
 
-        klimaatReadingPersister.persist(temperature, humidity);
+        klimaatReadingPersister.persist(temperature, null);
     }
 
     private void setConnectionParameters() throws IOException {
@@ -98,7 +104,30 @@ public class SensorTagReader {
             Result result = expect.expect(regexp("handle (\\d+) state 1 lm MASTER"));
             String handle = result.group(1);
 
-            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 200 --max 230");
+            /**
+             * From http://processors.wiki.ti.com/images/4/4a/Sensor_Tag_and_BTool_Tutorial1.pdf
+             *
+             * 0x2A04 GAP_PERI_CONN_PARAM_UUID (Peripheral Preferred Connection Parameters)
+             *
+             * 50 00 (100ms preferred min connection interval)
+             * A0 00 (200ms preferred max connection interval)
+             * 00 00 (0 preferred slave latency)
+             * E8 03 (10000ms preferred supervision timeout)
+             *
+             * -------------------------------------------------------------------------------------
+             *
+             * hcitool lecup <handle> <min> <max> <latency> <timeout>
+             * Options:
+             * -H, --handle <0xXXXX> LE connection handle
+             * -m, --min <interval> Range: 0x0006 to 0x0C80
+             * -M, --max <interval> Range: 0x0006 to 0x0C80
+             * -l, --latency <range> Slave latency. Range: 0x0000 to 0x03E8
+             * -t, --timeout <time> N * 10ms. Range: 0x000A to 0x0C80
+             *
+             * min/max range: 7.5ms to 4s. Multiply factor: 1.25ms
+             * timeout range: 100ms to 32.0s. Larger than max interval
+             */
+            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 80 --max 160 --latency 0 --timeout 1000");
 
             expect.sendLine("exit");
             expect.expect(eof());
@@ -113,19 +142,26 @@ public class SensorTagReader {
         return new ExpectBuilder()
                     .withOutput(process.getOutputStream())
                     .withInputs(process.getInputStream(), process.getErrorStream())
-                    .withEchoOutput(System.out)
-                    .withEchoInput(System.out)
+//                    .withEchoOutput(System.out)
+//                    .withEchoInput(System.out)
                     .withInputFilters(removeColors(), removeNonPrintable())
-                    .withExceptionOnFailure()
                     .withTimeout(15, TimeUnit.SECONDS);
     }
 
-    private void connectToSensortag(Expect expect) throws IOException {
+    private void connectToSensortag(Expect expect) throws IOException, SensortagException {
         expect.sendLine("gatttool -b " + sensortagBluetoothAddress + " --interactive");
-        expect.expect(contains("[LE]>"));
+
+        Result startGattoolResult = expect.expect(contains("[LE]>"));
+        if (!startGattoolResult.isSuccessful()) {
+            throw new SensortagException("Failed to start gatttool. " + startGattoolResult.getInput());
+        }
 
         expect.sendLine("connect");
-        expect.expect(contains("Connection successful"));
+
+        Result connectResult = expect.expect(contains("Connection successful"));
+        if (!connectResult.isSuccessful()) {
+            throw new SensortagException("Failed to connect. " + connectResult.getInput());
+        }
     }
 
     private void enableNotifications(Expect expect) throws IOException {
@@ -138,14 +174,19 @@ public class SensorTagReader {
         expect.sendLine("char-write-cmd 0x26 0000"); // Disable temperature sensor notifications
     }
 
-    private String readTemperature(Expect expect) throws IOException {
+    private String readTemperature(Expect expect) throws IOException, SensortagException {
         expect.sendLine("char-write-cmd 0x29 01"); // Enable temperature sensor
 
         Result result = expect.expect(regexp("Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})"));
-        String value = result.group(1);
-        expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
 
-        return value;
+        if (result.isSuccessful()) {
+            String value = result.group(1);
+            expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
+
+            return value;
+        } else {
+            throw new SensortagException("Failed to get temperature. " + result.getInput());
+        }
     }
 
     private String readHumidity(Expect expect) throws IOException {
