@@ -36,6 +36,9 @@ public class SensorTagReader {
     private void reconnectToSensorTagOnException() throws InterruptedException, IOException {
         LOG.info("Starting SensorTagReader");
 
+        LOG.info("sensortag.bluetooth.address = " + sensortagBluetoothAddress);
+        LOG.info("sensortag.probetime.seconds = " + sensortagProbeTimeInSeconds);
+
         while (1 == 1) {
             try {
                 connectAndListenForSensorValues();
@@ -105,7 +108,7 @@ public class SensorTagReader {
             String handle = result.group(1);
 
             /**
-             * From http://processors.wiki.ti.com/images/4/4a/Sensor_Tag_and_BTool_Tutorial1.pdf
+             * From http://processors.wiki.ti.com/images/4/4a/Sensor_Tag_and_BTool_Tutorial1.pdf:
              *
              * 0x2A04 GAP_PERI_CONN_PARAM_UUID (Peripheral Preferred Connection Parameters)
              *
@@ -113,6 +116,40 @@ public class SensorTagReader {
              * A0 00 (200ms preferred max connection interval)
              * 00 00 (0 preferred slave latency)
              * E8 03 (10000ms preferred supervision timeout)
+             *
+             * The connection parameters for a BLE connection is a set of parameters that determine when and how the Central and a Peripheral in a link transmits data.
+             * It is always the Central that actually sets the connection parameters used, but the Peripheral can send a so-called Connection Parameter Update Request,
+             * that the Central can then accept or reject.
+             *
+             * -------------------------------------------------------------------------------------
+             *
+             * There are multiple connection parameters (defined in Bluetooth 4.0 specification, Volume 3, Part A, Section 4.20) that will determine the throughput.
+             * Keep in mind that higher throughput will result in more power consumption.
+             *
+             * Connection interval:
+             * This defines how often that the central communicates with the peripheral.
+             * There can be a maximum of four packets sent per connection interval, and each packet can have up to 20B of payload.
+             * According to the BLE specification, the allowable range for connection parameters is from 7.5mSec to 4000mSec.
+             * The Connection Interval is the parameter that most affects data rate. Think of the Connection Interval as the train schedule:
+             * for example, trains leave the station every half hour. Each train can have 1-4 cars, and each car can hold 0 to 20 bytes.
+             * So if you have a 20 ms Connection Interval, then the theoretical maximum for sending a message and receiving the ACK is
+             * 80 bytes (of data) in 40 mS (one Connection Interval to send, plus one Interval to receive the ACK).
+             * But trains leave whether full or not. So you might only send 20 bytes every 80 mS -- or less.
+             *
+             * Slave latency:
+             * This is the number of connection intervals that the slave is allowed to skip. For example, if the connection interval is 20mSec and slave latency is 4,
+             * then if the peripheral wants to then it only needs to answer the master every 80mSec.
+             * Slave latency is useful if you want to mostly stay asleep, but then burst out data at a faster rate occasionally.
+             * In this case, the peripheral only needs to respond to the master every 80mSec to keep the connection alive,
+             * but if it has a lot of data then it can send data every 20mSec. Slave Latency is any value between 0 and 499,
+             * though it cannot exceed: ((supervisionTimeout / connInterval) – 1)
+             *
+             * Connection supervision timeout:
+             * The supervision timeout parameter specifies the maximum amount of time that either the master or slave can go before receiving a link-layer packet.
+             * Both slave and master device maintain their own “Supervision timer”, which resets to zero every time a packet is received.
+             * If supervision timer ever reaches the supervision timeout, the device considers the connection lost,
+             * and exits the connection state (returning to the advertising, scanning, or standby state).
+             * The Supervision Timeout is a multiple of 10ms in the range of 100ms and 32.0s. It Must be larger than (1 + slaveLatency) * (ConnInterval) where,
              *
              * -------------------------------------------------------------------------------------
              *
@@ -127,7 +164,12 @@ public class SensorTagReader {
              * min/max range: 7.5ms to 4s. Multiply factor: 1.25ms
              * timeout range: 100ms to 32.0s. Larger than max interval
              */
-            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 80 --max 160 --latency 0 --timeout 1000");
+
+            // Verified working correctly:
+            // expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 80 --max 160 --latency 0 --timeout 1000");
+
+            // Experimental:
+            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 640 --max 1240 --latency 0 --timeout 3000");
 
             expect.sendLine("exit");
             expect.expect(eof());
