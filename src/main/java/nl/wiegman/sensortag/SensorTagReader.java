@@ -36,9 +36,6 @@ public class SensorTagReader {
     private void reconnectToSensorTagOnException() throws InterruptedException, IOException {
         LOG.info("Starting SensorTagReader");
 
-        LOG.info("sensortag.bluetooth.address = " + sensortagBluetoothAddress);
-        LOG.info("sensortag.probetime.seconds = " + sensortagProbeTimeInSeconds);
-
         while (1 == 1) {
             try {
                 connectAndListenForSensorValues();
@@ -51,7 +48,7 @@ public class SensorTagReader {
     }
 
     private void connectAndListenForSensorValues() throws IOException, InterruptedException, SensortagException {
-        Process process = getShellProcess();
+        Process process = createShellProcess();
         Expect expect = getExpectBuilder(process).build();
 
         try {
@@ -75,16 +72,7 @@ public class SensorTagReader {
             }
 
         } finally {
-            expect.sendLine("disconnect");
-            TimeUnit.SECONDS.sleep(1);
-
-            expect.sendLine("exit"); // Exit from gattool
-            TimeUnit.SECONDS.sleep(1);
-
-            expect.sendLine("exit"); // Exit from terminal
-            expect.expect(eof());
-
-            process.waitFor();
+            disconnect(process, expect);
         }
     }
 
@@ -99,13 +87,11 @@ public class SensorTagReader {
     }
 
     private void setConnectionParameters() throws IOException {
-        Process process = getShellProcess();
+        Process process = createShellProcess();
 
         try (Expect expect = getExpectBuilder(process).build()) {
 
-            expect.sendLine("sudo hcitool con");
-            Result result = expect.expect(regexp("handle (\\d+) state 1 lm MASTER"));
-            String handle = result.group(1);
+            String handle = getCurrentConnectionHandleId(expect);
 
             /**
              * From http://processors.wiki.ti.com/images/4/4a/Sensor_Tag_and_BTool_Tutorial1.pdf:
@@ -165,18 +151,20 @@ public class SensorTagReader {
              * timeout range: 100ms to 32.0s. Larger than max interval
              */
 
-            // Verified working correctly:
-            // expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 80 --max 160 --latency 0 --timeout 1000");
-
-            // Experimental:
-            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 640 --max 1240 --latency 0 --timeout 3000");
+            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 320 --max 640 --latency 0 --timeout 3000");
 
             expect.sendLine("exit");
             expect.expect(eof());
         }
     }
 
-    private Process getShellProcess() throws IOException {
+    private String getCurrentConnectionHandleId(Expect expect) throws IOException {
+        expect.sendLine("sudo hcitool con");
+        Result result = expect.expect(regexp("handle (\\d+) state 1 lm MASTER"));
+        return result.group(1);
+    }
+
+    private Process createShellProcess() throws IOException {
         return Runtime.getRuntime().exec("/bin/bash");
     }
 
@@ -184,8 +172,6 @@ public class SensorTagReader {
         return new ExpectBuilder()
                     .withOutput(process.getOutputStream())
                     .withInputs(process.getInputStream(), process.getErrorStream())
-//                    .withEchoOutput(System.out)
-//                    .withEchoInput(System.out)
                     .withInputFilters(removeColors(), removeNonPrintable())
                     .withTimeout(15, TimeUnit.SECONDS);
     }
@@ -239,5 +225,18 @@ public class SensorTagReader {
         expect.sendLine("char-write-cmd 0x3f 00"); // Disable humidity sensor
 
         return value;
+    }
+
+    private void disconnect(Process process, Expect expect) throws IOException, InterruptedException {
+        expect.sendLine("disconnect");
+        TimeUnit.SECONDS.sleep(1);
+
+        expect.sendLine("exit"); // Exit from gattool
+        TimeUnit.SECONDS.sleep(1);
+
+        expect.sendLine("exit"); // Exit from terminal
+        expect.expect(eof());
+
+        process.waitFor();
     }
 }
