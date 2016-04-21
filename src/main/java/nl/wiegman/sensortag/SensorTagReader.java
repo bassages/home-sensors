@@ -21,7 +21,7 @@ import static net.sf.expectit.matcher.Matchers.*;
 @Component
 public class SensorTagReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OldSensorTagReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
     @Autowired
     private KlimaatReadingPersister klimaatReadingPersister;
