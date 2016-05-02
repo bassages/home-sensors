@@ -67,8 +67,13 @@ public class SensorTagReader {
             enableNotifications(expect);
 
             while (1 == 1) {
-                readAndPersistValues(expect);
-                TimeUnit.SECONDS.sleep(sensortagProbeTimeInSeconds);
+                long start = System.currentTimeMillis();
+                readAndPersistSensorValues(expect);
+                long processingTime = System.currentTimeMillis() - start;
+
+                long sleepDurationInMilliseconds = (sensortagProbeTimeInSeconds * 1000) - processingTime;
+                LOG.debug("Sleep for " + sleepDurationInMilliseconds + " milliseconds");
+                TimeUnit.MILLISECONDS.sleep(sleepDurationInMilliseconds);
             }
 
         } finally {
@@ -76,11 +81,12 @@ public class SensorTagReader {
         }
     }
 
-    private void readAndPersistValues(Expect expect) throws IOException, SensortagException {
+    private void readAndPersistSensorValues(Expect expect) throws IOException, SensortagException {
         String temperatureHex = readTemperature(expect);
-//        String humidityHex = readHumidity(expect);
-
         BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
+        discardTemperatureNotifications(expect);
+
+//        String humidityHex = readHumidity(expect);
 //        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
 
         klimaatReadingPersister.persist(temperature, null);
@@ -205,26 +211,26 @@ public class SensorTagReader {
     private String readTemperature(Expect expect) throws IOException, SensortagException {
         expect.sendLine("char-write-cmd 0x29 01"); // Enable temperature sensor
 
-        String value = null;
+        String value;
 
-        int i = 0;
-        while (i < 3) {
-            Result result = expectTemperatureNotification(expect, 10, TimeUnit.SECONDS);
-            if (result.isSuccessful()) {
-                value = result.group(1);
-                LOG.debug("Temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(value));
-            } else {
-                throw new SensortagException("Failed to get temperature. " + result.getInput());
-            }
-            i++;
+        Result result = expectTemperatureNotification(expect, 10, TimeUnit.SECONDS);
+        if (result.isSuccessful()) {
+            value = result.group(1);
+            LOG.debug("Temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(value));
+        } else {
+            throw new SensortagException("Failed to get temperature. " + result.getInput());
         }
 
         expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
-
-        while(expectTemperatureNotification(expect, 3, TimeUnit.SECONDS).isSuccessful()) {
-            LOG.debug("Discarding temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(value));
-        }
         return value;
+    }
+
+    private void discardTemperatureNotifications(Expect expect) throws IOException {
+        Result result = expectTemperatureNotification(expect, 3, TimeUnit.SECONDS);
+        while(result.isSuccessful()) {
+            LOG.debug("Discarding temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(result.group(1)));
+            result = expectTemperatureNotification(expect, 3, TimeUnit.SECONDS);
+        }
     }
 
     private Result expectTemperatureNotification(Expect expect, long duration, TimeUnit timeUnit) throws IOException {
