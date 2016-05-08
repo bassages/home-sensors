@@ -84,7 +84,6 @@ public class SensorTagReader {
     private void readAndPersistSensorValues(Expect expect) throws IOException, SensortagException {
         String temperatureHex = readTemperature(expect);
         BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
-        discardTemperatureNotifications(expect);
 
 //        String humidityHex = readHumidity(expect);
 //        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
@@ -157,7 +156,7 @@ public class SensorTagReader {
              * timeout range: 100ms to 32.0s. Larger than max interval
              */
 
-            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 320 --max 640 --latency 0 --timeout 3000");
+            expect.sendLine("sudo hcitool lecup --handle " + handle + " --min 320 --max 640 --latency 0 --timeout 3200");
 
             expect.sendLine("exit");
             expect.expect(eof());
@@ -213,7 +212,7 @@ public class SensorTagReader {
 
         String value;
 
-        Result result = expectTemperatureNotification(expect, 10, TimeUnit.SECONDS);
+        Result result = expectTemperatureNotification(expect, 15, TimeUnit.SECONDS);
         if (result.isSuccessful()) {
             value = result.group(1);
             LOG.debug("Temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(value));
@@ -222,6 +221,9 @@ public class SensorTagReader {
         }
 
         expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
+
+        discardTemperatureNotifications(expect);
+
         return value;
     }
 
