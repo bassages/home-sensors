@@ -1,12 +1,17 @@
 package nl.wiegman.sensortag;
 
+import net.sf.expectit.Expect;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+
 /**
  * <pre>
  *
  * Hardware on TI SensorTag: Texas Instruments TMP006 @ U5
  *
  * Two types of data are obtained from the IR Temperature sensor: object temperature and ambient temperature.
- * 
+ *
  * --------------------------------------------------------------------------------------
  * | Type                |  UUID  |  Read/Write | Format                                |
  * |------------------------------------------------------------------------------------|
@@ -16,9 +21,9 @@ package nl.wiegman.sensortag;
  * | <Period>            | AA03 * | R/W         | 1 byte                                |
  * --------------------------------------------------------------------------------------
  *
- * When the enable command is issued, the sensor starts to perform measurements each second (average over four measurements) 
- * and the data is stored in the <Data> each second as well. When the disable command is issued, the sensor is put in stand-by mode. 
- * 
+ * When the enable command is issued, the sensor starts to perform measurements each second (average over four measurements)
+ * and the data is stored in the <Data> each second as well. When the disable command is issued, the sensor is put in stand-by mode.
+ *
  * To obtain data either use notifications or read the data directly.
  * The period range varies from 300 ms to 2.55 seconds. The unit is 10 ms. i.e. writing 0x32 gives 500 ms, 0x64 1 second etc. The default value is 1 second.
  *
@@ -32,9 +37,38 @@ package nl.wiegman.sensortag;
  *
  * </pre>
  */
-public class ThermometerGatt {
+public class Thermometer extends AbstractSensortagSensor {
 
-    public static double ambientTemperatureFromHex(String hexValue) {
+    public static final String NOTIFICATION_REGEXP = "Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
+
+    public BigDecimal getAmbientTemperature(Expect expect) throws IOException, SensortagException {
+        enable(expect);
+        String value = expectSuccesfulMatch(expect, NOTIFICATION_REGEXP);
+        disable(expect);
+        return BigDecimal.valueOf(ambientTemperatureFromHex(value));
+    }
+
+    @Override
+    void enableNotifications(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x26 0100");
+    }
+
+    @Override
+    void enable(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x29 01");
+    }
+
+    @Override
+    void disable(Expect expect) throws IOException {
+        expect.sendLine("char-write-cmd 0x29 00");
+    }
+
+    @Override
+    String getNotificationPattern() {
+        return NOTIFICATION_REGEXP;
+    }
+
+    private double ambientTemperatureFromHex(String hexValue) {
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawAmbient = Integer.parseInt(hexValues[3] + hexValues[2], 16);
@@ -44,7 +78,8 @@ public class ThermometerGatt {
         }
     }
 
-    private static double getAmbientTemperature(int rawAmbient) {
+    private double getAmbientTemperature(int rawAmbient) {
         return rawAmbient / 128.0;
     }
+
 }

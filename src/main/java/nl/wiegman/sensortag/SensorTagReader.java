@@ -24,7 +24,7 @@ public class SensorTagReader {
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
     @Autowired
-    private KlimaatReadingPersister klimaatReadingPersister;
+    private KlimaatService klimaatService;
 
     @Value("${sensortag.bluetooth.address}")
     private String sensortagBluetoothAddress;
@@ -32,9 +32,12 @@ public class SensorTagReader {
     @Value("${sensortag.probetime.seconds}")
     private int sensortagProbeTimeInSeconds;
 
+    private Thermometer thermometer = new Thermometer();
+    private Hygrometer hygrometer = new Hygrometer();
+
     @PostConstruct
-    private void reconnectToSensorTagOnException() throws InterruptedException, IOException {
-        LOG.info("Starting SensorTagReader");
+    private void start() throws InterruptedException, IOException {
+        LOG.info("Start SensorTagReader");
 
         while (1 == 1) {
             try {
@@ -52,7 +55,9 @@ public class SensorTagReader {
         Expect expect = getExpectBuilder(process).build();
 
         try {
-            connectToSensortag(expect);
+            startInteractiveGattool(expect);
+            connect(expect);
+
             setConnectionParameters();
 
             /**
@@ -64,7 +69,8 @@ public class SensorTagReader {
              * 3. When notification with data is obtained at the Master side, disable the sensor (notification still on though)
              */
 
-            enableNotifications(expect);
+            thermometer.enableNotifications(expect);
+            hygrometer.enableNotifications(expect);
 
             while (1 == 1) {
                 long start = System.currentTimeMillis();
@@ -81,14 +87,31 @@ public class SensorTagReader {
         }
     }
 
+    private void startInteractiveGattool(Expect expect) throws IOException, SensortagException {
+        expect.sendLine("gatttool -b " + sensortagBluetoothAddress + " --interactive");
+
+        Result startGattoolResult = expect.withTimeout(20, TimeUnit.SECONDS).expect(contains("[LE]>"));
+        if (!startGattoolResult.isSuccessful()) {
+            throw new SensortagException("Failed to start gatttool. " + startGattoolResult.getInput());
+        }
+    }
+
+    private void connect(Expect expect) throws IOException, SensortagException {
+        expect.sendLine("connect");
+
+        Result connectResult = expect.withTimeout(20, TimeUnit.SECONDS).expect(contains("Connection successful"));
+        if (!connectResult.isSuccessful()) {
+            throw new SensortagException("Failed to connect. " + connectResult.getInput());
+        }
+    }
+
     private void readAndPersistSensorValues(Expect expect) throws IOException, SensortagException {
-        String temperatureHex = readTemperature(expect);
-        BigDecimal temperature = BigDecimal.valueOf(ThermometerGatt.ambientTemperatureFromHex(temperatureHex));
+        BigDecimal temperature = thermometer.getAmbientTemperature(expect);
+        BigDecimal humidity = hygrometer.getHumidity(expect);
+        klimaatService.persist(temperature, humidity);
 
-//        String humidityHex = readHumidity(expect);
-//        BigDecimal humidity = BigDecimal.valueOf(HygrometerGatt.humidityFromHex(humidityHex));
-
-        klimaatReadingPersister.persist(temperature, null);
+        thermometer.discardNotifications(expect);
+        hygrometer.discardNotifications(expect);
     }
 
     private void setConnectionParameters() throws IOException {
@@ -179,74 +202,6 @@ public class SensorTagReader {
                     .withInputs(process.getInputStream(), process.getErrorStream())
                     .withInputFilters(removeColors(), removeNonPrintable())
                     .withTimeout(15, TimeUnit.SECONDS);
-    }
-
-    private void connectToSensortag(Expect expect) throws IOException, SensortagException {
-        expect.sendLine("gatttool -b " + sensortagBluetoothAddress + " --interactive");
-
-        Result startGattoolResult = expect.expect(contains("[LE]>"));
-        if (!startGattoolResult.isSuccessful()) {
-            throw new SensortagException("Failed to start gatttool. " + startGattoolResult.getInput());
-        }
-
-        expect.sendLine("connect");
-
-        Result connectResult = expect.expect(contains("Connection successful"));
-        if (!connectResult.isSuccessful()) {
-            throw new SensortagException("Failed to connect. " + connectResult.getInput());
-        }
-    }
-
-    private void enableNotifications(Expect expect) throws IOException {
-        expect.sendLine("char-write-cmd 0x26 0100"); // Enable temperature sensor notifications
-        expect.sendLine("char-write-cmd 0x3c 0100"); // Enable humidity sensor notifications
-    }
-
-    private void disableNotifications(Expect expect) throws IOException {
-        expect.sendLine("char-write-cmd 0x3c 0000"); // Disable humidity sensor notifications
-        expect.sendLine("char-write-cmd 0x26 0000"); // Disable temperature sensor notifications
-    }
-
-    private String readTemperature(Expect expect) throws IOException, SensortagException {
-        expect.sendLine("char-write-cmd 0x29 01"); // Enable temperature sensor
-
-        String value;
-
-        Result result = expectTemperatureNotification(expect, 15, TimeUnit.SECONDS);
-        if (result.isSuccessful()) {
-            value = result.group(1);
-            LOG.debug("Temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(value));
-        } else {
-            throw new SensortagException("Failed to get temperature. " + result.getInput());
-        }
-
-        expect.sendLine("char-write-cmd 0x29 00"); // Disable temperature sensor
-
-        discardTemperatureNotifications(expect);
-
-        return value;
-    }
-
-    private void discardTemperatureNotifications(Expect expect) throws IOException {
-        Result result = expectTemperatureNotification(expect, 3, TimeUnit.SECONDS);
-        while(result.isSuccessful()) {
-            LOG.debug("Discarding temperature notification: " + ThermometerGatt.ambientTemperatureFromHex(result.group(1)));
-            result = expectTemperatureNotification(expect, 3, TimeUnit.SECONDS);
-        }
-    }
-
-    private Result expectTemperatureNotification(Expect expect, long duration, TimeUnit timeUnit) throws IOException {
-        return expect.withTimeout(duration, timeUnit).expect(regexp("Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})"));
-    }
-
-    private String readHumidity(Expect expect) throws IOException {
-        expect.sendLine("char-write-cmd 0x3f 01"); // Enable humidity sensor
-
-        Result result = expect.expect(regexp("Notification handle = 0x003b value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})"));
-        String value = result.group(1);
-        expect.sendLine("char-write-cmd 0x3f 00"); // Disable humidity sensor
-
-        return value;
     }
 
     private void disconnect(Process process, Expect expect) throws IOException, InterruptedException {

@@ -18,9 +18,9 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Component
-public class KlimaatReadingPersister {
+public class KlimaatService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KlimaatReadingPersister.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KlimaatService.class);
 
     @Value("${home-server-rest-service-klimaat-url}")
     private String homeServerRestServiceKlimaatUrl;
