@@ -109,9 +109,6 @@ public class SensorTagReader {
         BigDecimal temperature = thermometer.getAmbientTemperature(expect);
         BigDecimal humidity = hygrometer.getHumidity(expect);
         klimaatService.persist(temperature, humidity);
-
-        thermometer.discardNotifications(expect);
-        hygrometer.discardNotifications(expect);
     }
 
     private void setConnectionParameters() throws IOException {

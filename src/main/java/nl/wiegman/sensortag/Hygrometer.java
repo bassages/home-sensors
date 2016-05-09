@@ -33,12 +33,8 @@ public class Hygrometer extends AbstractSensortagSensor {
         enable(expect);
         String value = expectSuccesfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
+        discardNotifications(expect);
         return BigDecimal.valueOf(humidityFromHex(value));
-    }
-
-    @Override
-    String getNotificationPattern() {
-        return NOTIFICATION_REGEXP;
     }
 
     @Override

@@ -45,6 +45,7 @@ public class Thermometer extends AbstractSensortagSensor {
         enable(expect);
         String value = expectSuccesfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
+        discardNotifications(expect);
         return BigDecimal.valueOf(ambientTemperatureFromHex(value));
     }
 
@@ -61,11 +62,6 @@ public class Thermometer extends AbstractSensortagSensor {
     @Override
     void disable(Expect expect) throws IOException {
         expect.sendLine("char-write-cmd 0x29 00");
-    }
-
-    @Override
-    String getNotificationPattern() {
-        return NOTIFICATION_REGEXP;
     }
 
     private double ambientTemperatureFromHex(String hexValue) {
