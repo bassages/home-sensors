@@ -37,7 +37,7 @@ import java.math.BigDecimal;
  *
  * </pre>
  */
-public class Thermometer extends AbstractSensortagSensor {
+public class Thermometer extends AbstractSensor {
 
     public static final String NOTIFICATION_REGEXP = "Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
 
@@ -45,7 +45,7 @@ public class Thermometer extends AbstractSensortagSensor {
         enable(expect);
         String value = expectSuccesfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
-        discardNotifications(expect);
+        discardNotifications(expect, NOTIFICATION_REGEXP);
         return BigDecimal.valueOf(ambientTemperatureFromHex(value));
     }
 

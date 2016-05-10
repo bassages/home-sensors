@@ -25,7 +25,7 @@ import java.math.BigDecimal;
  *
  * The humidity and temperature data in the sensor is issued and measured explicitly where the humidity data takes ~64ms to measure.
  */
-public class Hygrometer extends AbstractSensortagSensor {
+public class Hygrometer extends AbstractSensor {
 
     public static final String NOTIFICATION_REGEXP = "Notification handle = 0x003b value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
 
@@ -33,7 +33,7 @@ public class Hygrometer extends AbstractSensortagSensor {
         enable(expect);
         String value = expectSuccesfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
-        discardNotifications(expect);
+        discardNotifications(expect, NOTIFICATION_REGEXP);
         return BigDecimal.valueOf(humidityFromHex(value));
     }
 

@@ -8,10 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static net.sf.expectit.matcher.Matchers.contains;
 import static net.sf.expectit.matcher.Matchers.regexp;
 
-public abstract class AbstractSensortagSensor {
+public abstract class AbstractSensor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
@@ -23,7 +22,7 @@ public abstract class AbstractSensortagSensor {
 
     String expectSuccesfulMatch(Expect expect, String regexp) throws IOException, SensortagException {
         String value;
-        Result result = expect.withTimeout(15, TimeUnit.SECONDS).expect(regexp(regexp));
+        Result result = expect.withTimeout(20, TimeUnit.SECONDS).expect(regexp(regexp));
         if (result.isSuccessful()) {
             value = result.group(1);
         } else {
@@ -32,8 +31,8 @@ public abstract class AbstractSensortagSensor {
         return value;
     }
 
-    void discardNotifications(Expect expect) throws IOException {
-        while(expect.withTimeout(10, TimeUnit.SECONDS).expect(contains("Notification handle")).isSuccessful()) {
+    void discardNotifications(Expect expect, String regexp) throws IOException {
+        while(expect.withTimeout(15, TimeUnit.SECONDS).expect(regexp(regexp)).isSuccessful()) {
             LOG.debug("Discarding notification handle");
         }
     }
