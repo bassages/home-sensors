@@ -22,17 +22,17 @@ public abstract class AbstractSensor {
 
     String expectSuccesfulMatch(Expect expect, String regexp) throws IOException, SensortagException {
         String value;
-        Result result = expect.withTimeout(20, TimeUnit.SECONDS).expect(regexp(regexp));
+        Result result = expect.withTimeout(25, TimeUnit.SECONDS).expect(regexp(regexp));
         if (result.isSuccessful()) {
             value = result.group(1);
         } else {
-            throw new SensortagException("No match found. " + result.getInput());
+            throw new SensortagException("No match found for regexp [" + regexp + "] in [" + result.getInput() + "]");
         }
         return value;
     }
 
     void discardNotifications(Expect expect, String regexp) throws IOException {
-        while(expect.withTimeout(15, TimeUnit.SECONDS).expect(regexp(regexp)).isSuccessful()) {
+        while(expect.withTimeout(20, TimeUnit.SECONDS).expect(regexp(regexp)).isSuccessful()) {
             LOG.debug("Discarding notification handle");
         }
     }
