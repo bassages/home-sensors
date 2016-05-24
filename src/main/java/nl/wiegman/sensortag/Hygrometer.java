@@ -53,23 +53,25 @@ public class Hygrometer extends AbstractSensor {
     }
 
     private double temperatureFromHex(String hexValue) {
+        double result = 0.0;
+
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawTemperature = Integer.parseInt(hexValues[1] + hexValues[0], 16);
-            return getAmbientTemperature(rawTemperature);
-        } else {
-            return 0.0;
+            result = getAmbientTemperature(rawTemperature);
         }
+        return result;
     }
 
     private double humidityFromHex(String hexValue) {
+        double result = 0.0;
+
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawHumidity = Integer.parseInt(hexValues[3] + hexValues[2], 16);
-            return getHumidity(rawHumidity);
-        } else {
-            return 0.0;
+            result =  getHumidity(rawHumidity);
         }
+        return result;
     }
 
     private float getAmbientTemperature(int temperatureRaw) {

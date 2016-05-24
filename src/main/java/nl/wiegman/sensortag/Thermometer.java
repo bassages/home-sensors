@@ -65,13 +65,13 @@ public class Thermometer extends AbstractSensor {
     }
 
     private double ambientTemperatureFromHex(String hexValue) {
+        double result = 0.0;
         String[] hexValues = hexValue.split(" ");
         if (hexValues.length == 4) {
             int rawAmbient = Integer.parseInt(hexValues[3] + hexValues[2], 16);
-            return getAmbientTemperature(rawAmbient);
-        } else {
-            return 0.0;
+            result = getAmbientTemperature(rawAmbient);
         }
+        return result;
     }
 
     private double getAmbientTemperature(int rawAmbient) {
