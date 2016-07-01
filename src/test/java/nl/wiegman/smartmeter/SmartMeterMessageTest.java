@@ -6,6 +6,9 @@ import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -13,7 +16,7 @@ public class SmartMeterMessageTest {
 
     @Test
     public void validMessage1() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-1.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-1.txt"), StandardCharsets.UTF_8);
         SmartMeterMessage smartMeterMessage = new SmartMeterMessage(message);
 
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
@@ -30,7 +33,7 @@ public class SmartMeterMessageTest {
 
     @Test
     public void validMessage2() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-2.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-2.txt"), StandardCharsets.UTF_8);
         SmartMeterMessage smartMeterMessage = new SmartMeterMessage(message);
 
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
@@ -47,7 +50,7 @@ public class SmartMeterMessageTest {
 
     @Test
     public void validMessage3() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-3.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-3.txt"), StandardCharsets.UTF_8);
         SmartMeterMessage smartMeterMessage = new SmartMeterMessage(message);
 
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
@@ -64,26 +67,26 @@ public class SmartMeterMessageTest {
 
     @Test
     public void validMessage4() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-4.txt"));
-        SmartMeterMessage smartMeterMessage = new SmartMeterMessage(message);
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-4.txt"), StandardCharsets.UTF_8);
+        new SmartMeterMessage(message);
     }
 
     @Ignore("Test broken, invalid CRC is reported, which is very strange because other tests pass...")
     @Test
     public void validMessageFromP1Specification() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-from-P1-specification.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-from-P1-specification.txt"), StandardCharsets.UTF_8);
         new SmartMeterMessage(message);
     }
 
     @Test
     public void validMessageFromInternet() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.0-from-internet.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.0-from-internet.txt"), StandardCharsets.UTF_8);
         new SmartMeterMessage(message);
     }
 
     @Test
     public void invalidCrc() throws Exception {
-        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-invalid-crc.txt"));
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-invalid-crc.txt"), StandardCharsets.UTF_8);
 
         assertThatExceptionOfType(SmartMeterMessage.InvalidSmartMeterMessageException.class).isThrownBy(() -> { new SmartMeterMessage(message); })
                 .withNoCause();
