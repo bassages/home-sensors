@@ -2,6 +2,8 @@ package nl.wiegman.sensortag;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -24,6 +27,10 @@ public class KlimaatService {
 
     @Value("${home-server-rest-service-klimaat-url}")
     private String homeServerRestServiceKlimaatUrl;
+    @Value("${home-server-rest-service-klimaat-basic-auth-user:#{null}}")
+    private String homeServerRestServiceKlimaatBasicAuthUser;
+    @Value("${home-server-rest-service-klimaat-basic-auth-password:#{null}}")
+    private String homeServerRestServiceKlimaatBasicAuthPassword;
 
     public void persist(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
 
@@ -51,11 +58,24 @@ public class KlimaatService {
             StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
+            setAuthorizationHeader(request);
+
             CloseableHttpResponse response = httpClient.execute(request);
 
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
                 throw new RuntimeException("Unexpected statusline: " + response.getStatusLine());
             }
+        }
+    }
+
+    private void setAuthorizationHeader(HttpPost request) {
+        if (homeServerRestServiceKlimaatBasicAuthUser != null
+                && homeServerRestServiceKlimaatBasicAuthPassword != null) {
+
+            String auth = homeServerRestServiceKlimaatBasicAuthUser + ":" + homeServerRestServiceKlimaatBasicAuthPassword;
+            byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+            String authorizationHeader = "Basic " + new String(encodedAuth);
+            request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         }
     }
 
