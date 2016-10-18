@@ -25,6 +25,9 @@ public class KlimaatService {
 
     private static final Logger LOG = LoggerFactory.getLogger(KlimaatService.class);
 
+    @Value("${home-display-rest-service-klimaat-url:#{null}}")
+    private String homeDisplayRestServiceKlimaatUrl;
+
     @Value("${home-server-rest-service-klimaat-url}")
     private String homeServerRestServiceKlimaatUrl;
     @Value("${home-server-rest-service-klimaat-basic-auth-user:#{null}}")
@@ -35,13 +38,20 @@ public class KlimaatService {
     public void persist(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
 
         try {
-            String jsonMessage = createSmartMeterJsonMessage(temperatuur, luchtvochtigheid);
+            String jsonMessage = createKlimaatJsonMessage(temperatuur, luchtvochtigheid);
 
             try {
                 postToHomeServer(jsonMessage);
-
             } catch (Exception e) {
                 LOG.warn("Post to " + homeServerRestServiceKlimaatUrl + " failed.", e);
+            }
+
+            if (homeDisplayRestServiceKlimaatUrl != null) {
+                try {
+                    postToHomeDisplay(jsonMessage);
+                } catch (Exception e) {
+                    LOG.info("Post to " + homeDisplayRestServiceKlimaatUrl + " failed.", e.getMessage());
+                }
             }
 
         } catch (JsonProcessingException e) {
@@ -68,6 +78,23 @@ public class KlimaatService {
         }
     }
 
+    private void postToHomeDisplay(String jsonString) throws Exception {
+        LOG.debug("Post to home-display: " + jsonString);
+
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+
+            HttpPost request = new HttpPost(homeDisplayRestServiceKlimaatUrl);
+            StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+            request.setEntity(params);
+
+            CloseableHttpResponse response = httpClient.execute(request);
+
+            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                throw new RuntimeException("Unexpected statusline: " + response.getStatusLine());
+            }
+        }
+    }
+
     private void setAuthorizationHeader(HttpPost request) {
         if (homeServerRestServiceKlimaatBasicAuthUser != null
                 && homeServerRestServiceKlimaatBasicAuthPassword != null) {
@@ -79,7 +106,7 @@ public class KlimaatService {
         }
     }
 
-    private String createSmartMeterJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
+    private static String createKlimaatJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
         HomeServerKlimaat homeServerKlimaat = new HomeServerKlimaat();
         homeServerKlimaat.setDatumtijd(new Date().getTime());
         homeServerKlimaat.setTemperatuur(temperatuur);

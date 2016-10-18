@@ -54,6 +54,8 @@ public class SensorTagReader {
         Process process = createShellProcess();
         Expect expect = getExpectBuilder(process).build();
 
+        killAllGatttools(expect);
+
         try {
             startInteractiveGattool(expect);
             connect(expect);
@@ -181,6 +183,10 @@ public class SensorTagReader {
             expect.sendLine("exit");
             expect.expect(eof());
         }
+    }
+
+    private void killAllGatttools(final Expect expect) throws IOException {
+        expect.sendLine("pkill -f gatttool");
     }
 
     private String getCurrentConnectionHandleId(Expect expect) throws IOException {
