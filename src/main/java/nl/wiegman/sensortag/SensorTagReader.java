@@ -18,6 +18,13 @@ import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;
 import static net.sf.expectit.matcher.Matchers.*;
 
+/**
+ * Connects to a Texas Instruments Sensortag over Bluetooth low energy to periodically
+ * obtain the actual thermometer and hygrometer values.
+ * The values will be send to {@link KlimaatService} to publish them.
+ *
+ * Needs blueZ see http://www.bluez.org/ (gattool and hcitool) to be installed on the host OS.
+ */
 @Component
 public class SensorTagReader {
 
@@ -110,7 +117,7 @@ public class SensorTagReader {
     private void readAndPersistSensorValues(Expect expect) throws IOException, SensortagException {
         BigDecimal temperature = thermometer.getAmbientTemperature(expect);
         BigDecimal humidity = hygrometer.getHumidity(expect);
-        klimaatService.persist(temperature, humidity);
+        klimaatService.publish(temperature, humidity);
     }
 
     private void setConnectionParameters() throws IOException {
