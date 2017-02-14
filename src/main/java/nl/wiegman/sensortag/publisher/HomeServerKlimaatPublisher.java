@@ -27,10 +27,11 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
 
     @Value("${home-server-rest-service-klimaat-url:#{null}}")
     private String homeServerRestServiceKlimaatUrl;
-    @Value("${home-server-rest-service-klimaat-basic-auth-user:#{null}}")
-    private String homeServerRestServiceKlimaatBasicAuthUser;
-    @Value("${home-server-rest-service-klimaat-basic-auth-password:#{null}}")
-    private String homeServerRestServiceKlimaatBasicAuthPassword;
+
+    @Value("${home-server-rest-service-basic-auth-user:#{null}}")
+    private String homeServerRestServiceBasicAuthUser;
+    @Value("${home-server-rest-service-basic-auth-password:#{null}}")
+    private String homeServerRestServiceBasicAuthPassword;
 
     // Publish asynchronous, because we do not want to block the main thread
     @Async
@@ -82,9 +83,9 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     }
 
     private void setAuthorizationHeader(HttpPost request) {
-        if (homeServerRestServiceKlimaatBasicAuthUser != null
-                && homeServerRestServiceKlimaatBasicAuthPassword != null) {
-            String auth = homeServerRestServiceKlimaatBasicAuthUser + ":" + homeServerRestServiceKlimaatBasicAuthPassword;
+        if (homeServerRestServiceBasicAuthUser != null
+                && homeServerRestServiceBasicAuthPassword != null) {
+            String auth = homeServerRestServiceBasicAuthUser + ":" + homeServerRestServiceBasicAuthPassword;
             byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
             String authorizationHeader = "Basic " + new String(encodedAuth);
             request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);

@@ -15,7 +15,7 @@ public class MessageBuffer {
     private final List<String> lines = new ArrayList<>();
 
     @Autowired
-    private SmartMeterMessagePersister smartMeterMessagePersister;
+    private HomeServerSmartMeterPublisher homeServerSmartMeterPublisher;
 
     public synchronized void addLine(String line) {
 
@@ -27,7 +27,7 @@ public class MessageBuffer {
             if (line.startsWith("!")) {
                 try {
                     SmartMeterMessage message = new SmartMeterMessage(lines.toArray(new String[0]));
-                    smartMeterMessagePersister.persist(message);
+                    homeServerSmartMeterPublisher.publish(message);
                     lines.clear();
                 } catch (SmartMeterMessage.InvalidSmartMeterMessageException e) {
                     LOG.error("Invalid CRC for smartmetermessage: " + String.join("\n", lines));

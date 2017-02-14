@@ -1,7 +1,10 @@
 package nl.wiegman.smartmeter;
 
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -18,14 +21,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
-public class SmartMeterMessagePersister {
+public class HomeServerSmartMeterPublisher {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterMessagePersister.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
 
     @Value("${home-server-rest-service-meterstanden-url}")
     private String homeServerRestServiceMeterstandenUrl;
 
-    public void persist(SmartMeterMessage smartMeterMessage) {
+    @Value("${home-server-rest-service-basic-auth-user:#{null}}")
+    private String homeServerRestServiceBasicAuthUser;
+    @Value("${home-server-rest-service-basic-auth-password:#{null}}")
+    private String homeServerRestServiceBasicAuthPassword;
+
+    public void publish(SmartMeterMessage smartMeterMessage) {
 
         try {
             String jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
@@ -33,7 +41,7 @@ public class SmartMeterMessagePersister {
             try {
                 postToHomeServer(jsonMessage);
             } catch (Exception e) {
-                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
+                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed.", e);
             }
 
         } catch (JsonProcessingException e) {
@@ -50,11 +58,23 @@ public class SmartMeterMessagePersister {
             StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
+            setAuthorizationHeader(request);
+
             CloseableHttpResponse response = httpClient.execute(request);
 
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
                 throw new RuntimeException("Unexpected statusline: " + response.getStatusLine());
             }
+        }
+    }
+
+    private void setAuthorizationHeader(HttpPost request) {
+        if (homeServerRestServiceBasicAuthUser != null
+                && homeServerRestServiceBasicAuthPassword != null) {
+            String auth = homeServerRestServiceBasicAuthUser + ":" + homeServerRestServiceBasicAuthPassword;
+            byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+            String authorizationHeader = "Basic " + new String(encodedAuth);
+            request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         }
     }
 

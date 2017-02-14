@@ -20,7 +20,7 @@ import static org.mockito.Mockito.verify;
 public class MessageBufferTest {
 
     @Mock
-    private SmartMeterMessagePersister smartMeterMessagePersisterMock;
+    private HomeServerSmartMeterPublisher homeServerSmartMeterPublisherMock;
 
     @InjectMocks
     private MessageBuffer messageBuffer;
@@ -38,7 +38,7 @@ public class MessageBufferTest {
 
         assertThat(messageBuffer.getPendingLinesSize()).isEqualTo(0);
 
-        verify(smartMeterMessagePersisterMock, times(2)).persist((SmartMeterMessage) Matchers.anyObject());
+        verify(homeServerSmartMeterPublisherMock, times(2)).publish((SmartMeterMessage) Matchers.anyObject());
     }
 
     @Test
