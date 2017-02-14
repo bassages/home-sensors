@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -26,7 +27,7 @@ import static net.sf.expectit.matcher.Matchers.*;
  * Needs blueZ see http://www.bluez.org/ (gattool and hcitool) to be installed on the host OS.
  */
 @Component
-public class SensorTagReader {
+public class SensorTagReader implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
@@ -42,8 +43,7 @@ public class SensorTagReader {
     private Thermometer thermometer = new Thermometer();
     private Hygrometer hygrometer = new Hygrometer();
 
-    @PostConstruct
-    private void start() throws InterruptedException, IOException {
+    public void run(String... strings) throws Exception {
         LOG.info("Start SensorTagReader");
 
         while (1 == 1) {

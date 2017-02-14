@@ -32,6 +32,7 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     @Value("${home-server-rest-service-klimaat-basic-auth-password:#{null}}")
     private String homeServerRestServiceKlimaatBasicAuthPassword;
 
+    // Publish asynchronous, because we do not want to block the main thread
     @Async
     @Override
     public void publish(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
@@ -83,7 +84,6 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     private void setAuthorizationHeader(HttpPost request) {
         if (homeServerRestServiceKlimaatBasicAuthUser != null
                 && homeServerRestServiceKlimaatBasicAuthPassword != null) {
-
             String auth = homeServerRestServiceKlimaatBasicAuthUser + ":" + homeServerRestServiceKlimaatBasicAuthPassword;
             byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
             String authorizationHeader = "Basic " + new String(encodedAuth);

@@ -1,8 +1,7 @@
 package nl.wiegman.smartmeter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
+import java.math.BigDecimal;
+
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,10 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 public class SmartMeterMessagePersister {
@@ -35,17 +32,8 @@ public class SmartMeterMessagePersister {
 
             try {
                 postToHomeServer(jsonMessage);
-
             } catch (Exception e) {
-//                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
-//
-//                try {
-//                    File file = new File(bufferDirectory, System.currentTimeMillis() + ".txt");
-//                    FileUtils.writeStringToFile(file, jsonMessage);
-//
-//                } catch (IOException e1) {
-//                    LOG.error("Failed to save file. Message=" + smartMeterMessage, e1);
-//                }
+                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed. Writing message to disk", e);
             }
 
         } catch (JsonProcessingException e) {
@@ -71,13 +59,18 @@ public class SmartMeterMessagePersister {
     }
 
     private String createSmartMeterJsonMessage(SmartMeterMessage smartMeterMessage) throws JsonProcessingException {
+        HomeServerMeterstand homeServerMeterstand = mapToHomeServerMeterstand(smartMeterMessage);
+        return new ObjectMapper().writeValueAsString(homeServerMeterstand);
+    }
+
+    private HomeServerMeterstand mapToHomeServerMeterstand(SmartMeterMessage smartMeterMessage) {
         HomeServerMeterstand homeServerMeterstand = new HomeServerMeterstand();
         homeServerMeterstand.setDatumtijd(smartMeterMessage.getDatetimestamp().getTime());
         homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
         homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
         homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueGasDeliveredToClient());
-        return new ObjectMapper().writeValueAsString(homeServerMeterstand);
+        return homeServerMeterstand;
     }
 
     private static class HomeServerMeterstand {

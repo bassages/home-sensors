@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,9 +14,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 @Component
-public class SmartMeterReaderNative {
+public class SmartMeterReaderNative implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
+
+    private static final String SERIAL_BAUD_RATE_SPEED = "115200";
+    private static final String SERIAL_PARITY_EVEN = "even";
 
     @Value("${smart-meter-port-name}")
     private String smartMeterPort;
@@ -23,16 +27,16 @@ public class SmartMeterReaderNative {
     @Autowired
     private MessageBuffer messageBuffer;
 
-//    @PostConstruct
-    public void start() {
-        connectAndListenForData();
+    @Override
+    public void run(String... args) throws Exception {
+//        connectAndListenForData();
     }
 
     private void connectAndListenForData() {
         LOG.info("Starting SmartMeterReaderNative");
 
         try {
-            String command = "cu -l /dev/" + smartMeterPort + " --speed 115200 --parity=even";
+            String command = "cu -l /dev/" + smartMeterPort + " --speed " + SERIAL_BAUD_RATE_SPEED + " --parity=" + SERIAL_PARITY_EVEN;
 
             Process process = Runtime.getRuntime().exec(command);
 
