@@ -27,7 +27,7 @@ public class HomeDisplayKlimaatPublisher implements KlimaatPublisher {
 
     @Async
     @Override
-    public void publish(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
+    public void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
         LOG.debug("HomeDisplayKlimaatPublisher::publish");
 
         try {

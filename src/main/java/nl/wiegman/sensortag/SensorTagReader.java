@@ -40,6 +40,9 @@ public class SensorTagReader implements CommandLineRunner {
     @Value("${sensortag.probetime.seconds}")
     private int sensortagProbeTimeInSeconds;
 
+    @Value("${sensortag-klimaat-sensorcode}")
+    private String klimaatSensorCode;
+
     private Thermometer thermometer = new Thermometer();
     private Hygrometer hygrometer = new Hygrometer();
 
@@ -117,7 +120,7 @@ public class SensorTagReader implements CommandLineRunner {
     private void readAndPersistSensorValues(Expect expect) throws IOException, SensortagException {
         BigDecimal temperature = thermometer.getAmbientTemperature(expect);
         BigDecimal humidity = hygrometer.getHumidity(expect);
-        klimaatService.publish(temperature, humidity);
+        klimaatService.publish(klimaatSensorCode, temperature, humidity);
     }
 
     private void setConnectionParameters() throws IOException {

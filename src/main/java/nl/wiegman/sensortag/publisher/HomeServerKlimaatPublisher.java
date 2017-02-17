@@ -36,12 +36,12 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     // Publish asynchronous, because we do not want to block the main thread
     @Async
     @Override
-    public void publish(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
+    public void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
         LOG.debug("HomeServerKlimaatPublisher::publish");
 
         if (homeServerRestServiceKlimaatUrl != null) {
             try {
-                String jsonMessage = createKlimaatJsonMessage(temperatuur, luchtvochtigheid);
+                String jsonMessage = createKlimaatJsonMessage(klimaatSensorCode, temperatuur, luchtvochtigheid);
 
                 try {
                     postToHomeServer(jsonMessage);
@@ -55,11 +55,12 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
         }
     }
 
-    private static String createKlimaatJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
+    private String createKlimaatJsonMessage(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
         HomeServerKlimaat homeServerKlimaat = new HomeServerKlimaat();
         homeServerKlimaat.setDatumtijd(new Date().getTime());
         homeServerKlimaat.setTemperatuur(temperatuur);
         homeServerKlimaat.setLuchtvochtigheid(luchtvochtigheid);
+        homeServerKlimaat.setKlimaatSensorCode(klimaatSensorCode);
         return new ObjectMapper().writeValueAsString(homeServerKlimaat);
     }
 
@@ -96,6 +97,7 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
         private long datumtijd;
         private BigDecimal temperatuur;
         private BigDecimal luchtvochtigheid;
+        private String klimaatSensorCode;
 
         public long getDatumtijd() {
             return datumtijd;
@@ -119,6 +121,14 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
 
         public void setLuchtvochtigheid(BigDecimal luchtvochtigheid) {
             this.luchtvochtigheid = luchtvochtigheid;
+        }
+
+        public String getKlimaatSensorCode() {
+            return klimaatSensorCode;
+        }
+
+        public void setKlimaatSensorCode(String klimaatSensorCode) {
+            this.klimaatSensorCode = klimaatSensorCode;
         }
     }
 }

@@ -17,8 +17,8 @@ public class KlimaatService {
     @Autowired
     private List<KlimaatPublisher> klimaatPublishers;
 
-    public void publish(BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
+    public void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
         LOG.debug("Publishing to {} publishers", klimaatPublishers.size());
-        klimaatPublishers.forEach(publisher -> publisher.publish(temperatuur, luchtvochtigheid));
+        klimaatPublishers.forEach(publisher -> publisher.publish(klimaatSensorCode, temperatuur, luchtvochtigheid));
     }
 }

@@ -4,5 +4,5 @@ import java.math.BigDecimal;
 
 public interface KlimaatPublisher {
 
-    void publish(BigDecimal temperatuur, BigDecimal luchtvochtigheid);
+    void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid);
 }
