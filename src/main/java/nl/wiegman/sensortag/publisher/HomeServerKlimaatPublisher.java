@@ -25,8 +25,8 @@ import java.util.Date;
 public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     private static final Logger LOG = LoggerFactory.getLogger(HomeServerKlimaatPublisher.class);
 
-    @Value("${home-server-rest-service-klimaat-url:#{null}}")
-    private String homeServerRestServiceKlimaatUrl;
+    @Value("${home-server-rest-service-url:#{null}}")
+    private String homeServerRestServiceUrl;
 
     @Value("${home-server-rest-service-basic-auth-user:#{null}}")
     private String homeServerRestServiceBasicAuthUser;
@@ -39,14 +39,15 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
     public void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
         LOG.debug("HomeServerKlimaatPublisher::publish");
 
-        if (homeServerRestServiceKlimaatUrl != null) {
+        if (homeServerRestServiceUrl != null) {
             try {
-                String jsonMessage = createKlimaatJsonMessage(klimaatSensorCode, temperatuur, luchtvochtigheid);
+                String jsonMessage = createKlimaatJsonMessage(temperatuur, luchtvochtigheid);
+                String url = String.format(homeServerRestServiceUrl + "/klimaat/sensors/%s", klimaatSensorCode);
 
                 try {
-                    postToHomeServer(jsonMessage);
+                    postJson(url, jsonMessage);
                 } catch (Exception e) {
-                    LOG.warn("Post to " + homeServerRestServiceKlimaatUrl + " failed.", e);
+                    LOG.warn("Post to url [" + url + "] failed.", e);
                 }
 
             } catch (JsonProcessingException e) {
@@ -55,21 +56,20 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
         }
     }
 
-    private String createKlimaatJsonMessage(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
+    private String createKlimaatJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
         HomeServerKlimaat homeServerKlimaat = new HomeServerKlimaat();
         homeServerKlimaat.setDatumtijd(new Date().getTime());
         homeServerKlimaat.setTemperatuur(temperatuur);
         homeServerKlimaat.setLuchtvochtigheid(luchtvochtigheid);
-        homeServerKlimaat.setKlimaatSensorCode(klimaatSensorCode);
         return new ObjectMapper().writeValueAsString(homeServerKlimaat);
     }
 
-    private void postToHomeServer(String jsonString) throws Exception {
-        LOG.debug("Post to home-server: " + jsonString);
+    private void postJson( String url, String jsonString) throws Exception {
+        LOG.debug("Post to url: {}. Request body: {}", url, jsonString);
 
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 
-            HttpPost request = new HttpPost(homeServerRestServiceKlimaatUrl);
+            HttpPost request = new HttpPost(url);
             StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
@@ -97,7 +97,6 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
         private long datumtijd;
         private BigDecimal temperatuur;
         private BigDecimal luchtvochtigheid;
-        private String klimaatSensorCode;
 
         public long getDatumtijd() {
             return datumtijd;
@@ -121,14 +120,6 @@ public class HomeServerKlimaatPublisher implements KlimaatPublisher {
 
         public void setLuchtvochtigheid(BigDecimal luchtvochtigheid) {
             this.luchtvochtigheid = luchtvochtigheid;
-        }
-
-        public String getKlimaatSensorCode() {
-            return klimaatSensorCode;
-        }
-
-        public void setKlimaatSensorCode(String klimaatSensorCode) {
-            this.klimaatSensorCode = klimaatSensorCode;
         }
     }
 }

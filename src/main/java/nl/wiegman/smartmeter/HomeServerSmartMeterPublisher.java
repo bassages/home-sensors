@@ -25,8 +25,8 @@ public class HomeServerSmartMeterPublisher {
 
     private static final Logger LOG = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
 
-    @Value("${home-server-rest-service-meterstanden-url}")
-    private String homeServerRestServiceMeterstandenUrl;
+    @Value("${home-server-rest-service-url:#{null}}")
+    private String homeServerRestServiceUrl;
 
     @Value("${home-server-rest-service-basic-auth-user:#{null}}")
     private String homeServerRestServiceBasicAuthUser;
@@ -36,12 +36,13 @@ public class HomeServerSmartMeterPublisher {
     public void publish(SmartMeterMessage smartMeterMessage) {
 
         try {
+            String url = String.format(homeServerRestServiceUrl + "/meterstanden");
             String jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
 
             try {
-                postToHomeServer(jsonMessage);
+                postJson(url, jsonMessage);
             } catch (Exception e) {
-                LOG.warn("Post to " + homeServerRestServiceMeterstandenUrl + " failed.", e);
+                LOG.warn("Post to url [" + url + "] failed.", e);
             }
 
         } catch (JsonProcessingException e) {
@@ -49,12 +50,12 @@ public class HomeServerSmartMeterPublisher {
         }
     }
 
-    private void postToHomeServer(String jsonString) throws Exception {
-        LOG.debug("Post to home-server: " + jsonString);
+    private void postJson(String url, String jsonString) throws Exception {
+        LOG.debug("Post to url: {}. Request body: {}", url, jsonString);
 
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 
-            HttpPost request = new HttpPost(homeServerRestServiceMeterstandenUrl);
+            HttpPost request = new HttpPost(url);
             StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
