@@ -1,17 +1,17 @@
 package nl.wiegman.homesensors;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 /**
  * Reads data from a serial device which is connected to the P1 port of a Smart Meter.
@@ -20,7 +20,7 @@ import java.io.InputStreamReader;
  * Needs the "cu" command to be installed on the host OS.
  */
 @Component
-public class SmartMeterReaderNative implements CommandLineRunner {
+public class SmartMeterReaderNative {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
 
@@ -34,8 +34,8 @@ public class SmartMeterReaderNative implements CommandLineRunner {
     @Autowired
     private MessageBuffer messageBuffer;
 
-    @Override
-    public void run(String... args) throws Exception {
+    @Async
+    public void run() throws Exception {
         if (smartMeterSerialPortPath == null || smartMeterSerialPortBaudRate == null || smartMeterSerialPortParity == null) {
             LOG.info("Not started SmartMeterReader, because the configuration for it is not defined.");
         } else {

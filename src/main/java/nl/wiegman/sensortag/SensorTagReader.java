@@ -1,23 +1,25 @@
 package nl.wiegman.sensortag;
 
-import net.sf.expectit.Expect;
-import net.sf.expectit.ExpectBuilder;
-import net.sf.expectit.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
+import static net.sf.expectit.filter.Filters.removeColors;
+import static net.sf.expectit.filter.Filters.removeNonPrintable;
+import static net.sf.expectit.matcher.Matchers.contains;
+import static net.sf.expectit.matcher.Matchers.eof;
+import static net.sf.expectit.matcher.Matchers.regexp;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
-import static net.sf.expectit.filter.Filters.removeColors;
-import static net.sf.expectit.filter.Filters.removeNonPrintable;
-import static net.sf.expectit.matcher.Matchers.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
 
 /**
  * Connects to a Texas Instruments Sensortag over Bluetooth low energy to periodically
@@ -27,7 +29,7 @@ import static net.sf.expectit.matcher.Matchers.*;
  * Needs blueZ see http://www.bluez.org/ (gattool and hcitool) to be installed on the host OS.
  */
 @Component
-public class SensorTagReader implements CommandLineRunner {
+public class SensorTagReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
@@ -46,7 +48,8 @@ public class SensorTagReader implements CommandLineRunner {
     private Thermometer thermometer = new Thermometer();
     private Hygrometer hygrometer = new Hygrometer();
 
-    public void run(String... strings) throws Exception {
+    @Async
+    public void run() throws Exception {
 
         if (sensortagBluetoothAddress == null || sensortagProbeTimeInSeconds == null || klimaatSensorCode == null) {
             LOG.info("Not started SensorTagReader, because the configuration for it is not defined.");

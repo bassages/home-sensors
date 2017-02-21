@@ -6,8 +6,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
-public class HomeSmartMeterApplication {
+public class HomeSensorsApplication {
+
 	public static void main(String[] args) {
-		SpringApplication.run(HomeSmartMeterApplication.class, args);
+		SpringApplication.run(HomeSensorsApplication.class, args);
 	}
 }
