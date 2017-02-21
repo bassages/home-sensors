@@ -1,4 +1,4 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.homesensors;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -13,40 +13,50 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+/**
+ * Reads data from a serial device which is connected to the P1 port of a Smart Meter.
+ * The data will be posted to home-server.
+ *
+ * Needs the "cu" command to be installed on the host OS.
+ */
 @Component
 public class SmartMeterReaderNative implements CommandLineRunner {
 
     private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
 
-    private static final String SERIAL_BAUD_RATE_SPEED = "115200";
-    private static final String SERIAL_PARITY_EVEN = "even";
-
-    @Value("${smart-meter-port-name}")
-    private String smartMeterPort;
+    @Value("${smart-meter-serial-port-path:#{null}}")
+    private String smartMeterSerialPortPath;
+    @Value("${smart-meter-serial-port-baudrate:#{null}}")
+    private String smartMeterSerialPortBaudRate;
+    @Value("${smart-meter-serial-port-parity:#{null}}")
+    private String smartMeterSerialPortParity;
 
     @Autowired
     private MessageBuffer messageBuffer;
 
     @Override
     public void run(String... args) throws Exception {
-//        connectAndListenForData();
+        if (smartMeterSerialPortPath == null || smartMeterSerialPortBaudRate == null || smartMeterSerialPortParity == null) {
+            LOG.info("Not started SmartMeterReader, because the configuration for it is not defined.");
+        } else {
+            LOG.info("Start SmartMeterReader");
+            connectAndListenForData();
+        }
     }
 
+    // TODO: Use ExpectIt to listen for data?
     private void connectAndListenForData() {
         LOG.info("Starting SmartMeterReaderNative");
 
         try {
-            String command = "cu -l /dev/" + smartMeterPort + " --speed " + SERIAL_BAUD_RATE_SPEED + " --parity=" + SERIAL_PARITY_EVEN;
+            String command = "cu -l " + smartMeterSerialPortPath + " --speed " + smartMeterSerialPortBaudRate + " --parity=" + smartMeterSerialPortParity + " -E q";
 
             Process process = Runtime.getRuntime().exec(command);
 
-            final Thread ioThread = new Thread() {
-                @Override
-                public void run() {
-                    handleInputStream(process.getInputStream());
-                    handleErrorStream(process.getErrorStream());
-                }
-            };
+            final Thread ioThread = new Thread(() -> {
+                handleInputStream(process.getInputStream());
+                handleErrorStream(process.getErrorStream());
+            });
             ioThread.start();
 
             int exitValue = process.waitFor();

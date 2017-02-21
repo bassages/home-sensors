@@ -1,4 +1,4 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.homesensors;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -36,7 +36,7 @@ public class HomeServerSmartMeterPublisher {
     public void publish(SmartMeterMessage smartMeterMessage) {
 
         try {
-            String url = String.format(homeServerRestServiceUrl + "/meterstanden");
+            String url = homeServerRestServiceUrl + "/meterstanden";
             String jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
 
             try {

@@ -1,4 +1,4 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.homesensors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

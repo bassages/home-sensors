@@ -34,28 +34,33 @@ public class SensorTagReader implements CommandLineRunner {
     @Autowired
     private KlimaatService klimaatService;
 
-    @Value("${sensortag.bluetooth.address}")
+    @Value("${sensortag.bluetooth.address:#{null}}")
     private String sensortagBluetoothAddress;
 
-    @Value("${sensortag.probetime.seconds}")
-    private int sensortagProbeTimeInSeconds;
+    @Value("${sensortag.probetime.seconds:#{null}}")
+    private Integer sensortagProbeTimeInSeconds;
 
-    @Value("${sensortag-klimaat-sensorcode}")
+    @Value("${sensortag-klimaat-sensorcode:#{null}}")
     private String klimaatSensorCode;
 
     private Thermometer thermometer = new Thermometer();
     private Hygrometer hygrometer = new Hygrometer();
 
     public void run(String... strings) throws Exception {
-        LOG.info("Start SensorTagReader");
 
-        while (1 == 1) {
-            try {
-                connectAndListenForSensorValues();
-            } catch (SensortagException e) {
-                LOG.error("Error occurred: " + e.getMessage());
-                LOG.error("Trying to reconnect in 10 seconds...");
-                TimeUnit.SECONDS.sleep(10);
+        if (sensortagBluetoothAddress == null || sensortagProbeTimeInSeconds == null || klimaatSensorCode == null) {
+            LOG.info("Not started SensorTagReader, because the configuration for it is not defined.");
+        } else {
+            LOG.info("Start SensorTagReader");
+
+            while (1 == 1) {
+                try {
+                    connectAndListenForSensorValues();
+                } catch (SensortagException e) {
+                    LOG.error("Error occurred: " + e.getMessage());
+                    LOG.error("Trying to reconnect in 10 seconds...");
+                    TimeUnit.SECONDS.sleep(10);
+                }
             }
         }
     }
@@ -69,11 +74,10 @@ public class SensorTagReader implements CommandLineRunner {
         try {
             startInteractiveGattool(expect);
             connect(expect);
-
             setConnectionParameters();
 
-            /**
-             * From the TI Sensortag Guide:
+            /*
+             * From the TI SensorTag Guide:
              *
              * The most power efficient way to obtain measurements for a sensor is to
              * 1. Enable notification
@@ -130,7 +134,7 @@ public class SensorTagReader implements CommandLineRunner {
 
             String handle = getCurrentConnectionHandleId(expect);
 
-            /**
+            /*
              * From http://processors.wiki.ti.com/images/4/4a/Sensor_Tag_and_BTool_Tutorial1.pdf:
              *
              * 0x2A04 GAP_PERI_CONN_PARAM_UUID (Peripheral Preferred Connection Parameters)

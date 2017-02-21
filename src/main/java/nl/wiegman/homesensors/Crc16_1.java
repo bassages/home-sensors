@@ -1,4 +1,4 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.homesensors;
 
 // Fast byte-wise CRC16 calculation.
 // Author: Christian d'Heureuse, www.source-code.biz

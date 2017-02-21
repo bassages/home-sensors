@@ -1,12 +1,9 @@
-package nl.wiegman.smartmeter;
+package nl.wiegman.homesensors;
 
 import org.apache.commons.io.IOUtils;
-import org.assertj.jodatime.api.Assertions;
-import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -88,8 +85,10 @@ public class SmartMeterMessageTest {
     public void invalidCrc() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-invalid-crc.txt"), StandardCharsets.UTF_8);
 
-        assertThatExceptionOfType(SmartMeterMessage.InvalidSmartMeterMessageException.class).isThrownBy(() -> { new SmartMeterMessage(message); })
-                .withNoCause();
+        assertThatExceptionOfType(SmartMeterMessage.InvalidSmartMeterMessageException.class).isThrownBy(() ->
+                new SmartMeterMessage(message)
+        )
+        .withNoCause();
 
     }
 }
