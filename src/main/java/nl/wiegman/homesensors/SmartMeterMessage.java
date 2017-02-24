@@ -26,6 +26,7 @@ public class SmartMeterMessage {
     public static final String ACTUAL_ELECTRICITY_POWER_DELIVERED = "1-0:1.7.0";
     public static final String LAST_HOURLY_VALUE_GAS_DELIVERED_TO_CLIENT = "0-1:24.2.1";
 
+    private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
     private static final String DST_ACTIVE = "S";
     private static final String DST_NOT_ACTIVE = "W";
 
@@ -98,7 +99,7 @@ public class SmartMeterMessage {
         } else if (DST_NOT_ACTIVE.equals(dstActive)) {
             // Now what?
         }
-        return new SimpleDateFormat("yyMMddhhmmss").parse(value.substring(0, 12));
+        return new SimpleDateFormat(DSMR_TIMESTAMP_FORMAT).parse(value.substring(0, 12));
     }
 
     private String getSingleStringValue(String key) {
@@ -155,7 +156,6 @@ public class SmartMeterMessage {
     private void verifyChecksum() throws InvalidSmartMeterMessageException {
         String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
 
-        // Both seems to be correct:
         int calculatedCrc16 = Crc16.calculate(messageForCalculatingCrc);
 
         LOG.debug("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
