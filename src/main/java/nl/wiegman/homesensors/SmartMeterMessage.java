@@ -1,174 +1,249 @@
 package nl.wiegman.homesensors;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SmartMeterMessage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
-
-    // OBIS codes
-    public static final String VERSION_INFORMATION_FOR_P1_OUTPUT = "1-3:0.2.8";
-    public static final String DATETIMESTAMP_OF_THE_P1_MESSAGE = "0-0:1.0.0";
-    public static final String EQUIPMENT_IDENTIFIER = "0-0:96.1.1";
-    public static final String METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1 = "1-0:1.8.1";
-    public static final String METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2 = "1-0:1.8.2";
-    public static final String METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1 = "1-0:2.8.1";
-    public static final String METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = "1-0:2.8.2";
-    public static final String TARIFF_INDICATOR_ELECTRICITY = "0-0:96.14.0";
-    public static final String ACTUAL_ELECTRICITY_POWER_DELIVERED = "1-0:1.7.0";
-    public static final String LAST_HOURLY_VALUE_GAS_DELIVERED_TO_CLIENT = "0-1:24.2.1";
-
-    private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
-    private static final String DST_ACTIVE = "S";
-    private static final String DST_NOT_ACTIVE = "W";
-
-    private String[] linesInMessage;
-
-    public SmartMeterMessage(String message) throws InvalidSmartMeterMessageException {
-        this.linesInMessage = message.split("\n|\r\n");
-        verifyChecksum();
+    public enum DstIndicator {
+        SUMMER,
+        WINTER
     }
 
-    public SmartMeterMessage(String[] linesInMessage) throws InvalidSmartMeterMessageException {
-        this.linesInMessage = linesInMessage;
-        verifyChecksum();
+    private String header;
+    private String versionInformationForP1Output;
+    private Date timestamp;
+    private SmartMeterMessage.DstIndicator timestampDstIndicator;
+    private String equipmentIdentifierElectricity;
+    private BigDecimal meterReadingElectricityDeliveredToClientTariff1;
+    private BigDecimal meterReadingElectricityDeliveredToClientTariff2;
+    private BigDecimal meterReadingElectricityDeliveredByClientTariff1;
+    private BigDecimal meterReadingElectricityDeliveredByClientTariff2;
+    private String tariffIndicatorElectricity;
+    private BigDecimal actualElectricityPowerDelivered;
+    private BigDecimal actualElectricityPowerRecieved;
+    private int numberOfPowerFailuresInAnyPhase;
+    private int numberOfLongPowerFailuresInAnyPhase;
+    private int numberOfVoltageSagsInPhaseL1;
+    private int numberOfVoltageSagsInPhaseL2;
+    private String textMessageCodes;
+    private String textMessage;
+    private int instantaneousCurrentL1;
+    private BigDecimal instantaneousActivePowerL1;
+    private BigDecimal instantaneousActivePowerL2;
+    private String deviceType;
+    private String equipmentIdentifierGas;
+    private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
+    private Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
+    private SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
+
+    public String getHeader() {
+        return header;
+    }
+
+    public void setHeader(String header) {
+        this.header = header;
     }
 
     public String getVersionInformationForP1Output() {
-        return getSingleStringValue(VERSION_INFORMATION_FOR_P1_OUTPUT);
+        return versionInformationForP1Output;
     }
 
-    public String getEquipmentIdentifier() {
-        return getSingleStringValue(EQUIPMENT_IDENTIFIER);
+    public void setVersionInformationForP1Output(String versionInformationForP1Output) {
+        this.versionInformationForP1Output = versionInformationForP1Output;
     }
 
-    public Date getDatetimestamp() {
-        try {
-            return stringToDate(getSingleStringValue(DATETIMESTAMP_OF_THE_P1_MESSAGE));
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public SmartMeterMessage.DstIndicator getTimestampDstIndicator() {
+        return timestampDstIndicator;
+    }
+
+    public void setTimestampDstIndicator(SmartMeterMessage.DstIndicator timestampDstIndicator) {
+        this.timestampDstIndicator = timestampDstIndicator;
+    }
+
+    public String getEquipmentIdentifierElectricity() {
+        return equipmentIdentifierElectricity;
+    }
+
+    public void setEquipmentIdentifierElectricity(String equipmentIdentifierElectricity) {
+        this.equipmentIdentifierElectricity = equipmentIdentifierElectricity;
     }
 
     public BigDecimal getMeterReadingElectricityDeliveredToClientTariff1() {
-        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1));
+        return meterReadingElectricityDeliveredToClientTariff1;
+    }
+
+    public void setMeterReadingElectricityDeliveredToClientTariff1(BigDecimal meterReadingElectricityDeliveredToClientTariff1) {
+        this.meterReadingElectricityDeliveredToClientTariff1 = meterReadingElectricityDeliveredToClientTariff1;
     }
 
     public BigDecimal getMeterReadingElectricityDeliveredToClientTariff2() {
-        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2));
+        return meterReadingElectricityDeliveredToClientTariff2;
+    }
+
+    public void setMeterReadingElectricityDeliveredToClientTariff2(BigDecimal meterReadingElectricityDeliveredToClientTariff2) {
+        this.meterReadingElectricityDeliveredToClientTariff2 = meterReadingElectricityDeliveredToClientTariff2;
     }
 
     public BigDecimal getMeterReadingElectricityDeliveredByClientTariff1() {
-        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1));
+        return meterReadingElectricityDeliveredByClientTariff1;
+    }
+
+    public void setMeterReadingElectricityDeliveredByClientTariff1(BigDecimal meterReadingElectricityDeliveredByClientTariff1) {
+        this.meterReadingElectricityDeliveredByClientTariff1 = meterReadingElectricityDeliveredByClientTariff1;
     }
 
     public BigDecimal getMeterReadingElectricityDeliveredByClientTariff2() {
-        return kwhStringToBigDecimal(getSingleStringValue(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2));
+        return meterReadingElectricityDeliveredByClientTariff2;
+    }
+
+    public void setMeterReadingElectricityDeliveredByClientTariff2(BigDecimal meterReadingElectricityDeliveredByClientTariff2) {
+        this.meterReadingElectricityDeliveredByClientTariff2 = meterReadingElectricityDeliveredByClientTariff2;
     }
 
     public String getTariffIndicatorElectricity() {
-        return getSingleStringValue(TARIFF_INDICATOR_ELECTRICITY);
+        return tariffIndicatorElectricity;
+    }
+
+    public void setTariffIndicatorElectricity(String tariffIndicatorElectricity) {
+        this.tariffIndicatorElectricity = tariffIndicatorElectricity;
     }
 
     public BigDecimal getActualElectricityPowerDelivered() {
-        return kwStringToBigDecimal(getSingleStringValue(ACTUAL_ELECTRICITY_POWER_DELIVERED));
+        return actualElectricityPowerDelivered;
     }
 
-    public BigDecimal getLastHourlyValueGasDeliveredToClient() {
-        String[] stringValues = getMultipleStringValue(LAST_HOURLY_VALUE_GAS_DELIVERED_TO_CLIENT);
-        return m3StringToBigDecimal(stringValues[1]);
+    public void setActualElectricityPowerDelivered(BigDecimal actualElectricityPowerDelivered) {
+        this.actualElectricityPowerDelivered = actualElectricityPowerDelivered;
     }
 
-    private int getCrc() {
-        return Integer.parseInt(linesInMessage[linesInMessage.length - 1].substring(1, 5), 16);
+    public BigDecimal getActualElectricityPowerRecieved() {
+        return actualElectricityPowerRecieved;
     }
 
-    private Date stringToDate(String value) throws ParseException {
-        String dstActive = value.substring(13, 13);
-
-        if (DST_ACTIVE.equals(dstActive)) {
-            // Now what?
-        } else if (DST_NOT_ACTIVE.equals(dstActive)) {
-            // Now what?
-        }
-        return new SimpleDateFormat(DSMR_TIMESTAMP_FORMAT).parse(value.substring(0, 12));
+    public void setActualElectricityPowerRecieved(BigDecimal actualElectricityPowerRecieved) {
+        this.actualElectricityPowerRecieved = actualElectricityPowerRecieved;
     }
 
-    private String getSingleStringValue(String key) {
-        String result = null;
-
-        for (String line : linesInMessage) {
-            if (line.startsWith(key)) {
-                result = StringUtils.substringBetween(line, "(", ")");
-            }
-        }
-        return result;
+    public int getNumberOfPowerFailuresInAnyPhase() {
+        return numberOfPowerFailuresInAnyPhase;
     }
 
-    private String[] getMultipleStringValue(String key) {
-        String[] result = null;
-
-        for (String line : linesInMessage) {
-            if (line.startsWith(key)) {
-                result = StringUtils.substringsBetween(line, "(", ")");
-                break;
-            }
-        }
-        return result;
+    public void setNumberOfPowerFailuresInAnyPhase(int numberOfPowerFailuresInAnyPhase) {
+        this.numberOfPowerFailuresInAnyPhase = numberOfPowerFailuresInAnyPhase;
     }
 
-
-    private BigDecimal kwhStringToBigDecimal(String value) {
-        BigDecimal result = null;
-
-        if (value != null) {
-            result = new BigDecimal(value.replace("*kWh", ""));
-        }
-        return result;
+    public int getNumberOfLongPowerFailuresInAnyPhase() {
+        return numberOfLongPowerFailuresInAnyPhase;
     }
 
-    private BigDecimal kwStringToBigDecimal(String value) {
-        BigDecimal result = null;
-
-        if (value != null) {
-            result = new BigDecimal(value.replace("*kW", ""));
-        }
-        return result;
+    public void setNumberOfLongPowerFailuresInAnyPhase(int numberOfLongPowerFailuresInAnyPhase) {
+        this.numberOfLongPowerFailuresInAnyPhase = numberOfLongPowerFailuresInAnyPhase;
     }
 
-    private BigDecimal m3StringToBigDecimal(String value) {
-        BigDecimal result = null;
-
-        if (value != null) {
-            result = new BigDecimal(value.replace("*m3", ""));
-        }
-        return result;
+    public int getNumberOfVoltageSagsInPhaseL1() {
+        return numberOfVoltageSagsInPhaseL1;
     }
 
-    private void verifyChecksum() throws InvalidSmartMeterMessageException {
-        String messageForCalculatingCrc = String.join("\r\n", ArrayUtils.subarray(linesInMessage, 0, linesInMessage.length-1)) + "\r\n!";
-
-        int calculatedCrc16 = Crc16.calculate(messageForCalculatingCrc);
-
-        LOG.debug("CRC from message text / Calculated CRC: " + Integer.toHexString(getCrc()) + "/" + Integer.toHexString(calculatedCrc16));
-
-        if (getCrc() != calculatedCrc16) {
-            throw new InvalidSmartMeterMessageException();
-        }
+    public void setNumberOfVoltageSagsInPhaseL1(int numberOfVoltageSagsInPhaseL1) {
+        this.numberOfVoltageSagsInPhaseL1 = numberOfVoltageSagsInPhaseL1;
     }
 
-    @Override
-    public String toString() {
-        return String.join("\r\n", linesInMessage);
+    public int getNumberOfVoltageSagsInPhaseL2() {
+        return numberOfVoltageSagsInPhaseL2;
     }
 
-    public static class InvalidSmartMeterMessageException extends Exception { }
+    public void setNumberOfVoltageSagsInPhaseL2(int numberOfVoltageSagsInPhaseL2) {
+        this.numberOfVoltageSagsInPhaseL2 = numberOfVoltageSagsInPhaseL2;
+    }
+
+    public String getTextMessageCodes() {
+        return textMessageCodes;
+    }
+
+    public void setTextMessageCodes(String textMessageCodes) {
+        this.textMessageCodes = textMessageCodes;
+    }
+
+    public String getTextMessage() {
+        return textMessage;
+    }
+
+    public void setTextMessage(String textMessage) {
+        this.textMessage = textMessage;
+    }
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
+
+    public BigDecimal getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient() {
+        return lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
+    }
+
+    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient) {
+        this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClient = lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
+    }
+
+    public int getInstantaneousCurrentL1() {
+        return instantaneousCurrentL1;
+    }
+
+    public void setInstantaneousCurrentL1(int instantaneousCurrentL1) {
+        this.instantaneousCurrentL1 = instantaneousCurrentL1;
+    }
+
+    public BigDecimal getInstantaneousActivePowerL1() {
+        return instantaneousActivePowerL1;
+    }
+
+    public void setInstantaneousActivePowerL1(BigDecimal instantaneousActivePowerL1) {
+        this.instantaneousActivePowerL1 = instantaneousActivePowerL1;
+    }
+
+    public BigDecimal getInstantaneousActivePowerL2() {
+        return instantaneousActivePowerL2;
+    }
+
+    public void setInstantaneousActivePowerL2(BigDecimal instantaneousActivePowerL2) {
+        this.instantaneousActivePowerL2 = instantaneousActivePowerL2;
+    }
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public String getEquipmentIdentifierGas() {
+        return equipmentIdentifierGas;
+    }
+
+    public void setEquipmentIdentifierGas(String equipmentIdentifierGas) {
+        this.equipmentIdentifierGas = equipmentIdentifierGas;
+    }
+
+    public Date getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp() {
+        return lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
+    }
+
+    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
+            Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp) {
+        this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
+    }
+
+    public SmartMeterMessage.DstIndicator getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator() {
+        return lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
+    }
+
+    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(
+            SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator) {
+        this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
+    }
 }

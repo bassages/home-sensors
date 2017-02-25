@@ -86,11 +86,11 @@ public class HomeServerSmartMeterPublisher {
 
     private HomeServerMeterstand mapToHomeServerMeterstand(SmartMeterMessage smartMeterMessage) {
         HomeServerMeterstand homeServerMeterstand = new HomeServerMeterstand();
-        homeServerMeterstand.setDatumtijd(smartMeterMessage.getDatetimestamp().getTime());
+        homeServerMeterstand.setDatumtijd(smartMeterMessage.getTimestamp().getTime());
         homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
         homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
-        homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueGasDeliveredToClient());
+        homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient());
         return homeServerMeterstand;
     }
 

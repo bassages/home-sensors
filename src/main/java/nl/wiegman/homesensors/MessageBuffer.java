@@ -1,42 +1,55 @@
 package nl.wiegman.homesensors;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class MessageBuffer {
     private static final Logger LOG = LoggerFactory.getLogger(MessageBuffer.class);
 
-    private final List<String> lines = new ArrayList<>();
+    private final List<String> bufferedLines = new ArrayList<>();
+
+    @Autowired
+    private SmartMeterMessageParser smartMeterMessageParser;
 
     @Autowired
     private HomeServerSmartMeterPublisher homeServerSmartMeterPublisher;
 
     public synchronized void addLine(String line) {
 
-        if (lines.isEmpty() && !line.startsWith("/")) {
-            LOG.error("Ignoring line, because it is not a valid header and no previous lines were received. Ignored line: " + line);
+        if (bufferedLines.isEmpty() && !isFirstLineOfP1Message(line)) {
+            LOG.error("Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: " + line);
         } else {
-            lines.add(line);
+            bufferedLines.add(line);
 
-            if (line.startsWith("!")) {
+            if (isLastLineOfP1Message(line)) {
+                String p1Message = bufferedLines.stream().collect(Collectors.joining("\n"));
                 try {
-                    SmartMeterMessage message = new SmartMeterMessage(lines.toArray(new String[0]));
-                    homeServerSmartMeterPublisher.publish(message);
-                    lines.clear();
-                } catch (SmartMeterMessage.InvalidSmartMeterMessageException e) {
-                    LOG.error("Invalid CRC for smartmetermessage: " + String.join("\n", lines));
+                    SmartMeterMessage smartMeterMessage = smartMeterMessageParser.parse(p1Message);
+                    homeServerSmartMeterPublisher.publish(smartMeterMessage);
+                    bufferedLines.clear();
+                } catch (SmartMeterMessageParser.InvalidSmartMeterMessageException e) {
+                    LOG.error("Invalid smartmetermessage: " + p1Message);
                 }
             }
         }
     }
 
-    public int getPendingLinesSize() {
-        return lines.size();
+    private boolean isFirstLineOfP1Message(String line) {
+        return line.startsWith("/");
+    }
+
+    private boolean isLastLineOfP1Message(String line) {
+        return line.startsWith("!");
+    }
+
+    public int getBufferedLinesSize() {
+        return bufferedLines.size();
     }
 }
