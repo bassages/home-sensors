@@ -51,6 +51,10 @@ public class SmartMeterMessageParserTest {
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).hasYear(2017).hasMonth(2).hasDayOfMonth(24).hasHourOfDay(19).hasMinute(00).hasSecond(00);
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
+        assertThat(smartMeterMessage.getPowerFailureLogItems()).hasSize(1);
+        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getTimestampOfEndOfFailure()).hasYear(2016).hasMonth(8).hasDayOfMonth(15).hasHourOfDay(13).hasMinute(51).hasSecond(47);
+        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getTimestampOfEndOfFailureDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.SUMMER);
+        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getFailureDurationInSeconds()).isEqualTo(647L);
     }
 
     @Test

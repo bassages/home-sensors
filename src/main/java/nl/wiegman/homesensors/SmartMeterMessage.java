@@ -1,7 +1,10 @@
 package nl.wiegman.homesensors;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 public class SmartMeterMessage {
 
@@ -36,6 +39,7 @@ public class SmartMeterMessage {
     private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     private Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     private SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
+    private List<PowerFailureLogItem> powerFailureLogItems = new ArrayList<>();
 
     public String getHeader() {
         return header;
@@ -245,5 +249,13 @@ public class SmartMeterMessage {
     public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(
             SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator) {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
+    }
+
+    public List<PowerFailureLogItem> getPowerFailureLogItems() {
+        return Collections.unmodifiableList(powerFailureLogItems);
+    }
+
+    public void addPowerFailureLog(PowerFailureLogItem powerFailureLogItem) {
+        this.powerFailureLogItems.add(powerFailureLogItem);
     }
 }
