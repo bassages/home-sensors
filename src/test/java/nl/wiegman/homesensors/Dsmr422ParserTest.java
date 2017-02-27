@@ -10,19 +10,22 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SmartMeterMessageParserTest {
+import nl.wiegman.homesensors.smartmeter.SmartMeterMessage;
+import nl.wiegman.homesensors.smartmeter.Dsmr422Parser;
 
-    private SmartMeterMessageParser smartMeterMessageParser;
+public class Dsmr422ParserTest {
+
+    private Dsmr422Parser dsmr422Parser;
 
     @Before
     public void setup() {
-        this.smartMeterMessageParser = new SmartMeterMessageParser();
+        this.dsmr422Parser = new Dsmr422Parser();
     }
 
     @Test
     public void shouldParseValidMessage1() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-1.txt"), StandardCharsets.UTF_8);
-        SmartMeterMessage smartMeterMessage = smartMeterMessageParser.parse(message);
+        SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
 
         assertThat(smartMeterMessage).isNotNull();
         assertThat(smartMeterMessage.getHeader()).isEqualTo("KFM5KAIFA-METER");
@@ -46,7 +49,6 @@ public class SmartMeterMessageParserTest {
         assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isEqualTo(0);
         assertThat(smartMeterMessage.getInstantaneousActivePowerL1()).isEqualTo(new BigDecimal("0.042"));
         assertThat(smartMeterMessage.getInstantaneousActivePowerL2()).isEqualTo(new BigDecimal("0.000"));
-        assertThat(smartMeterMessage.getDeviceType()).isEqualTo("003");
         assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("4730303235303033353032393639333137");
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).hasYear(2017).hasMonth(2).hasDayOfMonth(24).hasHourOfDay(19).hasMinute(00).hasSecond(00);
@@ -60,33 +62,43 @@ public class SmartMeterMessageParserTest {
     @Test
     public void shouldParseValidMessage2() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-2.txt"), StandardCharsets.UTF_8);
-        smartMeterMessageParser.parse(message);
+        SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+        assertThat(smartMeterMessage.getPowerFailureLogItems()).hasSize(2);
     }
 
     @Test
     public void shouldParseValidMessage3() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-3.txt"), StandardCharsets.UTF_8);
-        smartMeterMessageParser.parse(message);
+        dsmr422Parser.parse(message);
     }
 
     @Test
     public void shouldParseValidMessage4() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-4.txt"), StandardCharsets.UTF_8);
-        smartMeterMessageParser.parse(message);
+        dsmr422Parser.parse(message);
     }
 
     @Test
-    public void validMessageFromInternet() throws Exception {
+    public void shouldParseValidMessageFoundOnInternet() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.0-from-internet.txt"), StandardCharsets.UTF_8);
-        smartMeterMessageParser.parse(message);
+        dsmr422Parser.parse(message);
+    }
+
+    @Test
+    public void shouldParseValidMessageFromSpecifiation() throws Exception {
+        String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-from-P1-specification.txt"), StandardCharsets.UTF_8);
+        SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+
+        assertThat(smartMeterMessage.getTextMessageCodes()).isEqualTo("01 61 81");
+        assertThat(smartMeterMessage.getTextMessage()).isEqualTo("0123456789:;<=>?0123456789:;<=>?0123456789:;<=>?0123456789:;<=>?0123456789:;<=>?");
     }
 
     @Test
     public void invalidCrc() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-invalid-crc.txt"), StandardCharsets.UTF_8);
 
-        assertThatExceptionOfType(SmartMeterMessageParser.InvalidSmartMeterMessageException.class).isThrownBy(() ->
-                smartMeterMessageParser.parse(message)
+        assertThatExceptionOfType(Dsmr422Parser.InvalidSmartMeterMessageException.class).isThrownBy(() ->
+                dsmr422Parser.parse(message)
         ).withMessageStartingWith("CRC checksum failed");
     }
 }

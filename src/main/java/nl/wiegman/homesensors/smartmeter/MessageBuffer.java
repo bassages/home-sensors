@@ -1,4 +1,4 @@
-package nl.wiegman.homesensors;
+package nl.wiegman.homesensors.smartmeter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ public class MessageBuffer {
     private final List<String> bufferedLines = new ArrayList<>();
 
     @Autowired
-    private SmartMeterMessageParser smartMeterMessageParser;
+    private Dsmr422Parser dsmr422Parser;
 
     @Autowired
     private HomeServerSmartMeterPublisher homeServerSmartMeterPublisher;
@@ -31,10 +31,10 @@ public class MessageBuffer {
             if (isLastLineOfP1Message(line)) {
                 String p1Message = bufferedLines.stream().collect(Collectors.joining("\n"));
                 try {
-                    SmartMeterMessage smartMeterMessage = smartMeterMessageParser.parse(p1Message);
+                    SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(p1Message);
                     homeServerSmartMeterPublisher.publish(smartMeterMessage);
                     bufferedLines.clear();
-                } catch (SmartMeterMessageParser.InvalidSmartMeterMessageException e) {
+                } catch (Dsmr422Parser.InvalidSmartMeterMessageException e) {
                     LOG.error("Invalid smartmetermessage: " + p1Message);
                 }
             }

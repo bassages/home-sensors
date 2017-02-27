@@ -1,4 +1,4 @@
-package nl.wiegman.sensortag;
+package nl.wiegman.homesensors.sensortag;
 
 import net.sf.expectit.Expect;
 import net.sf.expectit.Result;

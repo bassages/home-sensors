@@ -1,4 +1,4 @@
-package nl.wiegman.homesensors;
+package nl.wiegman.homesensors.smartmeter;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ public class SmartMeterMessage {
     private BigDecimal actualElectricityPowerRecieved;
     private int numberOfPowerFailuresInAnyPhase;
     private int numberOfLongPowerFailuresInAnyPhase;
+    private List<PowerFailureLogItem> powerFailureLogItems = new ArrayList<>();
     private int numberOfVoltageSagsInPhaseL1;
     private int numberOfVoltageSagsInPhaseL2;
     private String textMessageCodes;
@@ -34,12 +35,11 @@ public class SmartMeterMessage {
     private int instantaneousCurrentL1;
     private BigDecimal instantaneousActivePowerL1;
     private BigDecimal instantaneousActivePowerL2;
-    private String deviceType;
+
     private String equipmentIdentifierGas;
     private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     private Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     private SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
-    private List<PowerFailureLogItem> powerFailureLogItems = new ArrayList<>();
 
     public String getHeader() {
         return header;
@@ -185,10 +185,6 @@ public class SmartMeterMessage {
         this.textMessage = textMessage;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
-
     public BigDecimal getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient() {
         return lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     }
@@ -219,10 +215,6 @@ public class SmartMeterMessage {
 
     public void setInstantaneousActivePowerL2(BigDecimal instantaneousActivePowerL2) {
         this.instantaneousActivePowerL2 = instantaneousActivePowerL2;
-    }
-
-    public String getDeviceType() {
-        return deviceType;
     }
 
     public String getEquipmentIdentifierGas() {

@@ -16,13 +16,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import nl.wiegman.homesensors.smartmeter.HomeServerSmartMeterPublisher;
+import nl.wiegman.homesensors.smartmeter.MessageBuffer;
+import nl.wiegman.homesensors.smartmeter.SmartMeterMessage;
+import nl.wiegman.homesensors.smartmeter.Dsmr422Parser;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MessageBufferTest {
 
     @Mock
     private HomeServerSmartMeterPublisher homeServerSmartMeterPublisherMock;
     @Mock
-    private SmartMeterMessageParser smartMeterMessageParserMock;
+    private Dsmr422Parser dsmr422ParserMock;
 
     @InjectMocks
     private MessageBuffer messageBuffer;
@@ -35,7 +40,7 @@ public class MessageBufferTest {
         assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
 
         verify(homeServerSmartMeterPublisherMock, times(1)).publish((SmartMeterMessage) Matchers.anyObject());
-        verify(smartMeterMessageParserMock, times(1)).parse((String)Matchers.anyObject());
+        verify(dsmr422ParserMock, times(1)).parse((String)Matchers.anyObject());
     }
 
     @Test
@@ -52,7 +57,7 @@ public class MessageBufferTest {
         assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
 
         verify(homeServerSmartMeterPublisherMock, times(2)).publish((SmartMeterMessage) Matchers.anyObject());
-        verify(smartMeterMessageParserMock, times(2)).parse((String)Matchers.anyObject());
+        verify(dsmr422ParserMock, times(2)).parse((String)Matchers.anyObject());
     }
 
     @Test

@@ -1,4 +1,4 @@
-package nl.wiegman.homesensors;
+package nl.wiegman.homesensors.smartmeter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +65,7 @@ public class SmartMeterReaderNative {
             }
 
         } catch (InterruptedException | IOException e) {
-            LOG.error("Oops, and unexpected error occurred.", e);
+            LOG.error("An unexpected error occurred.", e);
         }
     }
 

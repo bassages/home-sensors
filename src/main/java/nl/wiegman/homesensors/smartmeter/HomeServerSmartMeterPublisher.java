@@ -1,4 +1,4 @@
-package nl.wiegman.homesensors;
+package nl.wiegman.homesensors.smartmeter;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;

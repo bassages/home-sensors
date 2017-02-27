@@ -1,4 +1,4 @@
-package nl.wiegman.sensortag;
+package nl.wiegman.homesensors.sensortag;
 
 import static net.sf.expectit.filter.Filters.removeColors;
 import static net.sf.expectit.filter.Filters.removeNonPrintable;

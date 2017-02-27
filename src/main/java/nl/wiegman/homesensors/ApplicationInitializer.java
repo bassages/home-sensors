@@ -1,12 +1,12 @@
-package nl.wiegman;
+package nl.wiegman.homesensors;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import nl.wiegman.homesensors.SmartMeterReaderNative;
-import nl.wiegman.sensortag.SensorTagReader;
+import nl.wiegman.homesensors.smartmeter.SmartMeterReaderNative;
+import nl.wiegman.homesensors.sensortag.SensorTagReader;
 
 @Component
 public class ApplicationInitializer {

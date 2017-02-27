@@ -1,4 +1,4 @@
-package nl.wiegman.sensortag;
+package nl.wiegman.homesensors.sensortag;
 
 public class SensortagException extends Exception {
 

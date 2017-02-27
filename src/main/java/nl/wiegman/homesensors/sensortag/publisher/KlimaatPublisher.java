@@ -1,4 +1,4 @@
-package nl.wiegman.sensortag.publisher;
+package nl.wiegman.homesensors.sensortag.publisher;
 
 import java.math.BigDecimal;
 
