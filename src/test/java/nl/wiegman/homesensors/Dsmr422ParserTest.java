@@ -53,17 +53,17 @@ public class Dsmr422ParserTest {
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).hasYear(2017).hasMonth(2).hasDayOfMonth(24).hasHourOfDay(19).hasMinute(00).hasSecond(00);
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
-        assertThat(smartMeterMessage.getPowerFailureLogItems()).hasSize(1);
-        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getTimestampOfEndOfFailure()).hasYear(2016).hasMonth(8).hasDayOfMonth(15).hasHourOfDay(13).hasMinute(51).hasSecond(47);
-        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getTimestampOfEndOfFailureDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.SUMMER);
-        assertThat(smartMeterMessage.getPowerFailureLogItems().get(0).getFailureDurationInSeconds()).isEqualTo(647L);
+        assertThat(smartMeterMessage.getLongPowerFailureLog()).hasSize(1);
+        assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getTimestampOfEndOfFailure()).hasYear(2016).hasMonth(8).hasDayOfMonth(15).hasHourOfDay(13).hasMinute(51).hasSecond(47);
+        assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getTimestampOfEndOfFailureDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.SUMMER);
+        assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getFailureDurationInSeconds()).isEqualTo(647L);
     }
 
     @Test
     public void shouldParseValidMessage2() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-2.txt"), StandardCharsets.UTF_8);
         SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
-        assertThat(smartMeterMessage.getPowerFailureLogItems()).hasSize(2);
+        assertThat(smartMeterMessage.getLongPowerFailureLog()).hasSize(2);
     }
 
     @Test

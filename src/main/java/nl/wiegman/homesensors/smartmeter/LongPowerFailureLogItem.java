@@ -2,7 +2,7 @@ package nl.wiegman.homesensors.smartmeter;
 
 import java.util.Date;
 
-public class PowerFailureLogItem {
+public class LongPowerFailureLogItem {
 
     private Date timestampOfEndOfFailure;
     private long failureDurationInSeconds;

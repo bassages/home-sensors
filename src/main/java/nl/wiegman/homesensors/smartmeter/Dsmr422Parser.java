@@ -42,7 +42,7 @@ public class Dsmr422Parser {
     private static Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1 = compile("1-0:32.32.0\\((?<"+ GROUP_NAME +">\\d{5})\\)");
     private static Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2 = compile("1-0:32.36.0\\((?<"+ GROUP_NAME +">\\d{5})\\)");
     private static Pattern TEXT_MESSAGE_CODES = compile("0-0:96.13.1\\((?<"+ GROUP_NAME +">.*?)\\)");
-    private static Pattern TEXT_MESSAGE= compile("0-0:96.13.0\\((?<"+ GROUP_NAME +">.*?)\\)");
+    private static Pattern TEXT_MESSAGE = compile("0-0:96.13.0\\((?<"+ GROUP_NAME +">.*?)\\)");
     private static Pattern INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION = compile("1-0:31.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
     private static Pattern INSTANTANEOUS_ACTIVE_POWER_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
     private static Pattern INSTANTANEOUS_ACTIVE_POWER_L2 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
@@ -91,59 +91,68 @@ public class Dsmr422Parser {
         smartMeterMessage.setTimestamp(toDate(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
         smartMeterMessage.setTimestampDstIndicator(toDstindicator(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR, message)));
         smartMeterMessage.setEquipmentIdentifierElectricity(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message));
-        smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff1(new BigDecimal(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1, message)));
-        smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff2(new BigDecimal(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2, message)));
-        smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff1(new BigDecimal(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1, message)));
-        smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff2(new BigDecimal(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2, message)));
+        smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1, message)));
+        smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2, message)));
+        smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1, message)));
+        smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2, message)));
         smartMeterMessage.setTariffIndicatorElectricity(extractFromMessage(TARIFF_INDICATOR_ELECTRICITY, message));
-        smartMeterMessage.setActualElectricityPowerDelivered(new BigDecimal(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
-        smartMeterMessage.setActualElectricityPowerRecieved(new BigDecimal(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECIEVED, message)));
-        smartMeterMessage.setNumberOfPowerFailuresInAnyPhase(Integer.parseInt(extractFromMessage(NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE, message)));
-        smartMeterMessage.setNumberOfLongPowerFailuresInAnyPhase(Integer.parseInt(extractFromMessage(NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE, message)));
-        smartMeterMessage.setNumberOfVoltageSagsInPhaseL1(Integer.parseInt(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1, message)));
-        smartMeterMessage.setNumberOfVoltageSagsInPhaseL2(Integer.parseInt(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2, message)));
+        smartMeterMessage.setActualElectricityPowerDelivered(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
+        smartMeterMessage.setActualElectricityPowerRecieved(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECIEVED, message)));
+        smartMeterMessage.setNumberOfPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE, message)));
+        smartMeterMessage.setNumberOfLongPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE, message)));
+        smartMeterMessage.setNumberOfVoltageSagsInPhaseL1(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1, message)));
+        smartMeterMessage.setNumberOfVoltageSagsInPhaseL2(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2, message)));
         smartMeterMessage.setTextMessageCodes(octetStringToString(extractFromMessage(TEXT_MESSAGE_CODES, message)));
         smartMeterMessage.setTextMessage(octetStringToString(extractFromMessage(TEXT_MESSAGE, message)));
-        smartMeterMessage.setInstantaneousCurrentL1(Integer.parseInt(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
-        smartMeterMessage.setInstantaneousActivePowerL1(new BigDecimal(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L1, message)));
-        smartMeterMessage.setInstantaneousActivePowerL2(new BigDecimal(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L2, message)));
+        smartMeterMessage.setInstantaneousCurrentL1(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousActivePowerL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L1, message)));
+        smartMeterMessage.setInstantaneousActivePowerL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L2, message)));
 
         for (int i = 0; i < 4; i++) {
             String deviceType = extractFromMessage(DEVICE_TYPE[i], message);
-            if (deviceType == null) {
-                // Ignore
-            } else if (DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
+            if (deviceType != null && DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
                 smartMeterMessage.setEquipmentIdentifierGas(extractFromMessage(DEVICE_EQUIPMENT_IDENTIFIER[i], message));
-                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(new BigDecimal(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
+                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(bigDecimalFromString(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(toDate(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(toDstindicator(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP_DST_INDICATOR[i], message)));
-            } else {
-                LOG.warn("Ignoring unsupported devicetype " + deviceType);
             }
         }
 
         String powerFailureEventLogNrOfItems = extractFromMessage(LONG_POWER_FAILURE_EVENT_LOG_NR_OF_ITEMS, message);
-        if (StringUtils.isNoneBlank(powerFailureEventLogNrOfItems) && Integer.parseInt(powerFailureEventLogNrOfItems) > 0) {
-            parsePowerFailureLog(message, smartMeterMessage);
+        if (StringUtils.isNotBlank(powerFailureEventLogNrOfItems)) {
+            Integer powerFailureEventLogNrOfItemsInteger = integerFromString(powerFailureEventLogNrOfItems);
+            if (powerFailureEventLogNrOfItemsInteger != null && powerFailureEventLogNrOfItemsInteger > 0) {
+                parsePowerFailureLog(message, smartMeterMessage);
+            }
         }
         return smartMeterMessage;
+    }
+
+    private BigDecimal bigDecimalFromString(String string) {
+        return string == null ? null : new BigDecimal(string) ;
+    }
+
+    private Integer integerFromString(String string) {
+        return string == null ? null : Integer.valueOf(string) ;
     }
 
     private void parsePowerFailureLog(String message, SmartMeterMessage smartMeterMessage) throws InvalidSmartMeterMessageException {
         String powerFailureEventLogValue = extractFromMessage(LONG_POWER_FAILURE_EVENT_LOG_VALUE, message);
 
-        Matcher powerFailureLogTimestampMatcher = POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN.matcher(powerFailureEventLogValue);
-        while (powerFailureLogTimestampMatcher.find()) {
-            Date timestamp = toDate(powerFailureLogTimestampMatcher.group("timestamp"));
-            SmartMeterMessage.DstIndicator dstIndicator = toDstindicator(powerFailureLogTimestampMatcher.group("dstIndicator"));
-            int duration = Integer.parseInt(powerFailureLogTimestampMatcher.group("duration"));
+        if (powerFailureEventLogValue != null) {
+            Matcher powerFailureLogTimestampMatcher = POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN.matcher(powerFailureEventLogValue);
+            while (powerFailureLogTimestampMatcher.find()) {
+                Date timestamp = toDate(powerFailureLogTimestampMatcher.group("timestamp"));
+                SmartMeterMessage.DstIndicator dstIndicator = toDstindicator(powerFailureLogTimestampMatcher.group("dstIndicator"));
+                int duration = Integer.parseInt(powerFailureLogTimestampMatcher.group("duration"));
 
-            PowerFailureLogItem logItem = new PowerFailureLogItem();
-            logItem.setFailureDurationInSeconds(duration);
-            logItem.setTimestampOfEndOfFailure(timestamp);
-            logItem.setTimestampOfEndOfFailureDstIndicator(dstIndicator);
+                LongPowerFailureLogItem logItem = new LongPowerFailureLogItem();
+                logItem.setFailureDurationInSeconds(duration);
+                logItem.setTimestampOfEndOfFailure(timestamp);
+                logItem.setTimestampOfEndOfFailureDstIndicator(dstIndicator);
 
-            smartMeterMessage.addPowerFailureLog(logItem);
+                smartMeterMessage.addLongPowerFailureLogItem(logItem);
+            }
         }
     }
 

@@ -25,14 +25,14 @@ public class SmartMeterMessage {
     private String tariffIndicatorElectricity;
     private BigDecimal actualElectricityPowerDelivered;
     private BigDecimal actualElectricityPowerRecieved;
-    private int numberOfPowerFailuresInAnyPhase;
-    private int numberOfLongPowerFailuresInAnyPhase;
-    private List<PowerFailureLogItem> powerFailureLogItems = new ArrayList<>();
-    private int numberOfVoltageSagsInPhaseL1;
-    private int numberOfVoltageSagsInPhaseL2;
+    private Integer numberOfPowerFailuresInAnyPhase;
+    private Integer numberOfLongPowerFailuresInAnyPhase;
+    private List<LongPowerFailureLogItem> longPowerFailureLog = new ArrayList<>();
+    private Integer numberOfVoltageSagsInPhaseL1;
+    private Integer numberOfVoltageSagsInPhaseL2;
     private String textMessageCodes;
     private String textMessage;
-    private int instantaneousCurrentL1;
+    private Integer instantaneousCurrentL1;
     private BigDecimal instantaneousActivePowerL1;
     private BigDecimal instantaneousActivePowerL2;
 
@@ -137,35 +137,35 @@ public class SmartMeterMessage {
         this.actualElectricityPowerRecieved = actualElectricityPowerRecieved;
     }
 
-    public int getNumberOfPowerFailuresInAnyPhase() {
+    public Integer getNumberOfPowerFailuresInAnyPhase() {
         return numberOfPowerFailuresInAnyPhase;
     }
 
-    public void setNumberOfPowerFailuresInAnyPhase(int numberOfPowerFailuresInAnyPhase) {
+    public void setNumberOfPowerFailuresInAnyPhase(Integer numberOfPowerFailuresInAnyPhase) {
         this.numberOfPowerFailuresInAnyPhase = numberOfPowerFailuresInAnyPhase;
     }
 
-    public int getNumberOfLongPowerFailuresInAnyPhase() {
+    public Integer getNumberOfLongPowerFailuresInAnyPhase() {
         return numberOfLongPowerFailuresInAnyPhase;
     }
 
-    public void setNumberOfLongPowerFailuresInAnyPhase(int numberOfLongPowerFailuresInAnyPhase) {
+    public void setNumberOfLongPowerFailuresInAnyPhase(Integer numberOfLongPowerFailuresInAnyPhase) {
         this.numberOfLongPowerFailuresInAnyPhase = numberOfLongPowerFailuresInAnyPhase;
     }
 
-    public int getNumberOfVoltageSagsInPhaseL1() {
+    public Integer getNumberOfVoltageSagsInPhaseL1() {
         return numberOfVoltageSagsInPhaseL1;
     }
 
-    public void setNumberOfVoltageSagsInPhaseL1(int numberOfVoltageSagsInPhaseL1) {
+    public void setNumberOfVoltageSagsInPhaseL1(Integer numberOfVoltageSagsInPhaseL1) {
         this.numberOfVoltageSagsInPhaseL1 = numberOfVoltageSagsInPhaseL1;
     }
 
-    public int getNumberOfVoltageSagsInPhaseL2() {
+    public Integer getNumberOfVoltageSagsInPhaseL2() {
         return numberOfVoltageSagsInPhaseL2;
     }
 
-    public void setNumberOfVoltageSagsInPhaseL2(int numberOfVoltageSagsInPhaseL2) {
+    public void setNumberOfVoltageSagsInPhaseL2(Integer numberOfVoltageSagsInPhaseL2) {
         this.numberOfVoltageSagsInPhaseL2 = numberOfVoltageSagsInPhaseL2;
     }
 
@@ -193,11 +193,11 @@ public class SmartMeterMessage {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClient = lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     }
 
-    public int getInstantaneousCurrentL1() {
+    public Integer getInstantaneousCurrentL1() {
         return instantaneousCurrentL1;
     }
 
-    public void setInstantaneousCurrentL1(int instantaneousCurrentL1) {
+    public void setInstantaneousCurrentL1(Integer instantaneousCurrentL1) {
         this.instantaneousCurrentL1 = instantaneousCurrentL1;
     }
 
@@ -243,11 +243,11 @@ public class SmartMeterMessage {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
     }
 
-    public List<PowerFailureLogItem> getPowerFailureLogItems() {
-        return Collections.unmodifiableList(powerFailureLogItems);
+    public List<LongPowerFailureLogItem> getLongPowerFailureLog() {
+        return Collections.unmodifiableList(longPowerFailureLog);
     }
 
-    public void addPowerFailureLog(PowerFailureLogItem powerFailureLogItem) {
-        this.powerFailureLogItems.add(powerFailureLogItem);
+    public void addLongPowerFailureLogItem(LongPowerFailureLogItem longLongPowerFailureLogItem) {
+        this.longPowerFailureLog.add(longLongPowerFailureLogItem);
     }
 }

@@ -2,6 +2,9 @@ package nl.wiegman.homesensors.smartmeter;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
@@ -16,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,9 +38,8 @@ public class HomeServerSmartMeterPublisher {
     private String homeServerRestServiceBasicAuthPassword;
 
     public void publish(SmartMeterMessage smartMeterMessage) {
-
         try {
-            String url = homeServerRestServiceUrl + "/meterstanden";
+            String url = homeServerRestServiceUrl + "/slimmemeter";
             String jsonMessage = createSmartMeterJsonMessage(smartMeterMessage);
 
             try {
@@ -91,6 +94,27 @@ public class HomeServerSmartMeterPublisher {
         homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
         homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient());
+
+        homeServerMeterstand.setAantalSpanningsDippenInFaseL1(smartMeterMessage.getNumberOfVoltageSagsInPhaseL1());
+        homeServerMeterstand.setAantalSpanningsDippenInFaseL2(smartMeterMessage.getNumberOfVoltageSagsInPhaseL2());
+        homeServerMeterstand.setAantalStroomStoringenInAlleFases(smartMeterMessage.getNumberOfPowerFailuresInAnyPhase());
+        homeServerMeterstand.setAantalLangeStroomStoringenInAlleFases(smartMeterMessage.getNumberOfLongPowerFailuresInAnyPhase());
+
+        homeServerMeterstand.setTekstBericht(smartMeterMessage.getTextMessage());
+        homeServerMeterstand.setTekstBerichtCodes(smartMeterMessage.getTextMessageCodes());
+
+        homeServerMeterstand.setMeterIdentificatieStroom(smartMeterMessage.getEquipmentIdentifierElectricity());
+        homeServerMeterstand.setMeterIdentificatieGas(smartMeterMessage.getEquipmentIdentifierGas());
+
+        if (!CollectionUtils.isEmpty(smartMeterMessage.getLongPowerFailureLog())) {
+            homeServerMeterstand.setLangeStroomStoringen(new ArrayList<>());
+            for (LongPowerFailureLogItem item : smartMeterMessage.getLongPowerFailureLog()) {
+                LangeStroomStoring langeStroomStoring = new LangeStroomStoring();
+                langeStroomStoring.setDatumtijdEinde(item.getTimestampOfEndOfFailure());
+                langeStroomStoring.setDuurVanStoringInSeconden(item.getFailureDurationInSeconds());
+                homeServerMeterstand.getLangeStroomStoringen().add(langeStroomStoring);
+            }
+        }
         return homeServerMeterstand;
     }
 
@@ -100,6 +124,19 @@ public class HomeServerSmartMeterPublisher {
         private BigDecimal stroomTarief1;
         private BigDecimal stroomTarief2;
         private BigDecimal gas;
+
+        private String meterIdentificatieStroom;
+        private String meterIdentificatieGas;
+
+        private String tekstBericht;
+        private String tekstBerichtCodes;
+
+        private Integer aantalStroomStoringenInAlleFases;
+        private Integer aantalSpanningsDippenInFaseL1;
+        private Integer aantalSpanningsDippenInFaseL2;
+
+        private Integer aantalLangeStroomStoringenInAlleFases;
+        private List<LangeStroomStoring> langeStroomStoringen;
 
         public long getDatumtijd() {
             return datumtijd;
@@ -140,5 +177,99 @@ public class HomeServerSmartMeterPublisher {
         public void setGas(BigDecimal gas) {
             this.gas = gas;
         }
+
+        public Integer getAantalStroomStoringenInAlleFases() {
+            return aantalStroomStoringenInAlleFases;
+        }
+
+        public void setAantalStroomStoringenInAlleFases(Integer aantalStroomStoringenInAlleFases) {
+            this.aantalStroomStoringenInAlleFases = aantalStroomStoringenInAlleFases;
+        }
+
+        public Integer getAantalSpanningsDippenInFaseL1() {
+            return aantalSpanningsDippenInFaseL1;
+        }
+
+        public void setAantalSpanningsDippenInFaseL1(Integer aantalSpanningsDippenInFaseL1) {
+            this.aantalSpanningsDippenInFaseL1 = aantalSpanningsDippenInFaseL1;
+        }
+
+        public Integer getAantalSpanningsDippenInFaseL2() {
+            return aantalSpanningsDippenInFaseL2;
+        }
+
+        public void setAantalSpanningsDippenInFaseL2(Integer aantalSpanningsDippenInFaseL2) {
+            this.aantalSpanningsDippenInFaseL2 = aantalSpanningsDippenInFaseL2;
+        }
+
+        public String getTekstBericht() {
+            return tekstBericht;
+        }
+
+        public void setTekstBericht(String tekstBericht) {
+            this.tekstBericht = tekstBericht;
+        }
+
+        public Integer getAantalLangeStroomStoringenInAlleFases() {
+            return aantalLangeStroomStoringenInAlleFases;
+        }
+
+        public void setAantalLangeStroomStoringenInAlleFases(Integer aantalLangeStroomStoringenInAlleFases) {
+            this.aantalLangeStroomStoringenInAlleFases = aantalLangeStroomStoringenInAlleFases;
+        }
+
+        public List<LangeStroomStoring> getLangeStroomStoringen() {
+            return langeStroomStoringen;
+        }
+
+        public void setLangeStroomStoringen(List<LangeStroomStoring> langeStroomStoringen) {
+            this.langeStroomStoringen = langeStroomStoringen;
+        }
+
+        public void setTekstBerichtCodes(String tekstBerichtCodes) {
+            this.tekstBerichtCodes = tekstBerichtCodes;
+        }
+
+        public String getTekstBerichtCodes() {
+            return tekstBerichtCodes;
+        }
+
+        public String getMeterIdentificatieStroom() {
+            return meterIdentificatieStroom;
+        }
+
+        public void setMeterIdentificatieStroom(String meterIdentificatieStroom) {
+            this.meterIdentificatieStroom = meterIdentificatieStroom;
+        }
+
+        public String getMeterIdentificatieGas() {
+            return meterIdentificatieGas;
+        }
+
+        public void setMeterIdentificatieGas(String meterIdentificatieGas) {
+            this.meterIdentificatieGas = meterIdentificatieGas;
+        }
     }
+
+    public static class LangeStroomStoring {
+        private Date datumtijdEinde;
+        private Long duurVanStoringInSeconden;
+
+        public Date getDatumtijdEinde() {
+            return datumtijdEinde;
+        }
+
+        public void setDatumtijdEinde(Date datumtijdEinde) {
+            this.datumtijdEinde = datumtijdEinde;
+        }
+
+        public Long getDuurVanStoringInSeconden() {
+            return duurVanStoringInSeconden;
+        }
+
+        public void setDuurVanStoringInSeconden(Long duurVanStoringInSeconden) {
+            this.duurVanStoringInSeconden = duurVanStoringInSeconden;
+        }
+    }
+
 }
