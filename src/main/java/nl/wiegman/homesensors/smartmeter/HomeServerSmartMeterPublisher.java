@@ -91,6 +91,7 @@ public class HomeServerSmartMeterPublisher {
         HomeServerMeterstand homeServerMeterstand = new HomeServerMeterstand();
         homeServerMeterstand.setDatumtijd(smartMeterMessage.getTimestamp().getTime());
         homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
+        homeServerMeterstand.setTariefIndicatorStroom(smartMeterMessage.getTariffIndicatorElectricity());
         homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
         homeServerMeterstand.setGas(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient());
@@ -124,6 +125,7 @@ public class HomeServerSmartMeterPublisher {
         private BigDecimal stroomTarief1;
         private BigDecimal stroomTarief2;
         private BigDecimal gas;
+        private String tariefIndicatorStroom;
 
         private String meterIdentificatieStroom;
         private String meterIdentificatieGas;
@@ -248,6 +250,14 @@ public class HomeServerSmartMeterPublisher {
 
         public void setMeterIdentificatieGas(String meterIdentificatieGas) {
             this.meterIdentificatieGas = meterIdentificatieGas;
+        }
+
+        public String getTariefIndicatorStroom() {
+            return tariefIndicatorStroom;
+        }
+
+        public void setTariefIndicatorStroom(String tariefIndicatorStroom) {
+            this.tariefIndicatorStroom = tariefIndicatorStroom;
         }
     }
 
