@@ -22,7 +22,7 @@ public class SmartMeterMessage {
     private BigDecimal meterReadingElectricityDeliveredToClientTariff2;
     private BigDecimal meterReadingElectricityDeliveredByClientTariff1;
     private BigDecimal meterReadingElectricityDeliveredByClientTariff2;
-    private String tariffIndicatorElectricity;
+    private Integer tariffIndicatorElectricity;
     private BigDecimal actualElectricityPowerDelivered;
     private BigDecimal actualElectricityPowerRecieved;
     private Integer numberOfPowerFailuresInAnyPhase;
@@ -113,11 +113,11 @@ public class SmartMeterMessage {
         this.meterReadingElectricityDeliveredByClientTariff2 = meterReadingElectricityDeliveredByClientTariff2;
     }
 
-    public String getTariffIndicatorElectricity() {
+    public Integer getTariffIndicatorElectricity() {
         return tariffIndicatorElectricity;
     }
 
-    public void setTariffIndicatorElectricity(String tariffIndicatorElectricity) {
+    public void setTariffIndicatorElectricity(Integer tariffIndicatorElectricity) {
         this.tariffIndicatorElectricity = tariffIndicatorElectricity;
     }
 

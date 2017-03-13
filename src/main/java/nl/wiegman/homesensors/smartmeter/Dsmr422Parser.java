@@ -19,8 +19,8 @@ public class Dsmr422Parser {
 
     private static final Logger LOG = LoggerFactory.getLogger(Dsmr422Parser.class);
 
+    private static final String SUPPORTED_DSMR_VERSION = "42";
     private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
-
     private static final String GROUP_NAME = "attributeValue";
 
     private static Pattern HEADER = compile("^/(?<" + GROUP_NAME + ">.+?)\\R{2}");
@@ -80,14 +80,20 @@ public class Dsmr422Parser {
 
     private static Pattern POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN = Pattern.compile("(?<timestamp>\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})(?<dstIndicator>(S|W))\\)\\((?<duration>\\d{10})\\*s\\)");
 
-    public SmartMeterMessage parse(String message) throws InvalidSmartMeterMessageException {
+    public SmartMeterMessage parse(String message) throws InvalidSmartMeterMessageException, UnsupportedVersionException {
         String[] linesInMessage = message.split("\n|\r\n");
         verifyChecksum(linesInMessage);
 
         SmartMeterMessage smartMeterMessage = new SmartMeterMessage();
 
+        String versionInformationForP1Output = extractFromMessage(VERSION_INFORMATION_FOR_P1_OUTPUT, message);
+
+        if (!versionInformationForP1Output.equals(SUPPORTED_DSMR_VERSION)) {
+            throw new UnsupportedVersionException("Unsupported DSMR version: " + versionInformationForP1Output + " (The supported version is " + SUPPORTED_DSMR_VERSION + ")");
+        }
+
+        smartMeterMessage.setVersionInformationForP1Output(versionInformationForP1Output);
         smartMeterMessage.setHeader(extractFromMessage(HEADER, message));
-        smartMeterMessage.setVersionInformationForP1Output(extractFromMessage(VERSION_INFORMATION_FOR_P1_OUTPUT,message));
         smartMeterMessage.setTimestamp(toDate(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
         smartMeterMessage.setTimestampDstIndicator(toDstindicator(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR, message)));
         smartMeterMessage.setEquipmentIdentifierElectricity(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message));
@@ -95,7 +101,7 @@ public class Dsmr422Parser {
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2, message)));
-        smartMeterMessage.setTariffIndicatorElectricity(extractFromMessage(TARIFF_INDICATOR_ELECTRICITY, message));
+        smartMeterMessage.setTariffIndicatorElectricity(integerFromString(extractFromMessage(TARIFF_INDICATOR_ELECTRICITY, message)));
         smartMeterMessage.setActualElectricityPowerDelivered(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
         smartMeterMessage.setActualElectricityPowerRecieved(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECIEVED, message)));
         smartMeterMessage.setNumberOfPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE, message)));
@@ -210,4 +216,11 @@ public class Dsmr422Parser {
             super(message);
         }
     }
+
+    public static class UnsupportedVersionException extends Exception {
+        public UnsupportedVersionException(String message) {
+            super(message);
+        }
+    }
+
 }

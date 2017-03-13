@@ -37,7 +37,7 @@ public class Dsmr422ParserTest {
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2()).isEqualTo(new BigDecimal("5.573"));
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(new BigDecimal("1.301"));
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2()).isEqualTo(new BigDecimal("2.050"));
-        assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo("0002");
+        assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo(2);
         assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.042"));
         assertThat(smartMeterMessage.getActualElectricityPowerRecieved()).isEqualTo(new BigDecimal("0.000"));
         assertThat(smartMeterMessage.getNumberOfPowerFailuresInAnyPhase()).isEqualTo(1);
@@ -79,9 +79,12 @@ public class Dsmr422ParserTest {
     }
 
     @Test
-    public void shouldParseValidMessageFoundOnInternet() throws Exception {
+    public void shouldFailParseValidMessageFoundOnInternetWithWrongVersion() throws Exception {
         String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.0-from-internet.txt"), StandardCharsets.UTF_8);
-        dsmr422Parser.parse(message);
+        assertThatExceptionOfType(Dsmr422Parser.UnsupportedVersionException.class).isThrownBy(() ->
+            dsmr422Parser.parse(message)
+        ).withMessageStartingWith("Unsupported DSMR version");
+
     }
 
     @Test

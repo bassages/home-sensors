@@ -34,7 +34,7 @@ public class MessageBuffer {
                     SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(p1Message);
                     homeServerSmartMeterPublisher.publish(smartMeterMessage);
                     bufferedLines.clear();
-                } catch (Dsmr422Parser.InvalidSmartMeterMessageException e) {
+                } catch (Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
                     LOG.error("Invalid smartmetermessage: " + p1Message);
                 }
             }
