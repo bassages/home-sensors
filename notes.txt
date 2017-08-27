@@ -1,3 +1,0 @@
-Other parsers:
-- https://github.com/matthijskooijman/arduino-smartMeterMessage/blob/master/examples/parse/parse.ino
-- https://github.com/robertklep/node-smartMeterMessage-parser/blob/master/index.js

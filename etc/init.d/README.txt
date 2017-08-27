@@ -1,8 +1,8 @@
 Install:
-Copy file home-smart-meter to /etc/init.d and make it executable:
-sudo chmod +x home-smart-meter
+Copy file home-sensors to /etc/init.d and make it executable:
+sudo chmod +x home-sensors
 Execute:
-sudo update-rc.d home-smart-meter defaults enable
+sudo update-rc.d home-sensors defaults enable
 
 View service status:
-sudo systemctl status home-smart-meter
+sudo systemctl status home-sensors

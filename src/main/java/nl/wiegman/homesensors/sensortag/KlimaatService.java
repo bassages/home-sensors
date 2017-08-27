@@ -11,13 +11,17 @@ import java.util.List;
 
 @Service
 public class KlimaatService {
-    private static final Logger LOG = LoggerFactory.getLogger(KlimaatService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KlimaatService.class);
+
+    private final List<KlimaatPublisher> klimaatPublishers;
 
     @Autowired
-    private List<KlimaatPublisher> klimaatPublishers;
+    public KlimaatService(List<KlimaatPublisher> klimaatPublishers) {
+        this.klimaatPublishers = klimaatPublishers;
+    }
 
     public void publish(String klimaatSensorCode, BigDecimal temperatuur, BigDecimal luchtvochtigheid) {
-        LOG.debug("Publishing to {} publishers", klimaatPublishers.size());
+        LOGGER.debug("Publishing to {} publishers", klimaatPublishers.size());
         klimaatPublishers.forEach(publisher -> publisher.publish(klimaatSensorCode, temperatuur, luchtvochtigheid));
     }
 }

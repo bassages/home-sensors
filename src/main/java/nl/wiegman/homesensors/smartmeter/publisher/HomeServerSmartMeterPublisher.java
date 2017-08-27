@@ -1,4 +1,4 @@
-package nl.wiegman.homesensors.smartmeter;
+package nl.wiegman.homesensors.smartmeter.publisher;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -18,16 +18,20 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Component
-public class HomeServerSmartMeterPublisher {
+import nl.wiegman.homesensors.smartmeter.LongPowerFailureLogItem;
+import nl.wiegman.homesensors.smartmeter.SmartMeterMessage;
 
-    private static final Logger LOG = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
+@Component
+public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
 
     @Value("${home-server-rest-service-url:#{null}}")
     private String homeServerRestServiceUrl;
@@ -37,6 +41,9 @@ public class HomeServerSmartMeterPublisher {
     @Value("${home-server-rest-service-basic-auth-password:#{null}}")
     private String homeServerRestServiceBasicAuthPassword;
 
+    // Publish asynchronous, because we do not want to block the main thread
+    @Async
+    @Override
     public void publish(SmartMeterMessage smartMeterMessage) {
         try {
             String url = homeServerRestServiceUrl + "/slimmemeter";
@@ -45,16 +52,16 @@ public class HomeServerSmartMeterPublisher {
             try {
                 postJson(url, jsonMessage);
             } catch (Exception e) {
-                LOG.warn("Post to url [" + url + "] failed.", e);
+                LOGGER.warn("Post to url [" + url + "] failed.", e);
             }
 
         } catch (JsonProcessingException e) {
-            LOG.error("Failed to map message to json. Message=" + smartMeterMessage, e);
+            LOGGER.error("Failed to map message to json. Message=" + smartMeterMessage, e);
         }
     }
 
     private void postJson(String url, String jsonString) throws Exception {
-        LOG.debug("Post to url: {}. Request body: {}", url, jsonString);
+        LOGGER.debug("Post to url: {}. Request body: {}", url, jsonString);
 
         try (CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
 
