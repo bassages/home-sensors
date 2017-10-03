@@ -9,8 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import nl.wiegman.homesensors.smartmeter.publisher.HomeServerLocalSmartMeterPublisher;
-import nl.wiegman.homesensors.smartmeter.publisher.HomeServerSmartMeterPublisher;
 import nl.wiegman.homesensors.smartmeter.publisher.SmartMeterMessagePublisher;
 
 @Component
