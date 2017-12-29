@@ -2,7 +2,7 @@ package nl.wiegman.homesensors.sensortag.publisher;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpHeaders;
@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Service
 public class HomeServerLocalKlimaatPublisher implements KlimaatPublisher {
@@ -59,10 +61,14 @@ public class HomeServerLocalKlimaatPublisher implements KlimaatPublisher {
 
     private String createKlimaatJsonMessage(BigDecimal temperatuur, BigDecimal luchtvochtigheid) throws JsonProcessingException {
         HomeServerKlimaat homeServerKlimaat = new HomeServerKlimaat();
-        homeServerKlimaat.setDatumtijd(new Date().getTime());
+        homeServerKlimaat.setDatumtijd(LocalDateTime.now());
         homeServerKlimaat.setTemperatuur(temperatuur);
         homeServerKlimaat.setLuchtvochtigheid(luchtvochtigheid);
-        return new ObjectMapper().writeValueAsString(homeServerKlimaat);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        return objectMapper.writeValueAsString(homeServerKlimaat);
     }
 
     private void postJson( String url, String jsonString) throws Exception {
@@ -95,15 +101,15 @@ public class HomeServerLocalKlimaatPublisher implements KlimaatPublisher {
     }
 
     private static class HomeServerKlimaat {
-        private long datumtijd;
+        private LocalDateTime datumtijd;
         private BigDecimal temperatuur;
         private BigDecimal luchtvochtigheid;
 
-        public long getDatumtijd() {
+        public LocalDateTime getDatumtijd() {
             return datumtijd;
         }
 
-        public void setDatumtijd(long datumtijd) {
+        public void setDatumtijd(LocalDateTime datumtijd) {
             this.datumtijd = datumtijd;
         }
 

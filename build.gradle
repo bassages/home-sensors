@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '1.5.7.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.15.0'
+    id 'org.springframework.boot' version '1.5.9.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.17.0'
 }
 
 version = '1.0.0-SNAPSHOT'
@@ -18,16 +18,17 @@ repositories {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2.1'
+    gradleVersion = '4.4.1'
 }
 
 dependencies {
-    compile('commons-io:commons-io:2.5')
-    compile('org.apache.commons:commons-lang3:3.6')
-    compile('org.apache.httpcomponents:httpclient:4.5.3')
+    compile('commons-io:commons-io:2.6')
+    compile('org.apache.commons:commons-lang3:3.7')
+    compile('org.apache.httpcomponents:httpclient:4.5.4')
     compile('joda-time:joda-time:2.9.9')
     compile('com.fasterxml.jackson.core:jackson-core:2.8.6')
     compile('com.fasterxml.jackson.core:jackson-databind:2.8.6')
+    compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.6')
     compile('net.sf.expectit:expectit-core:0.8.3')
     compile('com.jcraft:jsch:0.1.54')
 
@@ -35,6 +36,6 @@ dependencies {
     compile("org.springframework.boot:spring-boot-devtools")
 
     testCompile('org.assertj:assertj-joda-time:2.0.0')
-    testCompile('org.assertj:assertj-core:3.6.2')
+    testCompile('org.assertj:assertj-core:3.8.0')
     testCompile("org.springframework.boot:spring-boot-starter-test")
 }
