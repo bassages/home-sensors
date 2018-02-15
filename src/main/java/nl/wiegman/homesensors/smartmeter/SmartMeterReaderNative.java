@@ -31,11 +31,15 @@ public class SmartMeterReaderNative {
     @Value("${smart-meter-serial-port-parity:#{null}}")
     private String smartMeterSerialPortParity;
 
+    private final MessageBuffer messageBuffer;
+
     @Autowired
-    private MessageBuffer messageBuffer;
+    public SmartMeterReaderNative(MessageBuffer messageBuffer) {
+        this.messageBuffer = messageBuffer;
+    }
 
     @Async
-    public void run() throws Exception {
+    public void run() {
         if (smartMeterSerialPortPath == null || smartMeterSerialPortBaudRate == null || smartMeterSerialPortParity == null) {
             LOG.info("Not started SmartMeterReader, because the configuration for it is not defined.");
         } else {
@@ -44,7 +48,6 @@ public class SmartMeterReaderNative {
         }
     }
 
-    // TODO: Use ExpectIt to listen for data?
     private void connectAndListenForData() {
         LOG.info("Starting SmartMeterReaderNative");
 

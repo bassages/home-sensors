@@ -5,13 +5,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
-import nl.wiegman.homesensors.smartmeter.SmartMeterMessage;
 import nl.wiegman.homesensors.smartmeter.Dsmr422Parser;
+import nl.wiegman.homesensors.smartmeter.SmartMeterMessage;
 
 public class Dsmr422ParserTest {
 
@@ -30,7 +31,7 @@ public class Dsmr422ParserTest {
         assertThat(smartMeterMessage).isNotNull();
         assertThat(smartMeterMessage.getHeader()).isEqualTo("KFM5KAIFA-METER");
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
-        assertThat(smartMeterMessage.getTimestamp()).hasYear(2017).hasMonth(2).hasDayOfMonth(24).hasHourOfDay(19).hasMinute(31).hasSecond(18);
+        assertThat(smartMeterMessage.getTimestamp()).isEqualTo(LocalDateTime.of(2017, 2, 24, 19, 31,18));
         assertThat(smartMeterMessage.getTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
         assertThat(smartMeterMessage.getEquipmentIdentifierElectricity()).isEqualTo("4530303235303030303738363130313136");
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1()).isEqualTo(new BigDecimal("1.628"));
@@ -51,10 +52,10 @@ public class Dsmr422ParserTest {
         assertThat(smartMeterMessage.getInstantaneousActivePowerL2()).isEqualTo(new BigDecimal("0.000"));
         assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("4730303235303033353032393639333137");
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
-        assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).hasYear(2017).hasMonth(2).hasDayOfMonth(24).hasHourOfDay(19).hasMinute(00).hasSecond(00);
+        assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).isEqualTo(LocalDateTime.of(2017, 2, 24, 19, 0,0));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
         assertThat(smartMeterMessage.getLongPowerFailureLog()).hasSize(1);
-        assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getTimestampOfEndOfFailure()).hasYear(2016).hasMonth(8).hasDayOfMonth(15).hasHourOfDay(13).hasMinute(51).hasSecond(47);
+        assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getTimestampOfEndOfFailure()).isEqualTo(LocalDateTime.of(2016, 8, 15, 13, 51, 47));
         assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getTimestampOfEndOfFailureDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.SUMMER);
         assertThat(smartMeterMessage.getLongPowerFailureLog().get(0).getFailureDurationInSeconds()).isEqualTo(647L);
     }

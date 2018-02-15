@@ -39,7 +39,7 @@ import java.math.BigDecimal;
  */
 public class Thermometer extends AbstractSensor {
 
-    public static final String NOTIFICATION_REGEXP = "Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
+    private static final String NOTIFICATION_REGEXP = "Notification handle = 0x0025 value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
 
     public BigDecimal getAmbientTemperature(Expect expect) throws IOException, SensortagException {
         enable(expect);

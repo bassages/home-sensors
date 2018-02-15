@@ -1,18 +1,18 @@
 package nl.wiegman.homesensors.smartmeter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 public class LongPowerFailureLogItem {
 
-    private Date timestampOfEndOfFailure;
+    private LocalDateTime timestampOfEndOfFailure;
     private long failureDurationInSeconds;
     private SmartMeterMessage.DstIndicator timestampOfEndOfFailureDstIndicator;
 
-    public Date getTimestampOfEndOfFailure() {
+    public LocalDateTime getTimestampOfEndOfFailure() {
         return timestampOfEndOfFailure;
     }
 
-    public void setTimestampOfEndOfFailure(Date timestampOfEndOfFailure) {
+    public void setTimestampOfEndOfFailure(LocalDateTime timestampOfEndOfFailure) {
         this.timestampOfEndOfFailure = timestampOfEndOfFailure;
     }
 

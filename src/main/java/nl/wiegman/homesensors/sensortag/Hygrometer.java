@@ -27,7 +27,7 @@ import java.math.BigDecimal;
  */
 public class Hygrometer extends AbstractSensor {
 
-    public static final String NOTIFICATION_REGEXP = "Notification handle = 0x003b value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
+    private static final String NOTIFICATION_REGEXP = "Notification handle = 0x003b value: (?!00 00 00 00)(\\w{2} \\w{2} \\w{2} \\w{2})";
 
     public BigDecimal getHumidity(Expect expect) throws IOException, SensortagException {
         enable(expect);

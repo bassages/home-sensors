@@ -2,9 +2,8 @@ package nl.wiegman.homesensors.smartmeter;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,7 +93,7 @@ public class Dsmr422Parser {
 
         smartMeterMessage.setVersionInformationForP1Output(versionInformationForP1Output);
         smartMeterMessage.setHeader(extractFromMessage(HEADER, message));
-        smartMeterMessage.setTimestamp(toDate(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
+        smartMeterMessage.setTimestamp(toLocalDateTime(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
         smartMeterMessage.setTimestampDstIndicator(toDstindicator(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR, message)));
         smartMeterMessage.setEquipmentIdentifierElectricity(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message));
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1, message)));
@@ -119,7 +118,8 @@ public class Dsmr422Parser {
             if (deviceType != null && DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
                 smartMeterMessage.setEquipmentIdentifierGas(extractFromMessage(DEVICE_EQUIPMENT_IDENTIFIER[i], message));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(bigDecimalFromString(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
-                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(toDate(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP[i], message)));
+                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
+                        toLocalDateTime(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(toDstindicator(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP_DST_INDICATOR[i], message)));
             }
         }
@@ -148,7 +148,7 @@ public class Dsmr422Parser {
         if (powerFailureEventLogValue != null) {
             Matcher powerFailureLogTimestampMatcher = POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN.matcher(powerFailureEventLogValue);
             while (powerFailureLogTimestampMatcher.find()) {
-                Date timestamp = toDate(powerFailureLogTimestampMatcher.group("timestamp"));
+                LocalDateTime timestamp = toLocalDateTime(powerFailureLogTimestampMatcher.group("timestamp"));
                 SmartMeterMessage.DstIndicator dstIndicator = toDstindicator(powerFailureLogTimestampMatcher.group("dstIndicator"));
                 int duration = Integer.parseInt(powerFailureLogTimestampMatcher.group("duration"));
 
@@ -173,12 +173,8 @@ public class Dsmr422Parser {
         }
     }
 
-    private Date toDate(String dateFromMessage) throws InvalidSmartMeterMessageException {
-        try {
-            return new SimpleDateFormat(DSMR_TIMESTAMP_FORMAT).parse(dateFromMessage);
-        } catch (ParseException e) {
-            throw new InvalidSmartMeterMessageException("Invalid date: " + dateFromMessage);
-        }
+    private LocalDateTime toLocalDateTime(String dateFromMessage) {
+        return LocalDateTime.parse(dateFromMessage, DateTimeFormatter.ofPattern(DSMR_TIMESTAMP_FORMAT));
     }
 
     private String octetStringToString(String octetString) {

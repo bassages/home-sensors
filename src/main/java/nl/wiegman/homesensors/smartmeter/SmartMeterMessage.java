@@ -1,9 +1,9 @@
 package nl.wiegman.homesensors.smartmeter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class SmartMeterMessage {
@@ -15,7 +15,7 @@ public class SmartMeterMessage {
 
     private String header;
     private String versionInformationForP1Output;
-    private Date timestamp;
+    private LocalDateTime timestamp;
     private SmartMeterMessage.DstIndicator timestampDstIndicator;
     private String equipmentIdentifierElectricity;
     private BigDecimal meterReadingElectricityDeliveredToClientTariff1;
@@ -38,7 +38,7 @@ public class SmartMeterMessage {
 
     private String equipmentIdentifierGas;
     private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
-    private Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
+    private LocalDateTime lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     private SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
 
     public String getHeader() {
@@ -57,11 +57,11 @@ public class SmartMeterMessage {
         this.versionInformationForP1Output = versionInformationForP1Output;
     }
 
-    public Date getTimestamp() {
+    public LocalDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Date timestamp) {
+    public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -225,12 +225,12 @@ public class SmartMeterMessage {
         this.equipmentIdentifierGas = equipmentIdentifierGas;
     }
 
-    public Date getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp() {
+    public LocalDateTime getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp() {
         return lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     }
 
     public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
-            Date lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp) {
+            LocalDateTime lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp) {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     }
 
