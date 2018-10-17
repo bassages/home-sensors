@@ -195,7 +195,7 @@ public class Dsmr422Parser {
         final String actual = Integer.toHexString(getCrc(linesInMessage));
         final String expected = Integer.toHexString(calculatedCrc16);
 
-        LOG.debug("Actual CRC: " + actual + " / Expected CRC : " + expected.toUpperCase());
+        LOG.debug("Actual CRC: {} / Expected CRC : {}", actual, expected.toUpperCase());
 
         if (getCrc(linesInMessage) != calculatedCrc16) {
             throw new InvalidSmartMeterMessageException("CRC checksum failed. Expected " + expected + " but was " + actual);

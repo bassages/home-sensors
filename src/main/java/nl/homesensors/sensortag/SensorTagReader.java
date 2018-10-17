@@ -65,7 +65,7 @@ public class SensorTagReader {
                 try {
                     connectAndListenForSensorValues();
                 } catch (final SensortagException e) {
-                    LOG.error("Error occurred: " + e.getMessage());
+                    LOG.error("Error occurred: {}", e.getMessage());
                     LOG.error("Trying to reconnect in 10 seconds...");
                     TimeUnit.SECONDS.sleep(10);
                 }
@@ -102,7 +102,7 @@ public class SensorTagReader {
                 final long processingTime = System.currentTimeMillis() - start;
 
                 final long sleepDurationInMilliseconds = (sensortagProbeTimeInSeconds * 1000) - processingTime;
-                LOG.debug("Sleep for " + sleepDurationInMilliseconds + " milliseconds");
+                LOG.debug("Sleep for {} milliseconds", sleepDurationInMilliseconds);
                 TimeUnit.MILLISECONDS.sleep(sleepDurationInMilliseconds);
             }
 

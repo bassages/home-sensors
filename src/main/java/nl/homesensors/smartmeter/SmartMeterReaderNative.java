@@ -8,7 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -61,7 +60,7 @@ public class SmartMeterReaderNative {
 
             final int exitValue = process.waitFor();
             if (exitValue != 0) {
-                LOG.warn("Unexpected exit value from command. Exit value=[" + exitValue + "]");
+                LOG.warn("Unexpected exit value from command. Exit value=[{}]", exitValue);
             }
 
         } catch (final InterruptedException | IOException e) {

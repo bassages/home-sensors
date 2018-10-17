@@ -49,6 +49,10 @@ final class Crc16 {
             0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040,
     };
 
+    private Crc16() {
+        // Keep it private
+    }
+
     static int calculate(final String in) {
         final byte[] bytes = in.getBytes();
         int crc = 0x0000;
