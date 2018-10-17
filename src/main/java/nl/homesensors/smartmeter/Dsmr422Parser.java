@@ -22,32 +22,34 @@ public class Dsmr422Parser {
     private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
     private static final String GROUP_NAME = "attributeValue";
 
-    private static final String KWH_VALUE = "\\d{6}\\.\\d{3})\\*kWh\\";
+    private static final String KWH_VALUE = "\\d{6}\\.\\d{3})\\*kWh";
+    private static final String KW_VALUE = "\\d{2}\\.\\d{3})\\*kW";
+    private static final String FIVE_DIGITS = "\\d{5}";
 
     private static final Pattern HEADER = compile("^/(?<" + GROUP_NAME + ">.+?)\\R{2}");
     private static final Pattern VERSION_INFORMATION_FOR_P1_OUTPUT = compile("1-3:0.2.8\\((?<" + GROUP_NAME + ">\\w{2})\\)");
     private static final Pattern DATETIMESTAMP_OF_THE_P1_MESSAGE = compile("0-0:1.0.0\\((?<" + GROUP_NAME + ">\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})");
     private static final Pattern DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR= compile("0-0:1.0.0.+?(?<" + GROUP_NAME + ">(S|W))\\)");
     private static final Pattern EQUIPMENT_IDENTIFIER_ELECTRICITY = compile("0-0:96.1.1\\((?<" + GROUP_NAME + ">\\w+)\\)");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1 = compile("1-0:1.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2 = compile("1-0:1.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1 = compile("1-0:2.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = compile("1-0:2.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1 = compile("1-0:1.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + "\\)");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2 = compile("1-0:1.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + "\\)");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1 = compile("1-0:2.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + "\\)");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = compile("1-0:2.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + "\\)");
     private static final Pattern TARIFF_INDICATOR_ELECTRICITY = compile("0-0:96.14.0\\((?<" + GROUP_NAME + ">\\d{4})\\)");
-    private static final Pattern ACTUAL_ELECTRICITY_POWER_DELIVERED = compile("1-0:1.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
-    private static final Pattern ACTUAL_ELECTRICITY_POWER_RECIEVED = compile("1-0:2.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
-    private static final Pattern NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.21\\((?<"+ GROUP_NAME +">\\d{5})\\)");
-    private static final Pattern NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.9\\((?<"+ GROUP_NAME +">\\d{5})\\)");
+    private static final Pattern ACTUAL_ELECTRICITY_POWER_DELIVERED = compile("1-0:1.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern ACTUAL_ELECTRICITY_POWER_RECIEVED = compile("1-0:2.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.21\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
+    private static final Pattern NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.9\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern LONG_POWER_FAILURE_EVENT_LOG_NR_OF_ITEMS = compile("1-0:99.97.0\\((?<" + GROUP_NAME + ">\\d*)\\)");
     private static final Pattern LONG_POWER_FAILURE_EVENT_LOG_VALUE = compile("\\(0-0:96.7.19\\)(?<" + GROUP_NAME + ">.+?)\\R");
-    private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1 = compile("1-0:32.32.0\\((?<"+ GROUP_NAME +">\\d{5})\\)");
-    private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2 = compile("1-0:32.36.0\\((?<"+ GROUP_NAME +">\\d{5})\\)");
+    private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1 = compile("1-0:32.32.0\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
+    private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2 = compile("1-0:32.36.0\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern TEXT_MESSAGE_CODES = compile("0-0:96.13.1\\((?<"+ GROUP_NAME +">.*?)\\)");
     private static final Pattern TEXT_MESSAGE = compile("0-0:96.13.0\\((?<"+ GROUP_NAME +">.*?)\\)");
     private static final Pattern INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION = compile("1-0:31.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
-    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
-    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L2 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
-    private static final Pattern POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN = Pattern.compile("(?<timestamp>\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})(?<dstIndicator>(S|W))\\)\\((?<duration>\\d{10})\\*s\\)");
+    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L2 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN = Pattern.compile("(?<timestamp>\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})(?<dstIndicator>([SW]))\\)\\((?<duration>\\d{10})\\*s\\)");
 
     // Slave devices (minimum of 0, maximum of 4)
     private static final Pattern[] DEVICE_TYPE = new Pattern[4];
