@@ -14,12 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import nl.homesensors.smartmeter.publisher.HomeServerSmartMeterPublisher;
-
 @Component
 public class HomeServerRestEndPoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerRestEndPoint.class);
 
     private final String homeServerRestApiUrl;
     private final HomeServerAuthentication homeServerAuthentication;
@@ -38,7 +36,6 @@ public class HomeServerRestEndPoint {
         LOGGER.debug("Post to url: {}. Request body: {}", url, json);
 
         try (final CloseableHttpClient httpClient = httpClientBuilderProvider.get().build()) {
-
             final HttpPost request = new HttpPost(url);
             final StringEntity params = new StringEntity(json, ContentType.APPLICATION_JSON);
             request.setEntity(params);

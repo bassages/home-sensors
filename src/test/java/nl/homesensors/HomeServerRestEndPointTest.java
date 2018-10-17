@@ -1,13 +1,14 @@
 package nl.homesensors;
 
+import static ch.qos.logback.classic.Level.INFO;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.time.Clock;
+import java.util.List;
 
 import javax.inject.Provider;
 
@@ -19,12 +20,15 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import ch.qos.logback.classic.spi.LoggingEvent;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeServerRestEndPointTest {
@@ -51,6 +55,9 @@ public class HomeServerRestEndPointTest {
 
     @Captor
     private ArgumentCaptor<HttpUriRequest> httpUriRequestCaptor;
+
+    @Rule
+    public final LoggingRule loggingRule = new LoggingRule(HomeServerRestEndPoint.class);
 
     @Before
     public void setUp() {
@@ -89,14 +96,17 @@ public class HomeServerRestEndPointTest {
     }
 
     @Test
-    public void givenEndpointDoesNotReturnStatusCode400WhenPostThenException() throws Exception {
+    public void givenEndpointDoesNotReturnStatusCode201WhenPostThenExceptionLogged() throws Exception {
         when(closeableHttpClient.execute(any())).thenReturn(closeableHttpResponse);
         when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
 
         when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
-        assertThatThrownBy(() -> homeServerRestEndPoint.post("somePath", "{\"a\":1}"))
-                .isInstanceOf(RuntimeException.class)
-                .hasMessageStartingWith("Unexpected statusline:");
+        loggingRule.setLevel(INFO);
+
+        homeServerRestEndPoint.post("somePath", "{\"a\":1}");
+
+        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
+        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[INFO] Post to url [http://home-server/api/somePath] failed."));
     }
 }
