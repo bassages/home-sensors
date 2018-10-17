@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -79,9 +80,8 @@ public class HomeDisplayClimatePublisher implements ClimatePublisher {
             final HttpPost request = createHttpPost(jsonString);
 
             final CloseableHttpResponse response = httpClient.execute(request);
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                throw new RuntimeException("Unexpected statuscode: " + response.getStatusLine());
-            }
+            Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK,
+                          "Unexpected statusline: " + response.getStatusLine());
         }
     }
 

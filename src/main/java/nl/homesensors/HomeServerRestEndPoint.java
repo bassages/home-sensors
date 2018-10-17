@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 @Component
 public class HomeServerRestEndPoint {
@@ -44,9 +45,9 @@ public class HomeServerRestEndPoint {
 
             final CloseableHttpResponse response = httpClient.execute(request);
 
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
-                throw new RuntimeException("Unexpected statusline: " + response.getStatusLine());
-            }
+            Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED,
+                          "Unexpected statusline: " + response.getStatusLine());
+
         } catch (final Exception e) {
             LOGGER.info("Post to url [" + url + "] failed.", e);
         }
