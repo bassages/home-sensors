@@ -65,6 +65,7 @@ public class SensorTagReader {
 
         LOG.info("Start SensorTagReader");
 
+        //noinspection InfiniteLoopStatement
         while (true) {
             try {
                 connectAndListenForSensorValues();
@@ -98,6 +99,7 @@ public class SensorTagReader {
             thermometer.enableNotifications(expect);
             hygrometer.enableNotifications(expect);
 
+            //noinspection InfiniteLoopStatement
             while (true) {
                 final long start = System.currentTimeMillis();
                 readAndPersistSensorValues(expect);
