@@ -20,7 +20,7 @@ public class ApplicationInitializer {
     }
 
     @PostConstruct
-    public void initialize() throws Exception {
+    public void initialize() throws InterruptedException {
         smartMeterReaderNative.run();
         sensorTagReader.run();
     }
