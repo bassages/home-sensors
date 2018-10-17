@@ -61,7 +61,7 @@ public class SensorTagReader {
         } else {
             LOG.info("Start SensorTagReader");
 
-            while (1 == 1) {
+            while (true) {
                 try {
                     connectAndListenForSensorValues();
                 } catch (final SensortagException e) {
