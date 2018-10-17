@@ -67,8 +67,7 @@ public class SensorTagReader {
                 try {
                     connectAndListenForSensorValues();
                 } catch (final SensortagException e) {
-                    LOG.error("Error occurred: {}", e.getMessage());
-                    LOG.error("Trying to reconnect in 10 seconds...");
+                    LOG.error("Error occurred: {}. Trying to reconnect in {} seconds...", e.getMessage(), NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
                     Thread.sleep(NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT * 1000);
                 }
             }
