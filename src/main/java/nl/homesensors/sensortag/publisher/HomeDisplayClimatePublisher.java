@@ -1,5 +1,6 @@
 package nl.homesensors.sensortag.publisher;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
@@ -71,7 +72,7 @@ public class HomeDisplayClimatePublisher implements ClimatePublisher {
         }
     }
 
-    private void postToHomeDisplay(final String jsonString) throws Exception {
+    private void postToHomeDisplay(final String jsonString) throws IOException {
         LOG.debug("Post to home-display: {}", jsonString);
 
         try (final CloseableHttpClient httpClient = httpClientBuilder.get().build()) {

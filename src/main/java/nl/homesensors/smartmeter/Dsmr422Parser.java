@@ -22,15 +22,17 @@ public class Dsmr422Parser {
     private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
     private static final String GROUP_NAME = "attributeValue";
 
+    private static final String KWH_VALUE = "\\d{6}\\.\\d{3})\\*kWh\\";
+
     private static final Pattern HEADER = compile("^/(?<" + GROUP_NAME + ">.+?)\\R{2}");
     private static final Pattern VERSION_INFORMATION_FOR_P1_OUTPUT = compile("1-3:0.2.8\\((?<" + GROUP_NAME + ">\\w{2})\\)");
     private static final Pattern DATETIMESTAMP_OF_THE_P1_MESSAGE = compile("0-0:1.0.0\\((?<" + GROUP_NAME + ">\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})");
     private static final Pattern DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR= compile("0-0:1.0.0.+?(?<" + GROUP_NAME + ">(S|W))\\)");
     private static final Pattern EQUIPMENT_IDENTIFIER_ELECTRICITY = compile("0-0:96.1.1\\((?<" + GROUP_NAME + ">\\w+)\\)");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1 = compile("1-0:1.8.1\\((?<" + GROUP_NAME + ">\\d{6}\\.\\d{3})\\*kWh\\)");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2 = compile("1-0:1.8.2\\((?<" + GROUP_NAME + ">\\d{6}\\.\\d{3})\\*kWh\\)");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1 = compile("1-0:2.8.1\\((?<" + GROUP_NAME + ">\\d{6}\\.\\d{3})\\*kWh\\)");
-    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = compile("1-0:2.8.2\\((?<" + GROUP_NAME + ">\\d{6}\\.\\d{3})\\*kWh\\)");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1 = compile("1-0:1.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2 = compile("1-0:1.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1 = compile("1-0:2.8.1\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
+    private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = compile("1-0:2.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + ")");
     private static final Pattern TARIFF_INDICATOR_ELECTRICITY = compile("0-0:96.14.0\\((?<" + GROUP_NAME + ">\\d{4})\\)");
     private static final Pattern ACTUAL_ELECTRICITY_POWER_DELIVERED = compile("1-0:1.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
     private static final Pattern ACTUAL_ELECTRICITY_POWER_RECIEVED = compile("1-0:2.7.0\\((?<" + GROUP_NAME + ">\\d{2}\\.\\d{3})\\*kW\\)");
@@ -195,7 +197,9 @@ public class Dsmr422Parser {
         final String actual = Integer.toHexString(getCrc(linesInMessage));
         final String expected = Integer.toHexString(calculatedCrc16);
 
-        LOG.debug("Actual CRC: {} / Expected CRC : {}", actual, expected.toUpperCase());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Actual CRC: {} / Expected CRC : {}", actual, expected.toUpperCase());
+        }
 
         if (getCrc(linesInMessage) != calculatedCrc16) {
             throw new InvalidSmartMeterMessageException("CRC checksum failed. Expected " + expected + " but was " + actual);

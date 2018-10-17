@@ -221,7 +221,7 @@ public class SensorTagReader {
         return Runtime.getRuntime().exec("/bin/bash");
     }
 
-    private ExpectBuilder getExpectBuilder(final Process process) throws IOException {
+    private ExpectBuilder getExpectBuilder(final Process process) {
         return new ExpectBuilder()
                     .withOutput(process.getOutputStream())
                     .withInputs(process.getInputStream(), process.getErrorStream())

@@ -80,6 +80,10 @@ public class SmartMeterReaderNative {
     }
 
     private void handleErrorStream(final InputStream errorStream) {
+        if (!LOG.isErrorEnabled()) {
+            return;
+
+        }
         try (final var isr = new InputStreamReader(errorStream)) {
             final LineIterator it = IOUtils.lineIterator(isr);
             while (it.hasNext()) {
