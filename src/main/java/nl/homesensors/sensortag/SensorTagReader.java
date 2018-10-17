@@ -96,7 +96,7 @@ public class SensorTagReader {
             thermometer.enableNotifications(expect);
             hygrometer.enableNotifications(expect);
 
-            while (1 == 1) {
+            while (true) {
                 final long start = System.currentTimeMillis();
                 readAndPersistSensorValues(expect);
                 final long processingTime = System.currentTimeMillis() - start;
