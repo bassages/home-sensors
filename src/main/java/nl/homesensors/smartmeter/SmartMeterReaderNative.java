@@ -63,8 +63,11 @@ public class SmartMeterReaderNative {
                 LOG.warn("Unexpected exit value from command. Exit value=[{}]", exitValue);
             }
 
-        } catch (final InterruptedException | IOException e) {
-            LOG.error("An unexpected error occurred.", e);
+        } catch (final InterruptedException  e) {
+            LOG.error("An InterruptedException occurred.", e);
+            Thread.currentThread().interrupt();
+        } catch (final IOException e) {
+            LOG.error("An unexpected IOException occurred.", e);
         }
     }
 
