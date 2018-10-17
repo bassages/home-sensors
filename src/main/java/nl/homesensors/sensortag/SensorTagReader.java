@@ -35,6 +35,8 @@ public class SensorTagReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
+    private static final int NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT = 10;
+
     private final List<ClimatePublisher> climatePublishers;
 
     @Value("${sensortag.bluetooth.address:#{null}}")
@@ -67,7 +69,7 @@ public class SensorTagReader {
                 } catch (final SensortagException e) {
                     LOG.error("Error occurred: {}", e.getMessage());
                     LOG.error("Trying to reconnect in 10 seconds...");
-                    TimeUnit.SECONDS.sleep(10);
+                    Thread.sleep(NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT * 1000);
                 }
             }
         }
