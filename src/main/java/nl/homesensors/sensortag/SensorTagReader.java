@@ -56,20 +56,21 @@ public class SensorTagReader {
     }
 
     @Async
-    public void run() throws Exception {
+    public void run() throws InterruptedException {
 
         if (sensortagBluetoothAddress == null || sensortagProbeTimeInSeconds == null || sensorCode == null) {
             LOG.warn("Not started SensorTagReader, because the configuration for it is not defined.");
-        } else {
-            LOG.info("Start SensorTagReader");
+            return;
+        }
 
-            while (true) {
-                try {
-                    connectAndListenForSensorValues();
-                } catch (final SensortagException e) {
-                    LOG.error("Error occurred: {}. Trying to reconnect in {} seconds...", e.getMessage(), NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
-                    Thread.sleep(NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT * 1000);
-                }
+        LOG.info("Start SensorTagReader");
+
+        while (true) {
+            try {
+                connectAndListenForSensorValues();
+            } catch (final SensortagException | IOException e) {
+                LOG.error("Error occurred: {}. Trying to reconnect in {} seconds...", e.getMessage(), NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
+                TimeUnit.MILLISECONDS.sleep(NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
             }
         }
     }
