@@ -12,7 +12,7 @@ public class LongPowerFailureLogItem {
         return timestampOfEndOfFailure;
     }
 
-    public void setTimestampOfEndOfFailure(LocalDateTime timestampOfEndOfFailure) {
+    public void setTimestampOfEndOfFailure(final LocalDateTime timestampOfEndOfFailure) {
         this.timestampOfEndOfFailure = timestampOfEndOfFailure;
     }
 
@@ -20,7 +20,7 @@ public class LongPowerFailureLogItem {
         return failureDurationInSeconds;
     }
 
-    public void setFailureDurationInSeconds(long failureDurationInSeconds) {
+    public void setFailureDurationInSeconds(final long failureDurationInSeconds) {
         this.failureDurationInSeconds = failureDurationInSeconds;
     }
 
@@ -28,7 +28,7 @@ public class LongPowerFailureLogItem {
         return timestampOfEndOfFailureDstIndicator;
     }
 
-    public void setTimestampOfEndOfFailureDstIndicator(SmartMeterMessage.DstIndicator timestampOfEndOfFailureDstIndicator) {
+    public void setTimestampOfEndOfFailureDstIndicator(final SmartMeterMessage.DstIndicator timestampOfEndOfFailureDstIndicator) {
         this.timestampOfEndOfFailureDstIndicator = timestampOfEndOfFailureDstIndicator;
     }
 

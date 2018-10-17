@@ -27,7 +27,7 @@ public class SmartMeterMessage {
     private BigDecimal actualElectricityPowerRecieved;
     private Integer numberOfPowerFailuresInAnyPhase;
     private Integer numberOfLongPowerFailuresInAnyPhase;
-    private List<LongPowerFailureLogItem> longPowerFailureLog = new ArrayList<>();
+    private final List<LongPowerFailureLogItem> longPowerFailureLog = new ArrayList<>();
     private Integer numberOfVoltageSagsInPhaseL1;
     private Integer numberOfVoltageSagsInPhaseL2;
     private String textMessageCodes;
@@ -45,7 +45,7 @@ public class SmartMeterMessage {
         return header;
     }
 
-    public void setHeader(String header) {
+    void setHeader(final String header) {
         this.header = header;
     }
 
@@ -53,7 +53,7 @@ public class SmartMeterMessage {
         return versionInformationForP1Output;
     }
 
-    public void setVersionInformationForP1Output(String versionInformationForP1Output) {
+    void setVersionInformationForP1Output(final String versionInformationForP1Output) {
         this.versionInformationForP1Output = versionInformationForP1Output;
     }
 
@@ -61,7 +61,7 @@ public class SmartMeterMessage {
         return timestamp;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
+    public void setTimestamp(final LocalDateTime timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -69,7 +69,7 @@ public class SmartMeterMessage {
         return timestampDstIndicator;
     }
 
-    public void setTimestampDstIndicator(SmartMeterMessage.DstIndicator timestampDstIndicator) {
+    void setTimestampDstIndicator(final SmartMeterMessage.DstIndicator timestampDstIndicator) {
         this.timestampDstIndicator = timestampDstIndicator;
     }
 
@@ -77,7 +77,7 @@ public class SmartMeterMessage {
         return equipmentIdentifierElectricity;
     }
 
-    public void setEquipmentIdentifierElectricity(String equipmentIdentifierElectricity) {
+    void setEquipmentIdentifierElectricity(final String equipmentIdentifierElectricity) {
         this.equipmentIdentifierElectricity = equipmentIdentifierElectricity;
     }
 
@@ -85,7 +85,7 @@ public class SmartMeterMessage {
         return meterReadingElectricityDeliveredToClientTariff1;
     }
 
-    public void setMeterReadingElectricityDeliveredToClientTariff1(BigDecimal meterReadingElectricityDeliveredToClientTariff1) {
+    void setMeterReadingElectricityDeliveredToClientTariff1(final BigDecimal meterReadingElectricityDeliveredToClientTariff1) {
         this.meterReadingElectricityDeliveredToClientTariff1 = meterReadingElectricityDeliveredToClientTariff1;
     }
 
@@ -93,7 +93,7 @@ public class SmartMeterMessage {
         return meterReadingElectricityDeliveredToClientTariff2;
     }
 
-    public void setMeterReadingElectricityDeliveredToClientTariff2(BigDecimal meterReadingElectricityDeliveredToClientTariff2) {
+    void setMeterReadingElectricityDeliveredToClientTariff2(final BigDecimal meterReadingElectricityDeliveredToClientTariff2) {
         this.meterReadingElectricityDeliveredToClientTariff2 = meterReadingElectricityDeliveredToClientTariff2;
     }
 
@@ -101,7 +101,7 @@ public class SmartMeterMessage {
         return meterReadingElectricityDeliveredByClientTariff1;
     }
 
-    public void setMeterReadingElectricityDeliveredByClientTariff1(BigDecimal meterReadingElectricityDeliveredByClientTariff1) {
+    void setMeterReadingElectricityDeliveredByClientTariff1(final BigDecimal meterReadingElectricityDeliveredByClientTariff1) {
         this.meterReadingElectricityDeliveredByClientTariff1 = meterReadingElectricityDeliveredByClientTariff1;
     }
 
@@ -109,7 +109,7 @@ public class SmartMeterMessage {
         return meterReadingElectricityDeliveredByClientTariff2;
     }
 
-    public void setMeterReadingElectricityDeliveredByClientTariff2(BigDecimal meterReadingElectricityDeliveredByClientTariff2) {
+    void setMeterReadingElectricityDeliveredByClientTariff2(final BigDecimal meterReadingElectricityDeliveredByClientTariff2) {
         this.meterReadingElectricityDeliveredByClientTariff2 = meterReadingElectricityDeliveredByClientTariff2;
     }
 
@@ -117,7 +117,7 @@ public class SmartMeterMessage {
         return tariffIndicatorElectricity;
     }
 
-    public void setTariffIndicatorElectricity(Integer tariffIndicatorElectricity) {
+    void setTariffIndicatorElectricity(final Integer tariffIndicatorElectricity) {
         this.tariffIndicatorElectricity = tariffIndicatorElectricity;
     }
 
@@ -125,7 +125,7 @@ public class SmartMeterMessage {
         return actualElectricityPowerDelivered;
     }
 
-    public void setActualElectricityPowerDelivered(BigDecimal actualElectricityPowerDelivered) {
+    public void setActualElectricityPowerDelivered(final BigDecimal actualElectricityPowerDelivered) {
         this.actualElectricityPowerDelivered = actualElectricityPowerDelivered;
     }
 
@@ -133,7 +133,7 @@ public class SmartMeterMessage {
         return actualElectricityPowerRecieved;
     }
 
-    public void setActualElectricityPowerRecieved(BigDecimal actualElectricityPowerRecieved) {
+    void setActualElectricityPowerRecieved(final BigDecimal actualElectricityPowerRecieved) {
         this.actualElectricityPowerRecieved = actualElectricityPowerRecieved;
     }
 
@@ -141,7 +141,7 @@ public class SmartMeterMessage {
         return numberOfPowerFailuresInAnyPhase;
     }
 
-    public void setNumberOfPowerFailuresInAnyPhase(Integer numberOfPowerFailuresInAnyPhase) {
+    void setNumberOfPowerFailuresInAnyPhase(final Integer numberOfPowerFailuresInAnyPhase) {
         this.numberOfPowerFailuresInAnyPhase = numberOfPowerFailuresInAnyPhase;
     }
 
@@ -149,7 +149,7 @@ public class SmartMeterMessage {
         return numberOfLongPowerFailuresInAnyPhase;
     }
 
-    public void setNumberOfLongPowerFailuresInAnyPhase(Integer numberOfLongPowerFailuresInAnyPhase) {
+    void setNumberOfLongPowerFailuresInAnyPhase(final Integer numberOfLongPowerFailuresInAnyPhase) {
         this.numberOfLongPowerFailuresInAnyPhase = numberOfLongPowerFailuresInAnyPhase;
     }
 
@@ -157,7 +157,7 @@ public class SmartMeterMessage {
         return numberOfVoltageSagsInPhaseL1;
     }
 
-    public void setNumberOfVoltageSagsInPhaseL1(Integer numberOfVoltageSagsInPhaseL1) {
+    void setNumberOfVoltageSagsInPhaseL1(final Integer numberOfVoltageSagsInPhaseL1) {
         this.numberOfVoltageSagsInPhaseL1 = numberOfVoltageSagsInPhaseL1;
     }
 
@@ -165,7 +165,7 @@ public class SmartMeterMessage {
         return numberOfVoltageSagsInPhaseL2;
     }
 
-    public void setNumberOfVoltageSagsInPhaseL2(Integer numberOfVoltageSagsInPhaseL2) {
+    void setNumberOfVoltageSagsInPhaseL2(final Integer numberOfVoltageSagsInPhaseL2) {
         this.numberOfVoltageSagsInPhaseL2 = numberOfVoltageSagsInPhaseL2;
     }
 
@@ -173,7 +173,7 @@ public class SmartMeterMessage {
         return textMessageCodes;
     }
 
-    public void setTextMessageCodes(String textMessageCodes) {
+    void setTextMessageCodes(final String textMessageCodes) {
         this.textMessageCodes = textMessageCodes;
     }
 
@@ -181,7 +181,7 @@ public class SmartMeterMessage {
         return textMessage;
     }
 
-    public void setTextMessage(String textMessage) {
+    void setTextMessage(final String textMessage) {
         this.textMessage = textMessage;
     }
 
@@ -189,7 +189,7 @@ public class SmartMeterMessage {
         return lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     }
 
-    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient) {
+    void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(final BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient) {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClient = lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
     }
 
@@ -197,7 +197,7 @@ public class SmartMeterMessage {
         return instantaneousCurrentL1;
     }
 
-    public void setInstantaneousCurrentL1(Integer instantaneousCurrentL1) {
+    void setInstantaneousCurrentL1(final Integer instantaneousCurrentL1) {
         this.instantaneousCurrentL1 = instantaneousCurrentL1;
     }
 
@@ -205,7 +205,7 @@ public class SmartMeterMessage {
         return instantaneousActivePowerL1;
     }
 
-    public void setInstantaneousActivePowerL1(BigDecimal instantaneousActivePowerL1) {
+    void setInstantaneousActivePowerL1(final BigDecimal instantaneousActivePowerL1) {
         this.instantaneousActivePowerL1 = instantaneousActivePowerL1;
     }
 
@@ -213,7 +213,7 @@ public class SmartMeterMessage {
         return instantaneousActivePowerL2;
     }
 
-    public void setInstantaneousActivePowerL2(BigDecimal instantaneousActivePowerL2) {
+    void setInstantaneousActivePowerL2(final BigDecimal instantaneousActivePowerL2) {
         this.instantaneousActivePowerL2 = instantaneousActivePowerL2;
     }
 
@@ -221,7 +221,7 @@ public class SmartMeterMessage {
         return equipmentIdentifierGas;
     }
 
-    public void setEquipmentIdentifierGas(String equipmentIdentifierGas) {
+    void setEquipmentIdentifierGas(final String equipmentIdentifierGas) {
         this.equipmentIdentifierGas = equipmentIdentifierGas;
     }
 
@@ -229,8 +229,7 @@ public class SmartMeterMessage {
         return lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     }
 
-    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
-            LocalDateTime lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp) {
+    void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(final LocalDateTime lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp) {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp;
     }
 
@@ -238,8 +237,7 @@ public class SmartMeterMessage {
         return lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
     }
 
-    public void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(
-            SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator) {
+    void setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(final SmartMeterMessage.DstIndicator lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator) {
         this.lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator = lastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator;
     }
 
@@ -247,7 +245,7 @@ public class SmartMeterMessage {
         return Collections.unmodifiableList(longPowerFailureLog);
     }
 
-    public void addLongPowerFailureLogItem(LongPowerFailureLogItem longLongPowerFailureLogItem) {
+    public void addLongPowerFailureLogItem(final LongPowerFailureLogItem longLongPowerFailureLogItem) {
         this.longPowerFailureLog.add(longLongPowerFailureLogItem);
     }
 }

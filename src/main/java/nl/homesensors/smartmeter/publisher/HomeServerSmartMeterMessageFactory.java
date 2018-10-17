@@ -9,6 +9,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,6 +31,7 @@ public class HomeServerSmartMeterMessageFactory {
         final ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         return mapper;
     }
 
@@ -58,12 +61,13 @@ public class HomeServerSmartMeterMessageFactory {
                 final LangeStroomStoring langeStroomStoring = new LangeStroomStoring();
                 langeStroomStoring.setDatumtijdEinde(item.getTimestampOfEndOfFailure());
                 langeStroomStoring.setDuurVanStoringInSeconden(item.getFailureDurationInSeconds());
-                homeServerMeterstand.getLangeStroomStoringen().add(langeStroomStoring);
+                homeServerMeterstand.addLangeStroomStoring(langeStroomStoring);
             }
         }
         return homeServerMeterstand;
     }
 
+    @SuppressWarnings("unused")
     private static class HomeServerMeterstand {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         private LocalDateTime datumtijd;
@@ -86,145 +90,82 @@ public class HomeServerSmartMeterMessageFactory {
         private Integer aantalLangeStroomStoringenInAlleFases;
         private List<LangeStroomStoring> langeStroomStoringen;
 
-        public LocalDateTime getDatumtijd() {
-            return datumtijd;
-        }
-
-        public void setDatumtijd(LocalDateTime datumtijd) {
+        void setDatumtijd(final LocalDateTime datumtijd) {
             this.datumtijd = datumtijd;
         }
 
-        public int getStroomOpgenomenVermogenInWatt() {
-            return stroomOpgenomenVermogenInWatt;
-        }
-
-        public void setStroomOpgenomenVermogenInWatt(int stroomOpgenomenVermogenInWatt) {
+        void setStroomOpgenomenVermogenInWatt(final int stroomOpgenomenVermogenInWatt) {
             this.stroomOpgenomenVermogenInWatt = stroomOpgenomenVermogenInWatt;
         }
 
-        public BigDecimal getStroomTarief1() {
-            return stroomTarief1;
-        }
-
-        public void setStroomTarief1(BigDecimal stroomTarief1) {
+        void setStroomTarief1(final BigDecimal stroomTarief1) {
             this.stroomTarief1 = stroomTarief1;
         }
 
-        public BigDecimal getStroomTarief2() {
-            return stroomTarief2;
-        }
-
-        public void setStroomTarief2(BigDecimal stroomTarief2) {
+        void setStroomTarief2(final BigDecimal stroomTarief2) {
             this.stroomTarief2 = stroomTarief2;
         }
 
-        public BigDecimal getGas() {
-            return gas;
-        }
-
-        public void setGas(BigDecimal gas) {
+        void setGas(final BigDecimal gas) {
             this.gas = gas;
         }
 
-        public Integer getAantalStroomStoringenInAlleFases() {
-            return aantalStroomStoringenInAlleFases;
-        }
-
-        public void setAantalStroomStoringenInAlleFases(Integer aantalStroomStoringenInAlleFases) {
+        void setAantalStroomStoringenInAlleFases(final Integer aantalStroomStoringenInAlleFases) {
             this.aantalStroomStoringenInAlleFases = aantalStroomStoringenInAlleFases;
         }
 
-        public Integer getAantalSpanningsDippenInFaseL1() {
-            return aantalSpanningsDippenInFaseL1;
-        }
-
-        public void setAantalSpanningsDippenInFaseL1(Integer aantalSpanningsDippenInFaseL1) {
+        void setAantalSpanningsDippenInFaseL1(final Integer aantalSpanningsDippenInFaseL1) {
             this.aantalSpanningsDippenInFaseL1 = aantalSpanningsDippenInFaseL1;
         }
 
-        public Integer getAantalSpanningsDippenInFaseL2() {
-            return aantalSpanningsDippenInFaseL2;
-        }
-
-        public void setAantalSpanningsDippenInFaseL2(Integer aantalSpanningsDippenInFaseL2) {
+        void setAantalSpanningsDippenInFaseL2(final Integer aantalSpanningsDippenInFaseL2) {
             this.aantalSpanningsDippenInFaseL2 = aantalSpanningsDippenInFaseL2;
         }
 
-        public String getTekstBericht() {
-            return tekstBericht;
-        }
-
-        public void setTekstBericht(String tekstBericht) {
+        void setTekstBericht(final String tekstBericht) {
             this.tekstBericht = tekstBericht;
         }
 
-        public Integer getAantalLangeStroomStoringenInAlleFases() {
-            return aantalLangeStroomStoringenInAlleFases;
-        }
-
-        public void setAantalLangeStroomStoringenInAlleFases(Integer aantalLangeStroomStoringenInAlleFases) {
+        void setAantalLangeStroomStoringenInAlleFases(final Integer aantalLangeStroomStoringenInAlleFases) {
             this.aantalLangeStroomStoringenInAlleFases = aantalLangeStroomStoringenInAlleFases;
         }
 
-        public List<LangeStroomStoring> getLangeStroomStoringen() {
-            return langeStroomStoringen;
-        }
-
-        public void setLangeStroomStoringen(List<LangeStroomStoring> langeStroomStoringen) {
+        void setLangeStroomStoringen(final List<LangeStroomStoring> langeStroomStoringen) {
             this.langeStroomStoringen = langeStroomStoringen;
         }
 
-        public void setTekstBerichtCodes(String tekstBerichtCodes) {
+        void setTekstBerichtCodes(final String tekstBerichtCodes) {
             this.tekstBerichtCodes = tekstBerichtCodes;
         }
 
-        public String getTekstBerichtCodes() {
-            return tekstBerichtCodes;
-        }
-
-        public String getMeterIdentificatieStroom() {
-            return meterIdentificatieStroom;
-        }
-
-        public void setMeterIdentificatieStroom(String meterIdentificatieStroom) {
+        void setMeterIdentificatieStroom(final String meterIdentificatieStroom) {
             this.meterIdentificatieStroom = meterIdentificatieStroom;
         }
 
-        public String getMeterIdentificatieGas() {
-            return meterIdentificatieGas;
-        }
-
-        public void setMeterIdentificatieGas(String meterIdentificatieGas) {
+        void setMeterIdentificatieGas(final String meterIdentificatieGas) {
             this.meterIdentificatieGas = meterIdentificatieGas;
         }
 
-        public Integer getStroomTariefIndicator() {
-            return stroomTariefIndicator;
+        void setStroomTariefIndicator(final Integer stroomTariefIndicator) {
+            this.stroomTariefIndicator = stroomTariefIndicator;
         }
 
-        public void setStroomTariefIndicator(Integer stroomTariefIndicator) {
-            this.stroomTariefIndicator = stroomTariefIndicator;
+        void addLangeStroomStoring(final LangeStroomStoring langeStroomStoring) {
+            this.langeStroomStoringen.add(langeStroomStoring);
         }
     }
 
+    @SuppressWarnings("unused")
     public static class LangeStroomStoring {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         private LocalDateTime datumtijdEinde;
         private Long duurVanStoringInSeconden;
 
-        public LocalDateTime getDatumtijdEinde() {
-            return datumtijdEinde;
-        }
-
-        public void setDatumtijdEinde(LocalDateTime datumtijdEinde) {
+        void setDatumtijdEinde(final LocalDateTime datumtijdEinde) {
             this.datumtijdEinde = datumtijdEinde;
         }
 
-        public Long getDuurVanStoringInSeconden() {
-            return duurVanStoringInSeconden;
-        }
-
-        public void setDuurVanStoringInSeconden(Long duurVanStoringInSeconden) {
+        void setDuurVanStoringInSeconden(final Long duurVanStoringInSeconden) {
             this.duurVanStoringInSeconden = duurVanStoringInSeconden;
         }
     }

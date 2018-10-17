@@ -11,15 +11,17 @@ import nl.homesensors.HomeServerRestEndPoint;
 import nl.homesensors.smartmeter.SmartMeterMessage;
 
 @Component
-public class HomeServerLocalSmartMeterPublisher implements SmartMeterMessagePublisher {
+public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerLocalSmartMeterPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
+
+    private static final String API_PATH = "slimmemeter";
 
     private final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory;
     private final HomeServerRestEndPoint homeServerRestEndPoint;
 
-    public HomeServerLocalSmartMeterPublisher(final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory,
-                                              final HomeServerRestEndPoint homeServerRestEndPoint) {
+    public HomeServerSmartMeterPublisher(final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory,
+                                         final HomeServerRestEndPoint homeServerRestEndPoint) {
         this.homeServerSmartMeterMessageFactory = homeServerSmartMeterMessageFactory;
         this.homeServerRestEndPoint = homeServerRestEndPoint;
     }
@@ -29,11 +31,7 @@ public class HomeServerLocalSmartMeterPublisher implements SmartMeterMessagePubl
     @Override
     public void publish(final SmartMeterMessage smartMeterMessage) {
         try {
-            final String path = "slimmemeter";
-            final String jsonMessage = homeServerSmartMeterMessageFactory.create(smartMeterMessage);
-
-            homeServerRestEndPoint.post(path, jsonMessage);
-
+            homeServerRestEndPoint.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
         } catch (final JsonProcessingException e) {
             LOGGER.error("Failed to map message to json. Message=" + smartMeterMessage, e);
         }

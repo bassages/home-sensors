@@ -7,6 +7,7 @@ import static net.sf.expectit.matcher.Matchers.eof;
 import static net.sf.expectit.matcher.Matchers.regexp;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -18,20 +19,23 @@ import org.springframework.stereotype.Component;
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
 import net.sf.expectit.Result;
+import nl.homesensors.sensortag.publisher.ClimatePublisher;
 
 /**
  * Connects to a Texas Instruments Sensortag over Bluetooth low energy to periodically
- * obtain the actual thermometer and hygrometer values.
- * The values will be send to {@link ClimateService} to publish them.
+ * obtain the actual temperature and humidity.
  *
- * Needs blueZ see http://www.bluez.org/ (gattool and hcitool) to be installed on the host OS.
+ * The obtained values will be published to each {@link ClimatePublisher}.
+ *
+ * Dependencies:
+ * blueZ (gattool and hcitool) needs to be installed on the host OS (see http://www.bluez.org/).
  */
 @Component
 public class SensorTagReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
-    private final ClimateService climateService;
+    private final List<ClimatePublisher> climatePublishers;
 
     @Value("${sensortag.bluetooth.address:#{null}}")
     private String sensortagBluetoothAddress;
@@ -45,8 +49,8 @@ public class SensorTagReader {
     private final Thermometer thermometer = new Thermometer();
     private final Hygrometer hygrometer = new Hygrometer();
 
-    public SensorTagReader(final ClimateService climateService) {
-        this.climateService = climateService;
+    public SensorTagReader(final List<ClimatePublisher> climatePublishers) {
+        this.climatePublishers = climatePublishers;
     }
 
     @Async
@@ -60,7 +64,7 @@ public class SensorTagReader {
             while (1 == 1) {
                 try {
                     connectAndListenForSensorValues();
-                } catch (SensortagException e) {
+                } catch (final SensortagException e) {
                     LOG.error("Error occurred: " + e.getMessage());
                     LOG.error("Trying to reconnect in 10 seconds...");
                     TimeUnit.SECONDS.sleep(10);
@@ -128,7 +132,7 @@ public class SensorTagReader {
     private void readAndPersistSensorValues(final Expect expect) throws IOException, SensortagException {
         final Temperature temperature = thermometer.getAmbientTemperature(expect);
         final Humidity humidity = hygrometer.getHumidity(expect);
-        climateService.publish(SensorCode.of(sensorCode), temperature, humidity);
+        climatePublishers.forEach(climatePublisher -> climatePublisher.publish(SensorCode.of(sensorCode), temperature, humidity));
     }
 
     private void setConnectionParameters() throws IOException {

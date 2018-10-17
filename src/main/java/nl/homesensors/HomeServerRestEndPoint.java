@@ -1,5 +1,7 @@
 package nl.homesensors;
 
+import javax.inject.Provider;
+
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -12,30 +14,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import nl.homesensors.smartmeter.publisher.HomeServerLocalSmartMeterPublisher;
+import nl.homesensors.smartmeter.publisher.HomeServerSmartMeterPublisher;
 
 @Component
 public class HomeServerRestEndPoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerLocalSmartMeterPublisher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerSmartMeterPublisher.class);
 
-    private final String homeServerRestServiceUrl;
+    private final String homeServerRestApiUrl;
     private final HomeServerAuthentication homeServerAuthentication;
+    private final Provider<HttpClientBuilder> httpClientBuilderProvider;
 
     public HomeServerRestEndPoint(final HomeServerAuthentication homeServerAuthentication,
-                                  @Value("${home-server-local-rest-service-url:#{null}}") final String homeServerRestServiceUrl) {
+                                  @Value("${home-server-local-rest-service-url:#{null}}") final String homeServerRestApiUrl,
+                                  final Provider<HttpClientBuilder> httpClientBuilderProvider) {
         this.homeServerAuthentication = homeServerAuthentication;
-        this.homeServerRestServiceUrl = homeServerRestServiceUrl;
+        this.homeServerRestApiUrl = homeServerRestApiUrl;
+        this.httpClientBuilderProvider = httpClientBuilderProvider;
     }
 
-    public void post(final String path, final String jsonString) {
-        final String url = homeServerRestServiceUrl + "/" + path;
-        LOGGER.debug("Post to url: {}. Request body: {}", url, jsonString);
+    public void post(final String path, final String json) {
+        final String url = homeServerRestApiUrl + "/" + path;
+        LOGGER.debug("Post to url: {}. Request body: {}", url, json);
 
-        try (final CloseableHttpClient httpClient = HttpClientBuilder.create().build()) {
+        try (final CloseableHttpClient httpClient = httpClientBuilderProvider.get().build()) {
 
             final HttpPost request = new HttpPost(url);
-            final StringEntity params = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+            final StringEntity params = new StringEntity(json, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
             homeServerAuthentication.setAuthorizationHeader(request);

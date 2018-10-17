@@ -3,12 +3,26 @@ plugins {
     id 'org.springframework.boot' version '2.0.5.RELEASE'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'jacoco'
+    id "org.sonarqube" version '2.6.2'
 }
 
 version = '1.0.0-SNAPSHOT'
 
 jar {
     baseName = 'home-sensors'
+}
+
+jacoco {
+    toolVersion = '0.8.2'
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.junit.reportsPath", "build/test-results"
+        property "sonar.jacoco.reportPath", "build/test-reports/jacoco.exec"
+    }
 }
 
 sourceCompatibility = 1.10
@@ -42,7 +56,8 @@ dependencies {
     compile('net.sf.expectit:expectit-core:0.9.0')
     compile('com.jcraft:jsch:0.1.54')
     compile('javax.annotation:javax.annotation-api:1.2')
-
+    compile('javax.inject:javax.inject:1')
+    
     compile('org.springframework.boot:spring-boot-starter-logging')
     compile("org.springframework.boot:spring-boot-devtools")
 
