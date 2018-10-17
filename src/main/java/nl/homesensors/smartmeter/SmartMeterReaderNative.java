@@ -64,7 +64,7 @@ public class SmartMeterReaderNative {
             }
 
         } catch (final InterruptedException  e) {
-            LOG.error("An InterruptedException occurred.", e);
+            LOG.error("An unexpected InterruptedException occurred.", e);
             Thread.currentThread().interrupt();
         } catch (final IOException e) {
             LOG.error("An unexpected IOException occurred.", e);
