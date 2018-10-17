@@ -38,7 +38,7 @@ public class HomeServerSmartMeterMessageFactory {
     private HomeServerMeterstand mapToHomeServerMeterstand(final SmartMeterMessage smartMeterMessage) {
         final HomeServerMeterstand homeServerMeterstand = new HomeServerMeterstand();
         homeServerMeterstand.setDatumtijd(smartMeterMessage.getTimestamp());
-        homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(new BigDecimal(1000.0d)).intValue());
+        homeServerMeterstand.setStroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(BigDecimal.valueOf(1000)).intValue());
         homeServerMeterstand.setStroomTariefIndicator(smartMeterMessage.getTariffIndicatorElectricity());
         homeServerMeterstand.setStroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1());
         homeServerMeterstand.setStroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2());
