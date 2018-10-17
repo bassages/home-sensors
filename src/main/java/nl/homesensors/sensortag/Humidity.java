@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Humidity {
+public final class Humidity {
 
     private final BigDecimal value;
 

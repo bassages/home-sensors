@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Temperature {
+public final class Temperature {
 
     private final BigDecimal value;
 
