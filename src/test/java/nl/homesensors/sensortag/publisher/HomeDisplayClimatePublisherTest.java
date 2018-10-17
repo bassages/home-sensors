@@ -88,7 +88,10 @@ public class HomeDisplayClimatePublisherTest {
 
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             httpPost.getEntity().writeTo(baos);
-            assertThat(baos.toString()).isEqualTo("{\"datumtijd\":1514909340000,\"temperatuur\":21.9,\"luchtvochtigheid\":56.01}");
+            final String actual = baos.toString();
+            assertThat(actual).contains("\"datumtijd\":1514909340000");
+            assertThat(actual).contains("\"temperatuur\":21.9");
+            assertThat(actual).contains("\"luchtvochtigheid\":56.01");
         }
     }
 }
