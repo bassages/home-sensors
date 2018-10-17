@@ -65,7 +65,7 @@ public class HomeDisplayClimatePublisherTest {
 
     @Test
     public void givenSomeValidValuesThenPublishThenPostRequestSent() throws Exception {
-        timeTravelTo(clock, LocalDate.of(2018, 1, 2).atTime(17, 9));
+        timeTravelTo(clock, LocalDate.of(2018, 1, 2).atTime(17, 9, 11));
 
         when(closeableHttpClient.execute(any())).thenReturn(closeableHttpResponse);
         when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
@@ -88,7 +88,7 @@ public class HomeDisplayClimatePublisherTest {
 
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             httpPost.getEntity().writeTo(baos);
-            assertThat(baos.toString()).isEqualTo("{\"datumtijd\":1514909340000,\"temperatuur\":21.9,\"luchtvochtigheid\":56.01}");
+            assertThat(baos.toString()).isEqualTo("{\"datumtijd\":\"2018-01-02T17:09:11\",\"temperatuur\":21.9,\"luchtvochtigheid\":56.01}");
         }
     }
 }

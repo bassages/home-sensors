@@ -3,7 +3,6 @@ package nl.homesensors.sensortag.publisher;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import javax.inject.Provider;
 
@@ -24,6 +23,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
@@ -92,13 +93,13 @@ public class HomeDisplayClimatePublisher implements ClimatePublisher {
 
     @SuppressWarnings("unused")
     private static class HomeDisplayKlimaat {
-        private long datumtijd;
+        private LocalDateTime datumtijd;
         private BigDecimal temperatuur;
         private BigDecimal luchtvochtigheid;
 
         public static HomeDisplayKlimaat of(final LocalDateTime dateTime, final Temperature temperature, final Humidity humidity) {
             final HomeDisplayKlimaat homeDisplayKlimaat = new HomeDisplayKlimaat();
-            homeDisplayKlimaat.datumtijd = dateTime.atZone(ZoneOffset.systemDefault()).toInstant().toEpochMilli();
+            homeDisplayKlimaat.datumtijd = dateTime;
             homeDisplayKlimaat.temperatuur = temperature.getValue();
             homeDisplayKlimaat.luchtvochtigheid = humidity.getValue();
             return homeDisplayKlimaat;
@@ -107,6 +108,8 @@ public class HomeDisplayClimatePublisher implements ClimatePublisher {
         private String asJson() throws JsonProcessingException {
             final ObjectMapper mapper = new ObjectMapper();
             mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+            mapper.registerModule(new JavaTimeModule());
+            mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
             return mapper.writeValueAsString(this);
         }
     }
