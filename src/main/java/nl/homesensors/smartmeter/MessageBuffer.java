@@ -26,20 +26,21 @@ public class MessageBuffer {
     public synchronized void addLine(final String line) {
 
         if (bufferedLines.isEmpty() && !isFirstLineOfP1Message(line)) {
-            LOG.error("Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: {}", line);
-        } else {
-            bufferedLines.add(line);
+            LOG.warn("Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: {}", line);
+            return;
+        }
 
-            if (isLastLineOfP1Message(line)) {
-                final String p1Message = String.join("\n", bufferedLines);
-                try {
-                    final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(p1Message);
-                    smartMeterMessagePublishers.forEach(publisher -> publisher.publish(smartMeterMessage));
-                    bufferedLines.clear();
-                } catch (final Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
-                    LOG.error("Invalid smartmetermessage: {}", p1Message);
-                }
+        bufferedLines.add(line);
+
+        if (isLastLineOfP1Message(line)) {
+            final String message = String.join("\n", bufferedLines);
+            try {
+                final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+                smartMeterMessagePublishers.forEach(publisher -> publisher.publish(smartMeterMessage));
+            } catch (final Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
+                LOG.error("Ignoring invalid message: {}", message);
             }
+            bufferedLines.clear();
         }
     }
 

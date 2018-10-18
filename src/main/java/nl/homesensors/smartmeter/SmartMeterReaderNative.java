@@ -3,6 +3,7 @@ package nl.homesensors.smartmeter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.function.Consumer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -53,8 +54,8 @@ public class SmartMeterReaderNative {
             final Process process = Runtime.getRuntime().exec(command);
 
             final Thread ioThread = new Thread(() -> {
-                handleInputStream(process.getInputStream());
-                handleErrorStream(process.getErrorStream());
+                handleInputStreamLines(process.getInputStream(), messageBuffer::addLine);
+                handleInputStreamLines(process.getErrorStream(), LOG::error);
             });
             ioThread.start();
 
@@ -71,27 +72,14 @@ public class SmartMeterReaderNative {
         }
     }
 
-    private void handleInputStream(final InputStream inputStream) {
+    private void handleInputStreamLines(final InputStream inputStream, final Consumer<String> lineHandler) {
         try (final var inputStreamReader = new InputStreamReader(inputStream)) {
             final LineIterator it = IOUtils.lineIterator(inputStreamReader);
             while (it.hasNext()) {
-                messageBuffer.addLine(it.nextLine());
+                lineHandler.accept(it.nextLine());
             }
         } catch (final IOException e) {
             LOG.error("InputStream failure", e);
-        }
-    }
-
-    private void handleErrorStream(final InputStream errorStream) {
-        try (final var isr = new InputStreamReader(errorStream)) {
-            final LineIterator it = IOUtils.lineIterator(isr);
-            while (it.hasNext()) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error(it.nextLine());
-                }
-            }
-        } catch (final IOException e) {
-            LOG.error("ErrorStream failure: ", e);
         }
     }
 }

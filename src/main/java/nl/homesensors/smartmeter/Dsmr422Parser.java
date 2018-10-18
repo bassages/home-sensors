@@ -213,15 +213,14 @@ public class Dsmr422Parser {
     }
 
     public static class InvalidSmartMeterMessageException extends Exception {
-        InvalidSmartMeterMessageException(final String message) {
+        public InvalidSmartMeterMessageException(final String message) {
             super(message);
         }
     }
 
     public static class UnsupportedVersionException extends Exception {
-        UnsupportedVersionException(final String message) {
+        public UnsupportedVersionException(final String message) {
             super(message);
         }
     }
-
 }
