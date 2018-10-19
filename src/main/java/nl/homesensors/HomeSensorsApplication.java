@@ -29,4 +29,9 @@ public class HomeSensorsApplication {
 	public HttpClientBuilder getHttpClientBuilder() {
 		return HttpClientBuilder.create();
 	}
+
+	@Bean
+	public Runtime getRuntime() {
+		return Runtime.getRuntime();
+	}
 }

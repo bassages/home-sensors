@@ -20,7 +20,7 @@ import nl.homesensors.smartmeter.LongPowerFailureLogItem;
 import nl.homesensors.smartmeter.SmartMeterMessage;
 
 @Component
-public class HomeServerSmartMeterMessageFactory {
+class HomeServerSmartMeterMessageFactory {
 
     String create(final SmartMeterMessage smartMeterMessage) throws JsonProcessingException {
         final HomeServerMeterstand homeServerMeterstand = mapToHomeServerMeterstand(smartMeterMessage);
@@ -156,7 +156,7 @@ public class HomeServerSmartMeterMessageFactory {
     }
 
     @SuppressWarnings("unused")
-    public static class LangeStroomStoring {
+    static class LangeStroomStoring {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         private LocalDateTime datumtijdEinde;
         private Long duurVanStoringInSeconden;

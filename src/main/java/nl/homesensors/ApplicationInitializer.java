@@ -5,24 +5,23 @@ import javax.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import nl.homesensors.sensortag.SensorTagReader;
-import nl.homesensors.smartmeter.SmartMeterReaderNative;
+import nl.homesensors.smartmeter.SerialSmartMeterReader;
 
 @Component
 public class ApplicationInitializer {
 
-    private final SmartMeterReaderNative smartMeterReaderNative;
+    private final SerialSmartMeterReader serialSmartMeterReader;
     private final SensorTagReader sensorTagReader;
 
-    public ApplicationInitializer(final SmartMeterReaderNative smartMeterReaderNative,
+    public ApplicationInitializer(final SerialSmartMeterReader serialSmartMeterReader,
                                   final SensorTagReader sensorTagReader) {
-        this.smartMeterReaderNative = smartMeterReaderNative;
+        this.serialSmartMeterReader = serialSmartMeterReader;
         this.sensorTagReader = sensorTagReader;
     }
 
     @PostConstruct
     public void initialize() throws InterruptedException {
-        smartMeterReaderNative.run();
+        serialSmartMeterReader.run();
         sensorTagReader.run();
     }
-
 }

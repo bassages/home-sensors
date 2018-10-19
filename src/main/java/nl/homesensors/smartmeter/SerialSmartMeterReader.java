@@ -9,7 +9,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -20,44 +19,44 @@ import org.springframework.stereotype.Component;
  * Needs the "cu" command to be installed on the host OS.
  */
 @Component
-public class SmartMeterReaderNative {
+public class SerialSmartMeterReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SmartMeterReaderNative.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SerialSmartMeterReader.class);
 
-    @Value("${smart-meter-serial-port-path:#{null}}")
-    private String smartMeterSerialPortPath;
-    @Value("${smart-meter-serial-port-baudrate:#{null}}")
-    private String smartMeterSerialPortBaudRate;
-    @Value("${smart-meter-serial-port-parity:#{null}}")
-    private String smartMeterSerialPortParity;
-
+    private final SmartMeterSerialPortConfiguration smartMeterSerialPortConfiguration;
     private final MessageBuffer messageBuffer;
+    private final Runtime runtime;
 
-    public SmartMeterReaderNative(final MessageBuffer messageBuffer) {
+    public SerialSmartMeterReader(final SmartMeterSerialPortConfiguration smartMeterSerialPortConfiguration,
+                                  final MessageBuffer messageBuffer,
+                                  final Runtime runtime) {
+        this.smartMeterSerialPortConfiguration = smartMeterSerialPortConfiguration;
         this.messageBuffer = messageBuffer;
+        this.runtime = runtime;
     }
 
     @Async
     public void run() {
-        if (smartMeterSerialPortPath == null || smartMeterSerialPortBaudRate == null || smartMeterSerialPortParity == null) {
-            LOG.warn("Not started SmartMeterReader, because the configuration for it is not defined.");
-        } else {
-            LOG.info("Start SmartMeterReader");
-            connectAndListenForData();
+        if (!smartMeterSerialPortConfiguration.isComplete()) {
+            LOG.warn("Not started SmartMeterReader, because the configuration for it is incomplete.");
+            return;
         }
+        LOG.info("Start SmartMeterReader");
+        connectAndListenForData();
     }
 
     private void connectAndListenForData() {
         try {
-            final String command = "cu -l " + smartMeterSerialPortPath + " --speed " + smartMeterSerialPortBaudRate + " --parity=" + smartMeterSerialPortParity + " -E q";
-
-            final Process process = Runtime.getRuntime().exec(command);
+            final String command = "cu -l " + smartMeterSerialPortConfiguration.getPath() + " --speed " + smartMeterSerialPortConfiguration.getBaudRate() + " --parity=" + smartMeterSerialPortConfiguration.getParity() + " -E q";
+            final Process process = runtime.exec(command);
 
             final Thread ioThread = new Thread(() -> {
                 handleInputStreamLines(process.getInputStream(), messageBuffer::addLine);
                 handleInputStreamLines(process.getErrorStream(), LOG::error);
             });
+
             ioThread.start();
+            ioThread.join();
 
             final int exitValue = process.waitFor();
             if (exitValue != 0) {

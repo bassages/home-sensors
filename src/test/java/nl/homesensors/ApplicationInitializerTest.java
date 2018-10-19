@@ -1,6 +1,5 @@
 package nl.homesensors;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
@@ -10,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import nl.homesensors.sensortag.SensorTagReader;
-import nl.homesensors.smartmeter.SmartMeterReaderNative;
+import nl.homesensors.smartmeter.SerialSmartMeterReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ApplicationInitializerTest {
@@ -19,7 +18,7 @@ public class ApplicationInitializerTest {
     private ApplicationInitializer applicationInitializer;
 
     @Mock
-    private SmartMeterReaderNative smartMeterReaderNative;
+    private SerialSmartMeterReader serialSmartMeterReader;
     @Mock
     private SensorTagReader sensorTagReader;
 
@@ -27,7 +26,7 @@ public class ApplicationInitializerTest {
     public void whenInitializedThenReadersRun() throws Exception {
         applicationInitializer.initialize();
 
-        verify(smartMeterReaderNative).run();
+        verify(serialSmartMeterReader).run();
         verify(sensorTagReader).run();
     }
 }
