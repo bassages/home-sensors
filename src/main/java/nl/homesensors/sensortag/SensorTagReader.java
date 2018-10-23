@@ -111,7 +111,8 @@ public class SensorTagReader {
             }
 
         } finally {
-            disconnect(process, expect);
+            disconnectAndClose(expect);
+            cleanup(process);
         }
     }
 
@@ -233,7 +234,7 @@ public class SensorTagReader {
                     .withTimeout(15, TimeUnit.SECONDS);
     }
 
-    private void disconnect(final Process process, final Expect expect) throws IOException, InterruptedException {
+    private void disconnectAndClose(final Expect expect) throws IOException, InterruptedException {
         expect.sendLine("disconnect");
         TimeUnit.SECONDS.sleep(1);
 
@@ -242,7 +243,14 @@ public class SensorTagReader {
 
         expect.sendLine("exit"); // Exit from terminal
         expect.expect(eof());
+        expect.close();
+    }
 
-        process.waitFor();
+    private void cleanup(final Process process) throws InterruptedException {
+        process.waitFor(30, TimeUnit.SECONDS);
+        if (process.isAlive()) {
+            LOG.warn("Killing process with PID {}", process.toHandle().pid());
+            process.destroyForcibly();
+        }
     }
 }

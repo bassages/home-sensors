@@ -61,13 +61,11 @@ dependencies {
     compile('com.jcraft:jsch:0.1.54')
     compile('javax.annotation:javax.annotation-api:1.2')
     compile('javax.inject:javax.inject:1')
-
     compile('org.springframework.boot:spring-boot-starter-logging')
     compile("org.springframework.boot:spring-boot-devtools")
+    
     testCompile("org.springframework.boot:spring-boot-starter-test")
     testCompile('org.assertj:assertj-joda-time:2.2.0')
     testCompile('org.assertj:assertj-core:3.11.1')
     testCompile('nl.jqno.equalsverifier:equalsverifier:3.0')
-
-    runtime('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 }
