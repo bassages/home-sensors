@@ -4,5 +4,7 @@ import nl.homesensors.smartmeter.SmartMeterMessage;
 
 public interface SmartMeterMessagePublisher {
 
+    boolean isEnabled();
+
     void publish(SmartMeterMessage smartMeterMessage);
 }

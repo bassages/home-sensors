@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -32,7 +33,7 @@ import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
 
-@Service
+@Component
 public class HomeDisplayClimatePublisher implements ClimatePublisher {
     private static final Logger LOG = LoggerFactory.getLogger(HomeDisplayClimatePublisher.class);
 

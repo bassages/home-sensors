@@ -52,6 +52,7 @@ public class MessageBufferTest {
 
     @Test
     public void shouldParseSingleMessage() throws Exception {
+        when(smartMeterMessagePublisher.isEnabled()).thenReturn(true);
         when(dsmr422Parser.parse(anyString())).thenReturn(smartMeterMessage);
 
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {
@@ -64,6 +65,7 @@ public class MessageBufferTest {
 
     @Test
     public void shouldParseMultipleMessages() throws Exception {
+        when(smartMeterMessagePublisher.isEnabled()).thenReturn(true);
         when(dsmr422Parser.parse(anyString())).thenReturn(smartMeterMessage);
 
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {

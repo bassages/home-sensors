@@ -18,28 +18,25 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 @Component
-public class HomeServerRestEndPoint {
+public class AwsApiGateway {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerRestEndPoint.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsApiGateway.class);
 
-    private final String homeServerRestApiUrl;
-    private final HomeServerAuthentication homeServerAuthentication;
+    private final String apiRootUrl;
     private final Provider<HttpClientBuilder> httpClientBuilderProvider;
 
-    public HomeServerRestEndPoint(final HomeServerAuthentication homeServerAuthentication,
-                                  @Value("${home-server-local-rest-service-url:#{null}}") final String homeServerRestApiUrl,
-                                  final Provider<HttpClientBuilder> httpClientBuilderProvider) {
-        this.homeServerAuthentication = homeServerAuthentication;
-        this.homeServerRestApiUrl = homeServerRestApiUrl;
+    public AwsApiGateway(@Value("${aws-lambda-api.url:#{null}}") final String apiRootUrl,
+                         final Provider<HttpClientBuilder> httpClientBuilderProvider) {
+        this.apiRootUrl = apiRootUrl;
         this.httpClientBuilderProvider = httpClientBuilderProvider;
     }
 
     public boolean isEnabled() {
-        return isNotBlank(homeServerRestApiUrl);
+        return isNotBlank(apiRootUrl);
     }
 
     public void post(final String path, final String json) {
-        final String url = homeServerRestApiUrl + "/" + path;
+        final String url = apiRootUrl + "/" + path;
         LOGGER.debug("Post to url: {}. Request body: {}", url, json);
 
         try (final CloseableHttpClient httpClient = httpClientBuilderProvider.get().build()) {
@@ -47,11 +44,9 @@ public class HomeServerRestEndPoint {
             final StringEntity params = new StringEntity(json, ContentType.APPLICATION_JSON);
             request.setEntity(params);
 
-            homeServerAuthentication.setAuthorizationHeader(request);
-
             final CloseableHttpResponse response = httpClient.execute(request);
 
-            Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED,
+            Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK,
                           "Unexpected statusline: " + response.getStatusLine());
 
         } catch (final Exception e) {

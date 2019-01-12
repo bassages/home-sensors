@@ -36,4 +36,9 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
             LOGGER.error("Failed to map message to json. Message=" + smartMeterMessage, e);
         }
     }
+
+    @Override
+    public boolean isEnabled() {
+        return homeServerRestEndPoint.isEnabled();
+    }
 }

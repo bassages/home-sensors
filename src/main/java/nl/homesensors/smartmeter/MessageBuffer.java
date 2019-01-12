@@ -1,6 +1,7 @@
 package nl.homesensors.smartmeter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,13 +15,14 @@ public class MessageBuffer {
     private static final Logger LOG = LoggerFactory.getLogger(MessageBuffer.class);
 
     private final Dsmr422Parser dsmr422Parser;
-    private final List<SmartMeterMessagePublisher> smartMeterMessagePublishers;
+    private final Collection<SmartMeterMessagePublisher> smartMeterMessagePublishers;
 
     private final List<String> bufferedLines = new ArrayList<>();
 
     public MessageBuffer(final Dsmr422Parser dsmr422Parser, final List<SmartMeterMessagePublisher> smartMeterMessagePublishers) {
         this.dsmr422Parser = dsmr422Parser;
         this.smartMeterMessagePublishers = smartMeterMessagePublishers;
+        LOG.debug("SmarMeter publishers: " + smartMeterMessagePublishers.size());
     }
 
     public synchronized void addLine(final String line) {
@@ -36,7 +38,9 @@ public class MessageBuffer {
             final String message = String.join("\n", bufferedLines);
             try {
                 final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
-                smartMeterMessagePublishers.forEach(publisher -> publisher.publish(smartMeterMessage));
+                smartMeterMessagePublishers.stream()
+                                           .filter(SmartMeterMessagePublisher::isEnabled)
+                                           .forEach(publisher -> publisher.publish(smartMeterMessage));
             } catch (final Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
                 LOG.error("Ignoring invalid message: {}", message);
             }
