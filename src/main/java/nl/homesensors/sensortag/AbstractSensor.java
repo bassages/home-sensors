@@ -12,7 +12,7 @@ import static net.sf.expectit.matcher.Matchers.regexp;
 
 abstract class AbstractSensor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractSensor.class);
 
     abstract void enableNotifications(Expect expect) throws IOException;
 
