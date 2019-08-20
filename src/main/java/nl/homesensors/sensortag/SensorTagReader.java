@@ -53,7 +53,7 @@ public class SensorTagReader {
 
     public SensorTagReader(final List<ClimatePublisher> climatePublishers) {
         this.climatePublishers = climatePublishers;
-        LOG.debug("Climate publishers: " + climatePublishers);
+        LOG.debug("Climate publishers: {}", climatePublishers);
     }
 
     @Async

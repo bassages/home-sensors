@@ -22,7 +22,7 @@ public class MessageBuffer {
     public MessageBuffer(final Dsmr422Parser dsmr422Parser, final List<SmartMeterMessagePublisher> smartMeterMessagePublishers) {
         this.dsmr422Parser = dsmr422Parser;
         this.smartMeterMessagePublishers = smartMeterMessagePublishers;
-        LOG.debug("SmarMeter publishers: " + smartMeterMessagePublishers.size());
+        LOG.debug("Number of SmartMeter publishers: {}", smartMeterMessagePublishers.size());
     }
 
     public synchronized void addLine(final String line) {
