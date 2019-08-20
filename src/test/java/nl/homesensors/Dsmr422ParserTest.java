@@ -63,20 +63,28 @@ public class Dsmr422ParserTest {
     @Test
     public void shouldParseValidMessage2() throws Exception {
         final String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-2.txt"), StandardCharsets.UTF_8);
+
         final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+
         assertThat(smartMeterMessage.getLongPowerFailureLog()).hasSize(2);
     }
 
     @Test
     public void shouldParseValidMessage3() throws Exception {
         final String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-3.txt"), StandardCharsets.UTF_8);
-        dsmr422Parser.parse(message);
+
+        final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+
+        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.453"));
     }
 
     @Test
     public void shouldParseValidMessage4() throws Exception {
         final String message = IOUtils.toString(this.getClass().getResourceAsStream("message-4.2.2-4.txt"), StandardCharsets.UTF_8);
-        dsmr422Parser.parse(message);
+
+        final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+
+        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.454"));
     }
 
     @Test
