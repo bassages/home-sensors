@@ -37,8 +37,8 @@ sonarqube {
     }
 }
 
-sourceCompatibility = 1.14
-targetCompatibility = 1.14
+sourceCompatibility = 1.11
+targetCompatibility = 1.11
 compileJava.options.encoding = 'UTF-8'
 
 compileJava {
