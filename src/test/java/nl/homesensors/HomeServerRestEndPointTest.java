@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
-import java.time.Clock;
 import java.util.List;
 
 import javax.inject.Provider;
@@ -41,8 +40,6 @@ public class HomeServerRestEndPointTest {
     private Provider<HttpClientBuilder> httpClientBuilderProvider;
     @Mock
     private HttpClientBuilder httpClientBuilder;
-    @Mock
-    private Clock clock;
     @Mock
     private HomeServerAuthentication homeServerAuthentication;
 
