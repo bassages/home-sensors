@@ -118,7 +118,7 @@ public class Dsmr422Parser {
 
         for (int i = 0; i < 4; i++) {
             final String deviceType = extractFromMessage(DEVICE_TYPE[i], message);
-            if (deviceType != null && DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
+            if (DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
                 smartMeterMessage.setEquipmentIdentifierGas(extractFromMessage(DEVICE_EQUIPMENT_IDENTIFIER[i], message));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(bigDecimalFromString(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(

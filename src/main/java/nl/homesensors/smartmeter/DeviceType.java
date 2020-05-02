@@ -4,7 +4,7 @@ public enum DeviceType {
     GAS("003"),
     ;
 
-    private String deviceTypeIdentifier;
+    private final String deviceTypeIdentifier;
 
     DeviceType(String deviceTypeIdentifier) {
         this.deviceTypeIdentifier = deviceTypeIdentifier;
