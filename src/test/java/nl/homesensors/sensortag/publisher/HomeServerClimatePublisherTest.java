@@ -1,5 +1,6 @@
 package nl.homesensors.sensortag.publisher;
 
+import static java.time.Month.JANUARY;
 import static nl.homesensors.util.TimeMachine.timeTravelTo;
 import static org.mockito.Mockito.verify;
 
@@ -31,7 +32,7 @@ public class HomeServerClimatePublisherTest {
 
     @Test
     public void whenPublishThenMessageCreatedAndPostedToSlimmeMeterApiOfHomeServer() {
-        timeTravelTo(clock, LocalDate.of(2018, 1, 2).atTime(17, 9));
+        timeTravelTo(clock, LocalDate.of(2018, JANUARY, 2).atTime(17, 9));
 
         homeServerClimatePublisher.publish(SensorCode.of("GARDEN"), Temperature.of(new BigDecimal("10.1")), Humidity.of(new BigDecimal("61.7")));
 
