@@ -1,14 +1,11 @@
 package nl.homesensors;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-
 import org.apache.http.client.methods.HttpPost;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HomeServerAuthenticationTest {
@@ -21,7 +18,7 @@ public class HomeServerAuthenticationTest {
 
         homeServerAuthentication.setAuthorizationHeader(request);
 
-        verifyZeroInteractions(request);
+        verifyNoInteractions(request);
     }
 
     @Test
@@ -32,7 +29,7 @@ public class HomeServerAuthenticationTest {
 
         homeServerAuthentication.setAuthorizationHeader(request);
 
-        verifyZeroInteractions(request);
+        verifyNoInteractions(request);
     }
 
     @Test

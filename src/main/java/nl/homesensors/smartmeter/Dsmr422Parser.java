@@ -166,14 +166,11 @@ public class Dsmr422Parser {
     }
 
     private SmartMeterMessage.DstIndicator toDstindicator(final String dstIndicatorFromMessage) throws InvalidSmartMeterMessageException {
-        switch (dstIndicatorFromMessage) {
-            case "W":
-                return SmartMeterMessage.DstIndicator.WINTER;
-            case "S":
-                return SmartMeterMessage.DstIndicator.SUMMER;
-            default:
-                throw new InvalidSmartMeterMessageException("Invalid value for dst indicator: " + dstIndicatorFromMessage);
-        }
+        return switch (dstIndicatorFromMessage) {
+            case "W" -> SmartMeterMessage.DstIndicator.WINTER;
+            case "S" -> SmartMeterMessage.DstIndicator.SUMMER;
+            default -> throw new InvalidSmartMeterMessageException("Invalid value for dst indicator: " + dstIndicatorFromMessage);
+        };
     }
 
     private LocalDateTime toLocalDateTime(final String dateFromMessage) {

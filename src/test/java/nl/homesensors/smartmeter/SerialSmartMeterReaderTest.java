@@ -4,10 +4,7 @@ import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.WARN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.nio.charset.Charset;
 import java.util.List;
@@ -91,7 +88,7 @@ public class SerialSmartMeterReaderTest {
 
         serialSmartMeterReader.run();
 
-        verifyZeroInteractions(messageBuffer);
+        verifyNoInteractions(messageBuffer);
         final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
         assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] error1"));
         assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] error2"));

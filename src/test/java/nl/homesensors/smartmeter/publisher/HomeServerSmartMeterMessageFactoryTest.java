@@ -1,17 +1,16 @@
 package nl.homesensors.smartmeter.publisher;
 
-import static org.joda.time.DateTimeConstants.MAY;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
 
 import org.junit.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 import nl.homesensors.smartmeter.LongPowerFailureLogItem;
 import nl.homesensors.smartmeter.SmartMeterMessage;
+
+import static java.time.Month.MAY;
 
 public class HomeServerSmartMeterMessageFactoryTest {
 
@@ -20,8 +19,8 @@ public class HomeServerSmartMeterMessageFactoryTest {
     @Test
     public void givenSomeSmartMeterMessageWhenCreateThenCreated() throws Exception {
         final SmartMeterMessage smartMeterMessage = new SmartMeterMessage();
-        smartMeterMessage.setTimestamp(LocalDateTime.of(2018, Month.MAY, 3, 13, 14, 15));
-        smartMeterMessage.setActualElectricityPowerDelivered(new BigDecimal(0.64));
+        smartMeterMessage.setTimestamp(LocalDateTime.of(2018, MAY, 3, 13, 14, 15));
+        smartMeterMessage.setActualElectricityPowerDelivered(new BigDecimal("0.64"));
 
         final LongPowerFailureLogItem longPowerFailureLogItem = new LongPowerFailureLogItem();
         longPowerFailureLogItem.setFailureDurationInSeconds(12);
