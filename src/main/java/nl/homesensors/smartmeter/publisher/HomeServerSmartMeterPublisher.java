@@ -33,7 +33,7 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
         try {
             homeServerRestEndPoint.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
         } catch (final JsonProcessingException e) {
-            LOGGER.error("Failed to map message to json. Message=" + smartMeterMessage, e);
+            LOGGER.error(String.format("Failed to map message to json. Message=%s", smartMeterMessage), e);
         }
     }
 

@@ -46,7 +46,8 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
             homeServerRestEndPoint.post(path, jsonMessage);
 
         } catch (final JsonProcessingException e) {
-            LOG.error("Failed to create json. temperatuur=" + temperature + " luchtvochtigheid=" + humidity, e);
+            final String message = String.format("Failed to create json. temperatuur=%s, luchtvochtigheid=%s", temperature.toString(), humidity.toString());
+            LOG.error(message, e);
         }
     }
 

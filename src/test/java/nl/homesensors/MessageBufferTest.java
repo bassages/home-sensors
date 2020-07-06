@@ -58,7 +58,7 @@ public class MessageBufferTest {
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
         }
-        assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
+        assertThat(messageBuffer.getBufferedLinesSize()).isZero();
 
         verify(smartMeterMessagePublisher, times(1)).publish(smartMeterMessage);
     }
@@ -71,13 +71,13 @@ public class MessageBufferTest {
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
         }
-        assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
+        assertThat(messageBuffer.getBufferedLinesSize()).isZero();
 
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-2.txt").toURI()), defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
         }
 
-        assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
+        assertThat(messageBuffer.getBufferedLinesSize()).isZero();
 
         verify(smartMeterMessagePublisher, times(2)).publish(any(SmartMeterMessage.class));
         verify(dsmr422Parser, times(2)).parse(anyString());
@@ -96,7 +96,7 @@ public class MessageBufferTest {
         final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
         assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] Ignoring invalid message: /bull"));
 
-        assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
+        assertThat(messageBuffer.getBufferedLinesSize()).isZero();
     }
 
     @Test
@@ -108,6 +108,6 @@ public class MessageBufferTest {
         final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
         assertThat(loggedEvents).haveExactly(1, new MessageContaining("[WARN] Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: Hello this is not a valid header"));
 
-        assertThat(messageBuffer.getBufferedLinesSize()).isEqualTo(0);
+        assertThat(messageBuffer.getBufferedLinesSize()).isZero();
     }
 }

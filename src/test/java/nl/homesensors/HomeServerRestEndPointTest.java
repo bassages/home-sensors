@@ -86,7 +86,7 @@ public class HomeServerRestEndPointTest {
 
         try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             httpPost.getEntity().writeTo(baos);
-            assertThat(baos.toString()).isEqualTo(json);
+            assertThat(baos).hasToString(json);
         }
 
         verify(homeServerAuthentication).setAuthorizationHeader(httpPost);

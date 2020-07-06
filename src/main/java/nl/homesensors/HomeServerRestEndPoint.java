@@ -52,7 +52,7 @@ public class HomeServerRestEndPoint {
             final CloseableHttpResponse response = httpClient.execute(request);
 
             Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED,
-                          "Unexpected statusline: " + response.getStatusLine());
+                          String.format("Unexpected statusline: %s", response.getStatusLine()));
 
         } catch (final Exception e) {
             LOGGER.info("Post to url [" + url + "] failed.", e);

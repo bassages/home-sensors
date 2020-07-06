@@ -90,8 +90,9 @@ public class SerialSmartMeterReaderTest {
 
         verifyNoInteractions(messageBuffer);
         final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] error1"));
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] error2"));
+        assertThat(loggedEvents)
+                .haveExactly(1, new MessageContaining("[ERROR] error1"))
+                .haveExactly(1, new MessageContaining("[ERROR] error2"));
     }
 
     @Test

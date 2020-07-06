@@ -45,9 +45,9 @@ public class Dsmr422ParserTest {
         assertThat(smartMeterMessage.getNumberOfLongPowerFailuresInAnyPhase()).isEqualTo(1);
         assertThat(smartMeterMessage.getNumberOfVoltageSagsInPhaseL1()).isEqualTo(10);
         assertThat(smartMeterMessage.getNumberOfVoltageSagsInPhaseL2()).isEqualTo(2);
-        assertThat(smartMeterMessage.getTextMessageCodes()).isEqualTo(null);
-        assertThat(smartMeterMessage.getTextMessage()).isEqualTo(null);
-        assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isEqualTo(0);
+        assertThat(smartMeterMessage.getTextMessageCodes()).isNull();
+        assertThat(smartMeterMessage.getTextMessage()).isNull();
+        assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isZero();
         assertThat(smartMeterMessage.getInstantaneousActivePowerL1()).isEqualTo(new BigDecimal("0.042"));
         assertThat(smartMeterMessage.getInstantaneousActivePowerL2()).isEqualTo(new BigDecimal("0.000"));
         assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("4730303235303033353032393639333137");
