@@ -55,7 +55,7 @@ public class HomeServerRestEndPoint {
                           String.format("Unexpected statusline: %s", response.getStatusLine()));
 
         } catch (final Exception e) {
-            LOGGER.info("Post to url [" + url + "] failed.", e);
+            LOGGER.info(String.format("Post to url [%s] failed.", url), e);
         }
     }
 }
