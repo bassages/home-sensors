@@ -1,8 +1,8 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.1.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
-    id 'com.github.ben-manes.versions' version '0.28.0'
+    id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.29.0'
     id 'jacoco'
     id "org.sonarqube" version '3.0'
 }
@@ -18,7 +18,7 @@ jar {
 }
 
 jacoco {
-    toolVersion = '0.8.5'
+    toolVersion = '0.8.6'
 }
 
 jacocoTestReport {
@@ -38,8 +38,8 @@ sonarqube {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_14
-    targetCompatibility = JavaVersion.VERSION_14
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 }
 
 compileJava {
