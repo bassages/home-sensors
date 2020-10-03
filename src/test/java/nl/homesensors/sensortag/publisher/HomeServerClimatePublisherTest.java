@@ -36,6 +36,8 @@ public class HomeServerClimatePublisherTest {
 
         homeServerClimatePublisher.publish(SensorCode.of("GARDEN"), Temperature.of(new BigDecimal("10.1")), Humidity.of(new BigDecimal("61.7")));
 
-        verify(homeServerRestEndPoint).post("klimaat/sensors/GARDEN", "{\"datumtijd\":\"2018-01-02T17:09:00\",\"temperatuur\":10.1,\"luchtvochtigheid\":61.7}");
+        final String expectedBody = """
+                {"datumtijd":"2018-01-02T17:09:00","temperatuur":10.1,"luchtvochtigheid":61.7}""";
+        verify(homeServerRestEndPoint).post("klimaat/sensors/GARDEN", expectedBody);
     }
 }

@@ -28,9 +28,32 @@ public class HomeServerSmartMeterMessageFactoryTest {
         longPowerFailureLogItem.setTimestampOfEndOfFailure(LocalDate.of(2016, MAY, 23).atTime(13, 12, 9));
         smartMeterMessage.addLongPowerFailureLogItem(longPowerFailureLogItem);
 
-        final String json = homeServerSmartMeterMessageFactory.create(smartMeterMessage);
+        final String actual = homeServerSmartMeterMessageFactory.create(smartMeterMessage);
 
-        final String expected = "{\"datumtijd\":\"2018-05-03T13:14:15\",\"stroomOpgenomenVermogenInWatt\":640,\"stroomTarief1\":null,\"stroomTarief2\":null,\"gas\":null,\"stroomTariefIndicator\":null,\"meterIdentificatieStroom\":null,\"meterIdentificatieGas\":null,\"tekstBericht\":null,\"tekstBerichtCodes\":null,\"aantalStroomStoringenInAlleFases\":null,\"aantalSpanningsDippenInFaseL1\":null,\"aantalSpanningsDippenInFaseL2\":null,\"aantalLangeStroomStoringenInAlleFases\":null,\"langeStroomStoringen\":[{\"datumtijdEinde\":\"2016-05-23T13:12:09\",\"duurVanStoringInSeconden\":12}]}\n";
-        JSONAssert.assertEquals(expected, json, true);
+        final String expected = """
+                {
+                    "datumtijd":"2018-05-03T13:14:15",
+                    "stroomOpgenomenVermogenInWatt":640,
+                    "stroomTarief1":null,
+                    "stroomTarief2":null,
+                    "gas":null,
+                    "stroomTariefIndicator":null,
+                    "meterIdentificatieStroom":null,
+                    "meterIdentificatieGas":null,
+                    "tekstBericht":null,
+                    "tekstBerichtCodes":null,
+                    "aantalStroomStoringenInAlleFases":null,
+                    "aantalSpanningsDippenInFaseL1":null,
+                    "aantalSpanningsDippenInFaseL2":null,
+                    "aantalLangeStroomStoringenInAlleFases":null,
+                    "langeStroomStoringen":[
+                        {
+                            "datumtijdEinde":"2016-05-23T13:12:09",
+                            "duurVanStoringInSeconden":12
+                        }
+                    ]
+                }
+                """;
+        JSONAssert.assertEquals(expected, actual, true);
     }
 }
