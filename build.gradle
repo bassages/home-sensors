@@ -72,6 +72,6 @@ dependencies {
     compileOnly("org.springframework.boot:spring-boot-devtools")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation('org.assertj:assertj-core:3.16.1')
+    testImplementation('org.assertj:assertj-core:3.18.0')
     testImplementation('nl.jqno.equalsverifier:equalsverifier:3.4.1')
 }
