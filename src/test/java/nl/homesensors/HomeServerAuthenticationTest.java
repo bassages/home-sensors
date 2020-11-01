@@ -1,45 +1,51 @@
 package nl.homesensors;
 
 import org.apache.http.client.methods.HttpPost;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HomeServerAuthenticationTest {
+@ExtendWith(MockitoExtension.class)
+class HomeServerAuthenticationTest {
 
     @Test
-    public void givenNoUserNameSetWhenSetAuthorizationHeaderThenNoInteractionsWithRequest() {
+    void givenNoUserNameSetWhenSetAuthorizationHeaderThenNoInteractionsWithRequest() {
+        // given
         final HomeServerAuthentication homeServerAuthentication = new HomeServerAuthentication(null, "secret");
-
         final HttpPost request = mock(HttpPost.class);
 
+        // when
         homeServerAuthentication.setAuthorizationHeader(request);
 
+        // then
         verifyNoInteractions(request);
     }
 
     @Test
-    public void givenNoPasswordSetWhenSetAuthorizationHeaderThenNoInteractionsWithRequest() {
+    void givenNoPasswordSetWhenSetAuthorizationHeaderThenNoInteractionsWithRequest() {
+        // given
         final HomeServerAuthentication homeServerAuthentication = new HomeServerAuthentication("BadAssUser", null);
-
         final HttpPost request = mock(HttpPost.class);
 
+        // when
         homeServerAuthentication.setAuthorizationHeader(request);
 
+        // then
         verifyNoInteractions(request);
     }
 
     @Test
-    public void givenBothUsernameAndPasswordSetWhenSetAuthorizationHeaderThenHeaderAdded() {
+    void givenBothUsernameAndPasswordSetWhenSetAuthorizationHeaderThenHeaderAdded() {
+        // given
         final HomeServerAuthentication homeServerAuthentication = new HomeServerAuthentication("BadAssUser", "secret");
-
         final HttpPost request = mock(HttpPost.class);
 
+        // when
         homeServerAuthentication.setAuthorizationHeader(request);
 
+        // then
         verify(request).setHeader("Authorization", "Basic QmFkQXNzVXNlcjpzZWNyZXQ=");
     }
 }

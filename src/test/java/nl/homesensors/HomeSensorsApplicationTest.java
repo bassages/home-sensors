@@ -1,39 +1,39 @@
 package nl.homesensors;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Clock;
 
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class HomeSensorsApplicationTest {
 
     private HomeSensorsApplication homeSensorsApplication;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         homeSensorsApplication = new HomeSensorsApplication();
     }
 
     @Test
-    public void whenGetRuntimeThenReturned() {
+    void whenGetRuntimeThenReturned() {
         final Runtime runtime = homeSensorsApplication.getRuntime();
         assertThat(runtime).isSameAs(Runtime.getRuntime());
     }
 
     @Test
-    public void whenGetClockThenSystemDefaultZoneClockReturned() {
+    void whenGetClockThenSystemDefaultZoneClockReturned() {
         final Clock clock = homeSensorsApplication.getClock();
         assertThat(clock).isEqualTo(Clock.systemDefaultZone());
     }
 
     @Test
-    public void whenGetHttpClientBuilderThenReturned() {
+    void whenGetHttpClientBuilderThenReturned() {
         final HttpClientBuilder httpClientBuilder = homeSensorsApplication.getHttpClientBuilder();
         assertThat(httpClientBuilder).isNotNull();
     }

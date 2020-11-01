@@ -1,23 +1,22 @@
 package nl.homesensors.smartmeter.publisher;
 
+import nl.homesensors.smartmeter.LongPowerFailureLogItem;
+import nl.homesensors.smartmeter.SmartMeterMessage;
+import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import org.junit.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-
-import nl.homesensors.smartmeter.LongPowerFailureLogItem;
-import nl.homesensors.smartmeter.SmartMeterMessage;
-
 import static java.time.Month.MAY;
 
-public class HomeServerSmartMeterMessageFactoryTest {
+class HomeServerSmartMeterMessageFactoryTest {
 
     private final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory = new HomeServerSmartMeterMessageFactory();
 
     @Test
-    public void givenSomeSmartMeterMessageWhenCreateThenCreated() throws Exception {
+    void givenSomeSmartMeterMessageWhenCreateThenCreated() throws Exception {
         final SmartMeterMessage smartMeterMessage = new SmartMeterMessage();
         smartMeterMessage.setTimestamp(LocalDateTime.of(2018, MAY, 3, 13, 14, 15));
         smartMeterMessage.setActualElectricityPowerDelivered(new BigDecimal("0.64"));

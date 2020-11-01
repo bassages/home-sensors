@@ -1,20 +1,17 @@
 package nl.homesensors.smartmeter.publisher;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import nl.homesensors.HomeServerRestEndPoint;
 import nl.homesensors.smartmeter.SmartMeterMessage;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HomeServerSmartMeterPublisherTest {
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class HomeServerSmartMeterPublisherTest {
 
     @InjectMocks
     private HomeServerSmartMeterPublisher homeServerSmartMeterPublisher;
@@ -25,14 +22,17 @@ public class HomeServerSmartMeterPublisherTest {
     private HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory;
 
     @Test
-    public void whenPublishThenMessageCreatedAndPostedToSlimmeMeterApiOfHomeServer() throws Exception {
+    void whenPublishThenMessageCreatedAndPostedToSlimmeMeterApiOfHomeServer() throws Exception {
+        // given
         final SmartMeterMessage message = mock(SmartMeterMessage.class);
         final String json = "VerySmartMessage";
 
         when(homeServerSmartMeterMessageFactory.create(message)).thenReturn(json);
 
+        // when
         homeServerSmartMeterPublisher.publish(message);
 
+        // then
         verify(homeServerRestEndPoint).post("slimmemeter", json);
     }
 }

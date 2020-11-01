@@ -1,30 +1,27 @@
 package nl.homesensors.smartmeter;
 
-import static ch.qos.logback.classic.Level.ERROR;
-import static ch.qos.logback.classic.Level.WARN;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import nl.homesensors.CaptureLogging;
+import nl.homesensors.ContainsMessageAtLevel;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.NullInputStream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.Charset;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.NullInputStream;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-import ch.qos.logback.classic.spi.LoggingEvent;
-import nl.homesensors.LoggingRule;
-import nl.homesensors.MessageContaining;
-
-@RunWith(MockitoJUnitRunner.class)
-public class SerialSmartMeterReaderTest {
+@ExtendWith(MockitoExtension.class)
+class SerialSmartMeterReaderTest {
 
     @InjectMocks
     private SerialSmartMeterReader serialSmartMeterReader;
@@ -36,11 +33,8 @@ public class SerialSmartMeterReaderTest {
     @Mock
     private Runtime runtime;
 
-    @Rule
-    public final LoggingRule loggingRule = new LoggingRule(SerialSmartMeterReader.class);
-
     @Test
-    public void givenConfigurationCompleteWhenRunThenCuProcessStarted() throws Exception {
+    void givenConfigurationCompleteWhenRunThenCuProcessStarted() throws Exception {
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
         when(smartMeterSerialPortConfiguration.getBaudRate()).thenReturn("100");
         when(smartMeterSerialPortConfiguration.getParity()).thenReturn("even");
@@ -60,7 +54,7 @@ public class SerialSmartMeterReaderTest {
     }
 
     @Test
-    public void givenConfigurationCompleteWhenRunThenOutputOfProcessWrittenToMessageBuffer() throws Exception {
+    void givenConfigurationCompleteWhenRunThenOutputOfProcessWrittenToMessageBuffer() throws Exception {
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
 
         final Process process = mock(Process.class);
@@ -75,8 +69,9 @@ public class SerialSmartMeterReaderTest {
     }
 
     @Test
-    public void givenErrorStreamContainsLinesWhenRunThenLinesLoggedAsError() throws Exception {
-        loggingRule.setLevel(ERROR);
+    @CaptureLogging(SerialSmartMeterReader.class)
+    void givenErrorStreamContainsLinesWhenRunThenLinesLoggedAsError(
+            final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
 
@@ -89,27 +84,29 @@ public class SerialSmartMeterReaderTest {
         serialSmartMeterReader.run();
 
         verifyNoInteractions(messageBuffer);
-        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
+        final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
         assertThat(loggedEvents)
-                .haveExactly(1, new MessageContaining("[ERROR] error1"))
-                .haveExactly(1, new MessageContaining("[ERROR] error2"));
+                .haveExactly(1, new ContainsMessageAtLevel("error1", Level.ERROR))
+                .haveExactly(1, new ContainsMessageAtLevel("error2", Level.ERROR));
     }
 
     @Test
-    public void givenConfigurationIncompleteWhenRunThenLoggedAndNotStarted() {
-        loggingRule.setLevel(WARN);
+    @CaptureLogging(SerialSmartMeterReader.class)
+    void givenConfigurationIncompleteWhenRunThenLoggedAndNotStarted(
+            final ArgumentCaptor<LoggingEvent> loggerEventCaptor) {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(false);
 
         serialSmartMeterReader.run();
 
-        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[WARN] Not started SmartMeterReader, because the configuration for it is incomplete."));
+        final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
+        assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel("Not started SmartMeterReader, because the configuration for it is incomplete.", Level.WARN));
     }
 
     @Test
-    public void givenProcessEndsWithNonZeroExitValueWhenRunThenWarningLogged() throws Exception {
-        loggingRule.setLevel(WARN);
+    @CaptureLogging(SerialSmartMeterReader.class)
+    void givenProcessEndsWithNonZeroExitValueWhenRunThenWarningLogged(
+            final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
 
@@ -124,13 +121,14 @@ public class SerialSmartMeterReaderTest {
 
         serialSmartMeterReader.run();
 
-        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[WARN] Unexpected exit value from command. Exit value=[999]"));
+        final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
+        assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel("Unexpected exit value from command. Exit value=[999]", Level.WARN));
     }
 
     @Test
-    public void givenProcessInterruptedWhenRunThenErrorLogged() throws Exception {
-        loggingRule.setLevel(ERROR);
+    @CaptureLogging(SerialSmartMeterReader.class)
+    void givenProcessInterruptedWhenRunThenErrorLogged(
+            final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
 
@@ -144,7 +142,7 @@ public class SerialSmartMeterReaderTest {
 
         serialSmartMeterReader.run();
 
-        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[ERROR] An unexpected InterruptedException occurred."));
+        final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
+        assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel("An unexpected InterruptedException occurred.", Level.ERROR));
     }
 }

@@ -1,18 +1,17 @@
 package nl.homesensors;
 
-import static org.mockito.Mockito.verify;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import nl.homesensors.sensortag.SensorTagReader;
 import nl.homesensors.smartmeter.SerialSmartMeterReader;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ApplicationInitializerTest {
+import static org.mockito.Mockito.verify;
+
+@ExtendWith(MockitoExtension.class)
+class ApplicationInitializerTest {
 
     @InjectMocks
     private ApplicationInitializer applicationInitializer;
@@ -23,9 +22,11 @@ public class ApplicationInitializerTest {
     private SensorTagReader sensorTagReader;
 
     @Test
-    public void whenInitializedThenReadersRun() throws Exception {
+    void whenInitializedThenReadersRun() throws Exception {
+        // when
         applicationInitializer.initialize();
 
+        // then
         verify(serialSmartMeterReader).run();
         verify(sensorTagReader).run();
     }

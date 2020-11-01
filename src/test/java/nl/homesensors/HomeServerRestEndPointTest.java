@@ -1,16 +1,6 @@
 package nl.homesensors;
 
-import static ch.qos.logback.classic.Level.INFO;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.ByteArrayOutputStream;
-import java.util.List;
-
-import javax.inject.Provider;
-
+import ch.qos.logback.classic.spi.LoggingEvent;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,19 +8,26 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import ch.qos.logback.classic.spi.LoggingEvent;
+import javax.inject.Provider;
+import java.io.ByteArrayOutputStream;
+import java.util.List;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HomeServerRestEndPointTest {
+import static ch.qos.logback.classic.Level.INFO;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class HomeServerRestEndPointTest {
 
     private static final String HOME_SERVER_REST_API_URL = "http://home-server/api";
 
@@ -53,18 +50,16 @@ public class HomeServerRestEndPointTest {
     @Captor
     private ArgumentCaptor<HttpUriRequest> httpUriRequestCaptor;
 
-    @Rule
-    public final LoggingRule loggingRule = new LoggingRule(HomeServerRestEndPoint.class);
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        homeServerRestEndPoint = new HomeServerRestEndPoint(homeServerAuthentication, HOME_SERVER_REST_API_URL, httpClientBuilderProvider);
+        homeServerRestEndPoint = new HomeServerRestEndPoint(
+                homeServerAuthentication, HOME_SERVER_REST_API_URL, httpClientBuilderProvider);
         when(httpClientBuilderProvider.get()).thenReturn(httpClientBuilder);
         when(httpClientBuilder.build()).thenReturn(closeableHttpClient);
     }
 
     @Test
-    public void givenJsonToPostToPathWhenPostThenPosted() throws Exception {
+    void givenJsonToPostToPathWhenPostThenPosted() throws Exception {
         when(closeableHttpClient.execute(any())).thenReturn(closeableHttpResponse);
         when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
         when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_CREATED);
@@ -93,17 +88,19 @@ public class HomeServerRestEndPointTest {
     }
 
     @Test
-    public void givenEndpointDoesNotReturnStatusCode201WhenPostThenExceptionLogged() throws Exception {
+    @CaptureLogging(HomeServerRestEndPoint.class)
+    void givenEndpointDoesNotReturnStatusCode201WhenPostThenExceptionLogged(
+            final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
+
         when(closeableHttpClient.execute(any())).thenReturn(closeableHttpResponse);
         when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
 
         when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_BAD_REQUEST);
 
-        loggingRule.setLevel(INFO);
-
         homeServerRestEndPoint.post("somePath", "{\"a\":1}");
 
-        final List<LoggingEvent> loggedEvents = loggingRule.getLoggedEventCaptor().getAllValues();
-        assertThat(loggedEvents).haveExactly(1, new MessageContaining("[INFO] Post to url [http://home-server/api/somePath] failed."));
+        final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
+        final String expectedMessage = "Post to url [http://home-server/api/somePath] failed.";
+        assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel(expectedMessage, INFO));
     }
 }

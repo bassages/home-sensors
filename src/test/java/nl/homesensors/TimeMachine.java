@@ -1,10 +1,10 @@
-package nl.homesensors.util;
-
-import static org.mockito.Mockito.doReturn;
+package nl.homesensors;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+
+import static org.mockito.Mockito.doReturn;
 
 public final class TimeMachine {
 

@@ -1,23 +1,35 @@
 package nl.homesensors.smartmeter;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-
-@RunWith(MockitoJUnitRunner.class)
-public class SmartMeterSerialPortConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class SmartMeterSerialPortConfigurationTest {
 
     @Test
-    public void givenAllParametersAreNotBlankWhenIsCompleteThenTrue() {
+    void givenAllParametersAreNotBlankWhenIsCompleteThenTrue() {
+        // given
         final SmartMeterSerialPortConfiguration configuration = new SmartMeterSerialPortConfiguration("", "", "");
-        assertThat(configuration.isComplete()).isFalse();
+
+        // when
+        final boolean complete = configuration.isComplete();
+
+        // then
+        assertThat(complete).isFalse();
     }
 
     @Test
-    public void givenAllParametersAreBlankWhenIsCompleteThenFalse() {
+    void givenAllParametersAreBlankWhenIsCompleteThenFalse() {
+        // given
         final SmartMeterSerialPortConfiguration configuration = new SmartMeterSerialPortConfiguration("A", "B", "C");
-        assertThat(configuration.isComplete()).isTrue();
+
+        // when
+        final boolean complete = configuration.isComplete();
+
+        // then
+        assertThat(complete).isTrue();
     }
 }

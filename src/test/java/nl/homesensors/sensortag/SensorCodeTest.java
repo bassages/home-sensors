@@ -1,13 +1,12 @@
 package nl.homesensors.sensortag;
 
-import org.junit.Test;
-
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.jupiter.api.Test;
 
-public class SensorCodeTest {
+class SensorCodeTest {
 
     @Test
-    public void equals() {
+    void equals() {
         EqualsVerifier.forClass(SensorCode.class).verify();
     }
 }
