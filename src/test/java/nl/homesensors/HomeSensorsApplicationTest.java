@@ -11,7 +11,7 @@ import java.time.Clock;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
-public class HomeSensorsApplicationTest {
+class HomeSensorsApplicationTest {
 
     private HomeSensorsApplication homeSensorsApplication;
 
