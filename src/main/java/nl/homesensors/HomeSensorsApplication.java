@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @SpringBootApplication
 @EnableAsync
+// TODO: implement org.springframework.boot.CommandLineRunner to replace ApplicationInitializer
 public class HomeSensorsApplication {
 
 	public static void main(final String[] args) {
