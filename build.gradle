@@ -92,5 +92,5 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation('org.assertj:assertj-core:3.18.1')
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.5')
+    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.5.2')
 }
