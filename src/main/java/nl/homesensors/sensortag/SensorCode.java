@@ -2,22 +2,18 @@ package nl.homesensors.sensortag;
 
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@RequiredArgsConstructor
 public final class SensorCode {
 
+    @Getter
     private final String value;
-
-    private SensorCode(final String value) {
-        this.value = value;
-    }
 
     public static SensorCode of(final String value) {
         return new SensorCode(value);
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override

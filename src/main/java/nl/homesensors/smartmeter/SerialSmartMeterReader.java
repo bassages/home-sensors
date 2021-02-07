@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.function.Consumer;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
  * Needs the "cu" command to be installed on the host OS.
  */
 @Component
+@RequiredArgsConstructor
 public class SerialSmartMeterReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SerialSmartMeterReader.class);
@@ -26,14 +28,6 @@ public class SerialSmartMeterReader {
     private final SmartMeterSerialPortConfiguration smartMeterSerialPortConfiguration;
     private final MessageBuffer messageBuffer;
     private final Runtime runtime;
-
-    public SerialSmartMeterReader(final SmartMeterSerialPortConfiguration smartMeterSerialPortConfiguration,
-                                  final MessageBuffer messageBuffer,
-                                  final Runtime runtime) {
-        this.smartMeterSerialPortConfiguration = smartMeterSerialPortConfiguration;
-        this.messageBuffer = messageBuffer;
-        this.runtime = runtime;
-    }
 
     @Async
     public void run() {

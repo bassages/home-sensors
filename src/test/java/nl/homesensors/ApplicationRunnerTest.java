@@ -11,10 +11,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ApplicationInitializerTest {
+class ApplicationRunnerTest {
 
     @InjectMocks
-    private ApplicationInitializer applicationInitializer;
+    private ApplicationRunner applicationRunner;
 
     @Mock
     private SerialSmartMeterReader serialSmartMeterReader;
@@ -24,7 +24,7 @@ class ApplicationInitializerTest {
     @Test
     void whenInitializedThenReadersRun() throws Exception {
         // when
-        applicationInitializer.initialize();
+        applicationRunner.run();
 
         // then
         verify(serialSmartMeterReader).run();

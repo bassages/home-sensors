@@ -1,9 +1,6 @@
 package nl.homesensors;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import javax.inject.Provider;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -11,16 +8,18 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import javax.inject.Provider;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+@Slf4j
 @Component
 public class HomeServerRestEndPoint {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HomeServerRestEndPoint.class);
 
     private final String homeServerRestApiUrl;
     private final HomeServerAuthentication homeServerAuthentication;
@@ -40,7 +39,7 @@ public class HomeServerRestEndPoint {
 
     public void post(final String path, final String json) {
         final String url = homeServerRestApiUrl + "/" + path;
-        LOGGER.debug("Post to url: {}. Request body: {}", url, json);
+        log.debug("Post to url: {}. Request body: {}", url, json);
 
         try (final CloseableHttpClient httpClient = httpClientBuilderProvider.get().build()) {
             final HttpPost request = new HttpPost(url);
@@ -52,10 +51,10 @@ public class HomeServerRestEndPoint {
             final CloseableHttpResponse response = httpClient.execute(request);
 
             Assert.isTrue(response.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED,
-                          String.format("Unexpected statusline: %s", response.getStatusLine()));
+                          format("Unexpected statusline: %s", response.getStatusLine()));
 
         } catch (final Exception e) {
-            LOGGER.info(String.format("Post to url [%s] failed.", url), e);
+            log.info(format("Post to url [%s] failed.", url), e);
         }
     }
 }

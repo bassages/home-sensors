@@ -3,22 +3,18 @@ package nl.homesensors.sensortag;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@RequiredArgsConstructor
 public final class Humidity {
 
+    @Getter
     private final BigDecimal value;
-
-    private Humidity(final BigDecimal value) {
-        this.value = value;
-    }
 
     public static Humidity of(final BigDecimal value) {
         return new Humidity(value);
-    }
-
-    public BigDecimal getValue() {
-        return value;
     }
 
     @Override

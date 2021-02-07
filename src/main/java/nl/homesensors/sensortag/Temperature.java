@@ -3,22 +3,18 @@ package nl.homesensors.sensortag;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+@RequiredArgsConstructor
 public final class Temperature {
 
+    @Getter
     private final BigDecimal value;
-
-    private Temperature(final BigDecimal value) {
-        this.value = value;
-    }
 
     public static Temperature of(final BigDecimal value) {
         return new Temperature(value);
-    }
-
-    public BigDecimal getValue() {
-        return value;
     }
 
     @Override

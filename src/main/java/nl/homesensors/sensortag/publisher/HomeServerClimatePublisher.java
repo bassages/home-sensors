@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.LocalDateTime;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -22,16 +23,12 @@ import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
 
 @Component
+@RequiredArgsConstructor
 public class HomeServerClimatePublisher implements ClimatePublisher {
     private static final Logger LOG = LoggerFactory.getLogger(HomeServerClimatePublisher.class);
 
     private final HomeServerRestEndPoint homeServerRestEndPoint;
     private final Clock clock;
-
-    public HomeServerClimatePublisher(final HomeServerRestEndPoint homeServerRestEndPoint, final Clock clock) {
-        this.homeServerRestEndPoint = homeServerRestEndPoint;
-        this.clock = clock;
-    }
 
     // Publish asynchronous, because we do not want to block the main thread
     @Async
