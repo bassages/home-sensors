@@ -75,7 +75,7 @@ class Hygrometer extends AbstractSensor {
     }
 
     private float getAmbientTemperature(final int temperatureRaw) {
-        return -46.85f + 175.72f/65536f *(float)temperatureRaw;
+        return -46.85f + 175.72f/65536f * temperatureRaw;
     }
 
     private float getHumidity(int rawHumidity) {
