@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nl.homesensors.HomeServerRestEndPoint;
 import nl.homesensors.smartmeter.SmartMeterMessage;
-import org.apache.commons.lang3.builder.RecursiveToStringStyle;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +27,7 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
         try {
             homeServerRestEndPoint.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
         } catch (final JsonProcessingException e) {
-            final String smartMeterMessageAsString = ReflectionToStringBuilder.toString(smartMeterMessage, new RecursiveToStringStyle());
-            log.error(format("Failed to map message to json. Message=%s", smartMeterMessageAsString), e);
+            log.error(format("Failed to map message to json. Message=%s", smartMeterMessage), e);
         }
     }
 

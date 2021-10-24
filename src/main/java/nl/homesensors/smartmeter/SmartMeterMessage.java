@@ -2,12 +2,14 @@ package nl.homesensors.smartmeter;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@ToString
 @Getter
 @Setter
 public class SmartMeterMessage {
