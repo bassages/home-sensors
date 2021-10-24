@@ -77,5 +77,4 @@ class Thermometer extends AbstractSensor {
     private double getAmbientTemperature(final int rawAmbient) {
         return rawAmbient / 128.0;
     }
-
 }

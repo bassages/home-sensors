@@ -22,6 +22,8 @@ import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
 
+import static java.lang.String.format;
+
 @Component
 @RequiredArgsConstructor
 public class HomeServerClimatePublisher implements ClimatePublisher {
@@ -38,12 +40,12 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
 
         try {
             final String jsonMessage = HomeServerKlimaat.of(LocalDateTime.now(clock), temperature, humidity).asJson();
-            final String path = String.format("klimaat/sensors/%s", sensorCode.getValue());
+            final String path = format("klimaat/sensors/%s", sensorCode.getValue());
 
             homeServerRestEndPoint.post(path, jsonMessage);
 
         } catch (final JsonProcessingException e) {
-            final String message = String.format("Failed to create json. temperatuur=%s, luchtvochtigheid=%s", temperature.toString(), humidity.toString());
+            final String message = format("Failed to create json. temperature=%s, humidity=%s", temperature, humidity);
             LOG.error(message, e);
         }
     }
