@@ -1,17 +1,16 @@
 package nl.homesensors.smartmeter;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.function.Consumer;
-
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
 
 /**
  * Reads data from a serial device which is connected to the P1 port of a Smart Meter.
@@ -19,11 +18,10 @@ import org.springframework.stereotype.Component;
  *
  * Needs the "cu" command to be installed on the host OS.
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class SerialSmartMeterReader {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SerialSmartMeterReader.class);
 
     private final SmartMeterSerialPortConfiguration smartMeterSerialPortConfiguration;
     private final MessageBuffer messageBuffer;
@@ -32,10 +30,10 @@ public class SerialSmartMeterReader {
     @Async
     public void run() {
         if (!smartMeterSerialPortConfiguration.isComplete()) {
-            LOG.warn("Not started SmartMeterReader, because the configuration for it is incomplete.");
+            log.warn("Not started SmartMeterReader, because the configuration for it is incomplete.");
             return;
         }
-        LOG.info("Start SmartMeterReader");
+        log.info("Start SmartMeterReader");
         connectAndListenForData();
     }
 
@@ -46,7 +44,7 @@ public class SerialSmartMeterReader {
 
             final Thread ioThread = new Thread(() -> {
                 handleInputStreamLines(process.getInputStream(), messageBuffer::addLine);
-                handleInputStreamLines(process.getErrorStream(), LOG::error);
+                handleInputStreamLines(process.getErrorStream(), log::error);
             });
 
             ioThread.start();
@@ -54,14 +52,14 @@ public class SerialSmartMeterReader {
 
             final int exitValue = process.waitFor();
             if (exitValue != 0) {
-                LOG.warn("Unexpected exit value from command. Exit value=[{}]", exitValue);
+                log.warn("Unexpected exit value from command. Exit value=[{}]", exitValue);
             }
 
-        } catch (final InterruptedException  e) {
-            LOG.error("An unexpected InterruptedException occurred.", e);
+        } catch (final InterruptedException e) {
+            log.error("An unexpected InterruptedException occurred.", e);
             Thread.currentThread().interrupt();
         } catch (final IOException e) {
-            LOG.error("An unexpected IOException occurred.", e);
+            log.error("An unexpected IOException occurred.", e);
         }
     }
 
@@ -72,7 +70,7 @@ public class SerialSmartMeterReader {
                 lineHandler.accept(it.nextLine());
             }
         } catch (final IOException e) {
-            LOG.error("InputStream failure", e);
+            log.error("InputStream failure", e);
         }
     }
 }

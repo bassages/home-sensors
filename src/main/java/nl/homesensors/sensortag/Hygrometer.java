@@ -1,9 +1,9 @@
 package nl.homesensors.sensortag;
 
+import net.sf.expectit.Expect;
+
 import java.io.IOException;
 import java.math.BigDecimal;
-
-import net.sf.expectit.Expect;
 
 /**
  * Hardware on TI SensorTag: Sensirion SHT21 @ U6
@@ -34,7 +34,7 @@ class Hygrometer extends AbstractSensor {
         final String value = expectSuccessfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
         discardNotifications(expect, NOTIFICATION_REGEXP);
-        return Humidity.of(BigDecimal.valueOf(humidityFromHex(value)));
+        return new Humidity(BigDecimal.valueOf(humidityFromHex(value)));
     }
 
     @Override

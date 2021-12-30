@@ -1,9 +1,9 @@
 package nl.homesensors.sensortag;
 
+import net.sf.expectit.Expect;
+
 import java.io.IOException;
 import java.math.BigDecimal;
-
-import net.sf.expectit.Expect;
 
 /**
  * <pre>
@@ -46,7 +46,7 @@ class Thermometer extends AbstractSensor {
         final String value = expectSuccessfulMatch(expect, NOTIFICATION_REGEXP);
         disable(expect);
         discardNotifications(expect, NOTIFICATION_REGEXP);
-        return Temperature.of(BigDecimal.valueOf(ambientTemperatureFromHex(value)));
+        return new Temperature(BigDecimal.valueOf(ambientTemperatureFromHex(value)));
     }
 
     @Override

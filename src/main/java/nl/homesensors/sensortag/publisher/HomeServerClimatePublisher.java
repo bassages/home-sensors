@@ -1,34 +1,30 @@
 package nl.homesensors.sensortag.publisher;
 
-import java.math.BigDecimal;
-import java.time.Clock;
-import java.time.LocalDateTime;
-
-import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nl.homesensors.HomeServerRestEndPoint;
 import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.LocalDateTime;
 
 import static java.lang.String.format;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class HomeServerClimatePublisher implements ClimatePublisher {
-    private static final Logger LOG = LoggerFactory.getLogger(HomeServerClimatePublisher.class);
-
     private final HomeServerRestEndPoint homeServerRestEndPoint;
     private final Clock clock;
 
@@ -36,7 +32,7 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
     @Async
     @Override
     public void publish(final SensorCode sensorCode, final Temperature temperature, final Humidity humidity) {
-        LOG.debug("HomeServerClimatePublisher::publish");
+        log.debug("HomeServerClimatePublisher::publish");
 
         try {
             final String jsonMessage = HomeServerKlimaat.of(LocalDateTime.now(clock), temperature, humidity).asJson();
@@ -46,7 +42,7 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
 
         } catch (final JsonProcessingException e) {
             final String message = format("Failed to create json. temperature=%s, humidity=%s", temperature, humidity);
-            LOG.error(message, e);
+            log.error(message, e);
         }
     }
 

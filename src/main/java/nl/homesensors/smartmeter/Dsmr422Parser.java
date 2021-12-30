@@ -1,5 +1,10 @@
 package nl.homesensors.smartmeter;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -7,17 +12,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
+@Slf4j
 @Component
 public class Dsmr422Parser {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Dsmr422Parser.class);
-
     private static final String SUPPORTED_DSMR_VERSION = "42";
     private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
     private static final String GROUP_NAME = "attributeValue";
@@ -196,8 +193,8 @@ public class Dsmr422Parser {
         final String actual = Integer.toHexString(getCrc(linesInMessage));
         final String expected = Integer.toHexString(calculatedCrc16);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Actual CRC: {} / Expected CRC : {}", actual, expected.toUpperCase());
+        if (log.isDebugEnabled()) {
+            log.debug("Actual CRC: {} / Expected CRC : {}", actual, expected.toUpperCase());
         }
 
         if (getCrc(linesInMessage) != calculatedCrc16) {

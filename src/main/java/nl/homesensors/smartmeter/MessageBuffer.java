@@ -1,19 +1,16 @@
 package nl.homesensors.smartmeter;
 
+import lombok.extern.slf4j.Slf4j;
+import nl.homesensors.smartmeter.publisher.SmartMeterMessagePublisher;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import nl.homesensors.smartmeter.publisher.SmartMeterMessagePublisher;
-
+@Slf4j
 @Component
 public class MessageBuffer {
-    private static final Logger LOG = LoggerFactory.getLogger(MessageBuffer.class);
-
     private final Dsmr422Parser dsmr422Parser;
     private final Collection<SmartMeterMessagePublisher> smartMeterMessagePublishers;
 
@@ -22,13 +19,13 @@ public class MessageBuffer {
     public MessageBuffer(final Dsmr422Parser dsmr422Parser, final List<SmartMeterMessagePublisher> smartMeterMessagePublishers) {
         this.dsmr422Parser = dsmr422Parser;
         this.smartMeterMessagePublishers = smartMeterMessagePublishers;
-        LOG.debug("Number of SmartMeter publishers: {}", smartMeterMessagePublishers.size());
+        log.debug("Number of SmartMeter publishers: {}", smartMeterMessagePublishers.size());
     }
 
     public synchronized void addLine(final String line) {
 
         if (bufferedLines.isEmpty() && !isFirstLineOfP1Message(line)) {
-            LOG.warn("Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: {}", line);
+            log.warn("Ignoring line, because it is not a valid header and no previous bufferedLines were received. Ignored line: {}", line);
             return;
         }
 
@@ -42,7 +39,7 @@ public class MessageBuffer {
                                            .filter(SmartMeterMessagePublisher::isEnabled)
                                            .forEach(publisher -> publisher.publish(smartMeterMessage));
             } catch (final Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
-                LOG.error("Ignoring invalid message: {}", message);
+                log.error("Ignoring invalid message: {}", message);
             }
             bufferedLines.clear();
         }

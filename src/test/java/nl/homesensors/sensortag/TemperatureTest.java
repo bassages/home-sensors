@@ -7,6 +7,6 @@ class TemperatureTest {
 
     @Test
     void equals() {
-        EqualsVerifier.forClass(Temperature.class).verify();
+        EqualsVerifier.forClass(Temperature.class).withNonnullFields("value").verify();
     }
 }

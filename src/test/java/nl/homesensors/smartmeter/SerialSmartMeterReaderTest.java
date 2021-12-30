@@ -130,6 +130,7 @@ class SerialSmartMeterReaderTest {
     void givenProcessInterruptedWhenRunThenErrorLogged(
             final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
+        // given
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
 
         final Process process = mock(Process.class);
@@ -140,8 +141,10 @@ class SerialSmartMeterReaderTest {
 
         when(runtime.exec(anyString())).thenReturn(process);
 
+        // when
         serialSmartMeterReader.run();
 
+        // then
         final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
         assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel("An unexpected InterruptedException occurred.", Level.ERROR));
     }

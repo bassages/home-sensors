@@ -1,18 +1,16 @@
 package nl.homesensors.sensortag;
 
+import lombok.extern.slf4j.Slf4j;
 import net.sf.expectit.Expect;
 import net.sf.expectit.Result;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
+@Slf4j
 abstract class AbstractSensor {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractSensor.class);
 
     abstract void enableNotifications(Expect expect) throws IOException;
 
@@ -33,8 +31,7 @@ abstract class AbstractSensor {
 
     void discardNotifications(final Expect expect, final String regexp) throws IOException {
         while(expect.withTimeout(20, TimeUnit.SECONDS).expect(regexp(regexp)).isSuccessful()) {
-            LOG.debug("Discarding notification handle");
+            log.debug("Discarding notification handle");
         }
     }
-
 }

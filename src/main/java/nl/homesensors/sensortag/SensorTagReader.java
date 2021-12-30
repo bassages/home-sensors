@@ -1,25 +1,21 @@
 package nl.homesensors.sensortag;
 
-import static net.sf.expectit.filter.Filters.removeColors;
-import static net.sf.expectit.filter.Filters.removeNonPrintable;
-import static net.sf.expectit.matcher.Matchers.contains;
-import static net.sf.expectit.matcher.Matchers.eof;
-import static net.sf.expectit.matcher.Matchers.regexp;
+import lombok.extern.slf4j.Slf4j;
+import net.sf.expectit.Expect;
+import net.sf.expectit.ExpectBuilder;
+import net.sf.expectit.Result;
+import nl.homesensors.sensortag.publisher.ClimatePublisher;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-
-import net.sf.expectit.Expect;
-import net.sf.expectit.ExpectBuilder;
-import net.sf.expectit.Result;
-import nl.homesensors.sensortag.publisher.ClimatePublisher;
+import static net.sf.expectit.filter.Filters.removeColors;
+import static net.sf.expectit.filter.Filters.removeNonPrintable;
+import static net.sf.expectit.matcher.Matchers.*;
 
 /**
  * Connects to a Texas Instruments Sensortag over Bluetooth low energy to periodically
@@ -30,10 +26,9 @@ import nl.homesensors.sensortag.publisher.ClimatePublisher;
  * Dependencies:
  * blueZ (gattool and hcitool) needs to be installed on the host OS (see http://www.bluez.org/).
  */
+@Slf4j
 @Component
 public class SensorTagReader {
-
-    private static final Logger LOG = LoggerFactory.getLogger(SensorTagReader.class);
 
     private static final int NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT = 10;
 
@@ -53,25 +48,25 @@ public class SensorTagReader {
 
     public SensorTagReader(final List<ClimatePublisher> climatePublishers) {
         this.climatePublishers = climatePublishers;
-        LOG.debug("Climate publishers: {}", climatePublishers);
+        log.debug("Climate publishers: {}", climatePublishers);
     }
 
     @Async
     public void run() throws InterruptedException {
 
         if (sensortagBluetoothAddress == null || sensortagProbeTimeInSeconds == null || sensorCode == null) {
-            LOG.warn("Not started SensorTagReader, because the configuration for it is not defined.");
+            log.warn("Not started SensorTagReader, because the configuration for it is not defined.");
             return;
         }
 
-        LOG.info("Start SensorTagReader");
+        log.info("Start SensorTagReader");
 
         //noinspection InfiniteLoopStatement
         while (true) {
             try {
                 connectAndListenForSensorValues();
             } catch (final SensortagException | IOException e) {
-                LOG.error("Error occurred: {}. Trying to reconnect in {} seconds...", e.getMessage(), NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
+                log.error("Error occurred: {}. Trying to reconnect in {} seconds...", e.getMessage(), NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
                 TimeUnit.MILLISECONDS.sleep(NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT);
             }
         }
@@ -107,7 +102,7 @@ public class SensorTagReader {
                 final long processingTime = System.currentTimeMillis() - start;
 
                 final long sleepDurationInMilliseconds = (sensortagProbeTimeInSeconds * 1000) - processingTime;
-                LOG.debug("Sleep for {} milliseconds", sleepDurationInMilliseconds);
+                log.debug("Sleep for {} milliseconds", sleepDurationInMilliseconds);
                 TimeUnit.MILLISECONDS.sleep(sleepDurationInMilliseconds);
             }
 
@@ -250,7 +245,7 @@ public class SensorTagReader {
     private void cleanup(final Process process) throws InterruptedException {
         process.waitFor(30, TimeUnit.SECONDS);
         if (process.isAlive()) {
-            LOG.warn("Killing process with PID {}", process.toHandle().pid());
+            log.warn("Killing process with PID {}", process.toHandle().pid());
             process.destroyForcibly();
         }
     }

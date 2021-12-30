@@ -7,6 +7,6 @@ class HumidityTest {
 
     @Test
     void equals() {
-        EqualsVerifier.forClass(Humidity.class).verify();
+        EqualsVerifier.forClass(Humidity.class).withNonnullFields("value").verify();
     }
 }
