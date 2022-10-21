@@ -9,6 +9,9 @@ import java.util.concurrent.TimeUnit;
 
 import static net.sf.expectit.matcher.Matchers.regexp;
 
+// SonarQube: "Abstract classes without fields should be converted to interfaces".
+// Ignore because @Slf4j does not work on an interface.
+@SuppressWarnings("java:S1610")
 @Slf4j
 abstract class AbstractSensor {
 
