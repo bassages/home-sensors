@@ -1,41 +1,22 @@
 package nl.homesensors.smartmeter;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConstructorBinding;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-@Component
-class SmartMeterSerialPortConfiguration {
-
-    private final String portPath;
+@RequiredArgsConstructor
+@Getter
+@ConstructorBinding
+@ConfigurationProperties("home-sensors.smart-meter.serial-port")
+public class SmartMeterSerialPortConfiguration {
+    private final String path;
     private final String baudRate;
     private final String parity;
 
-    public SmartMeterSerialPortConfiguration(@Value("${smart-meter-serial-port-path:#{null}}")
-                                             final String portPath,
-                                             @Value("${smart-meter-serial-port-baudrate:#{null}}")
-                                             final String baudRate,
-                                             @Value("${smart-meter-serial-port-parity:#{null}}")
-                                             final String parity) {
-        this.portPath = portPath;
-        this.baudRate = baudRate;
-        this.parity = parity;
-    }
-
-    String getPath() {
-        return portPath;
-    }
-
-    String getBaudRate() {
-        return baudRate;
-    }
-
-    String getParity() {
-        return parity;
-    }
-
     boolean isComplete() {
-        return isNotBlank(portPath) && isNotBlank(baudRate) && isNotBlank(parity);
+        return isNotBlank(path) && isNotBlank(baudRate) && isNotBlank(parity);
     }
 }

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.homesensors.HomeServerRestEndPoint;
+import nl.homesensors.homeserver.HomeServerApi;
 import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
@@ -25,7 +25,7 @@ import static java.lang.String.format;
 @Component
 @RequiredArgsConstructor
 public class HomeServerClimatePublisher implements ClimatePublisher {
-    private final HomeServerRestEndPoint homeServerRestEndPoint;
+    private final HomeServerApi homeServerApi;
     private final Clock clock;
 
     // Publish asynchronous, because we do not want to block the main thread
@@ -38,7 +38,7 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
             final String jsonMessage = HomeServerKlimaat.of(LocalDateTime.now(clock), temperature, humidity).asJson();
             final String path = format("klimaat/sensors/%s", sensorCode.getValue());
 
-            homeServerRestEndPoint.post(path, jsonMessage);
+            homeServerApi.post(path, jsonMessage);
 
         } catch (final JsonProcessingException e) {
             final String message = format("Failed to create json. temperature=%s, humidity=%s", temperature, humidity);

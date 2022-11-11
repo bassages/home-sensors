@@ -1,6 +1,6 @@
 package nl.homesensors.sensortag.publisher;
 
-import nl.homesensors.HomeServerRestEndPoint;
+import nl.homesensors.homeserver.HomeServerApi;
 import nl.homesensors.sensortag.Humidity;
 import nl.homesensors.sensortag.SensorCode;
 import nl.homesensors.sensortag.Temperature;
@@ -25,7 +25,7 @@ class HomeServerClimatePublisherTest {
     private HomeServerClimatePublisher homeServerClimatePublisher;
 
     @Mock
-    private HomeServerRestEndPoint homeServerRestEndPoint;
+    private HomeServerApi homeServerApi;
     @Mock
     private Clock clock;
 
@@ -37,6 +37,6 @@ class HomeServerClimatePublisherTest {
 
         final String expectedBody = """
                 {"datumtijd":"2018-01-02T17:09:00","temperatuur":10.1,"luchtvochtigheid":61.7}""";
-        verify(homeServerRestEndPoint).post("klimaat/sensors/GARDEN", expectedBody);
+        verify(homeServerApi).post("klimaat/sensors/GARDEN", expectedBody);
     }
 }

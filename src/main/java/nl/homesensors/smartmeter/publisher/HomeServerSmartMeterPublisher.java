@@ -3,13 +3,12 @@ package nl.homesensors.smartmeter.publisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nl.homesensors.HomeServerRestEndPoint;
+import nl.homesensors.homeserver.HomeServerApi;
 import nl.homesensors.smartmeter.SmartMeterMessage;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -17,7 +16,7 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
     private static final String API_PATH = "slimmemeter";
 
     private final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory;
-    private final HomeServerRestEndPoint homeServerRestEndPoint;
+    private final HomeServerApi homeServerApi;
 
     // Publish asynchronous,
     // because we do not want to block the main thread which should always be able read sensor values
@@ -25,7 +24,7 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
     @Override
     public void publish(final SmartMeterMessage smartMeterMessage) {
         try {
-            homeServerRestEndPoint.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
+            homeServerApi.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
         } catch (final JsonProcessingException e) {
             log.error(format("Failed to map message to json. Message=%s", smartMeterMessage), e);
         }
@@ -33,6 +32,6 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
 
     @Override
     public boolean isEnabled() {
-        return homeServerRestEndPoint.isEnabled();
+        return homeServerApi.isEnabled();
     }
 }

@@ -4,7 +4,7 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import nl.homesensors.CaptureLogging;
 import nl.homesensors.ContainsMessageAtLevel;
-import nl.homesensors.HomeServerRestEndPoint;
+import nl.homesensors.homeserver.HomeServerApi;
 import nl.homesensors.smartmeter.LongPowerFailureLogItem;
 import nl.homesensors.smartmeter.SmartMeterMessage;
 import nl.homesensors.smartmeter.SmartMeterMessage.DstIndicator;
@@ -29,7 +29,7 @@ class HomeServerSmartMeterPublisherTest {
     private HomeServerSmartMeterPublisher homeServerSmartMeterPublisher;
 
     @Mock
-    private HomeServerRestEndPoint homeServerRestEndPoint;
+    private HomeServerApi homeServerApi;
     @Mock
     private HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory;
 
@@ -45,7 +45,7 @@ class HomeServerSmartMeterPublisherTest {
         homeServerSmartMeterPublisher.publish(message);
 
         // then
-        verify(homeServerRestEndPoint).post("slimmemeter", json);
+        verify(homeServerApi).post("slimmemeter", json);
     }
 
     @Test
@@ -74,14 +74,14 @@ class HomeServerSmartMeterPublisherTest {
 
     @Test
     void whenIsEnabledThenDeterminedByCallingHomeServerRestEndPoint() {
-        when(homeServerRestEndPoint.isEnabled()).thenReturn(true);
+        when(homeServerApi.isEnabled()).thenReturn(true);
 
         // when
         final boolean enabled = homeServerSmartMeterPublisher.isEnabled();
 
         // then
         assertThat(enabled).isTrue();
-        verify(homeServerRestEndPoint).isEnabled();
+        verify(homeServerApi).isEnabled();
     }
 
 }

@@ -1,11 +1,11 @@
 package nl.homesensors.sensortag;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.expectit.Expect;
 import net.sf.expectit.ExpectBuilder;
 import net.sf.expectit.Result;
 import nl.homesensors.sensortag.publisher.ClimatePublisher;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -18,49 +18,46 @@ import static net.sf.expectit.filter.Filters.removeNonPrintable;
 import static net.sf.expectit.matcher.Matchers.*;
 
 /**
+ * <p>
  * Connects to a Texas Instruments Sensortag over Bluetooth low energy to periodically
  * obtain the actual temperature and humidity.
- *
+ * </p>
+ * <p>
  * The obtained values will be published to each {@link ClimatePublisher}.
- *
+ * </p>
+ * <p>
  * Dependencies:
- * blueZ (gattool and hcitool) needs to be installed on the host OS (see http://www.bluez.org/).
+ * blueZ (gattool and hcitool) needs to be installed on the host OS (see <a href="http://www.bluez.org/">...</a>).
+ * </p>
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class SensorTagReader {
 
     private static final int NR_OF_SECONDS_TO_WAIT_BEFORE_ATTEMPT_RECONNECT = 10;
 
     private final List<ClimatePublisher> climatePublishers;
 
-    @Value("${sensortag.bluetooth.address:#{null}}")
-    private String sensortagBluetoothAddress;
-
-    @Value("${sensortag.probetime.seconds:#{null}}")
-    private Integer sensortagProbeTimeInSeconds;
-
-    @Value("${sensortag-klimaat-sensorcode:#{null}}")
-    private String sensorCode;
+    private final SensortagConfig sensortagConfig;
 
     private final Thermometer thermometer = new Thermometer();
     private final Hygrometer hygrometer = new Hygrometer();
 
-    public SensorTagReader(final List<ClimatePublisher> climatePublishers) {
-        this.climatePublishers = climatePublishers;
-        log.debug("Climate publishers: {}", climatePublishers);
-    }
-
     @Async
     public void run() throws InterruptedException {
-
-        if (sensortagBluetoothAddress == null || sensortagProbeTimeInSeconds == null || sensorCode == null) {
+        if (!sensortagConfig.isComplete()) {
             log.warn("Not started SensorTagReader, because the configuration for it is not defined.");
             return;
         }
-
         log.info("Start SensorTagReader");
+        foreverTryToConnectAndListenForSensorValues();
+    }
 
+    // SonarQube: "Loops should not be infinite".
+    // Ignore because this is intentional.
+    @SuppressWarnings("java:S2189")
+    private void foreverTryToConnectAndListenForSensorValues() throws InterruptedException {
         //noinspection InfiniteLoopStatement
         while (true) {
             try {
@@ -72,6 +69,9 @@ public class SensorTagReader {
         }
     }
 
+    // SonarQube: "Loops should not be infinite".
+    // Ignore because this is intentional.
+    @SuppressWarnings("java:S2189")
     private void connectAndListenForSensorValues() throws IOException, InterruptedException, SensortagException {
         final Process process = createShellProcess();
         final Expect expect = getExpectBuilder(process).build();
@@ -86,7 +86,7 @@ public class SensorTagReader {
             /*
              * From the TI SensorTag Guide:
              *
-             * The most power efficient way to obtain measurements for a sensor is to
+             * The most power efficient way to obtain measurements for a sensor is to:
              * 1. Enable notification
              * 2. Enable Sensor
              * 3. When notification with data is obtained at the Master side, disable the sensor (notification still on though)
@@ -101,19 +101,18 @@ public class SensorTagReader {
                 readAndPersistSensorValues(expect);
                 final long processingTime = System.currentTimeMillis() - start;
 
-                final long sleepDurationInMilliseconds = (sensortagProbeTimeInSeconds * 1000) - processingTime;
+                final long sleepDurationInMilliseconds = (sensortagConfig.getProbetimeSeconds() * 1000) - processingTime;
                 log.debug("Sleep for {} milliseconds", sleepDurationInMilliseconds);
                 TimeUnit.MILLISECONDS.sleep(sleepDurationInMilliseconds);
             }
 
         } finally {
-            disconnectAndClose(expect);
-            cleanup(process);
+            disconnectAndClose(process, expect);
         }
     }
 
     private void startInteractiveGattool(final Expect expect) throws IOException, SensortagException {
-        expect.sendLine("gatttool -b " + sensortagBluetoothAddress + " --interactive");
+        expect.sendLine("gatttool -b " + sensortagConfig.getBluetoothAddress() + " --interactive");
 
         final Result startGattoolResult = expect.withTimeout(20, TimeUnit.SECONDS).expect(contains("[LE]>"));
         if (!startGattoolResult.isSuccessful()) {
@@ -133,7 +132,8 @@ public class SensorTagReader {
     private void readAndPersistSensorValues(final Expect expect) throws IOException, SensortagException {
         final Temperature temperature = thermometer.getAmbientTemperature(expect);
         final Humidity humidity = hygrometer.getHumidity(expect);
-        climatePublishers.forEach(climatePublisher -> climatePublisher.publish(SensorCode.of(sensorCode), temperature, humidity));
+        climatePublishers.forEach(climatePublisher ->
+                climatePublisher.publish(SensorCode.of(sensortagConfig.getClimateSensorCode()), temperature, humidity));
     }
 
     private void setConnectionParameters() throws IOException {
@@ -230,16 +230,22 @@ public class SensorTagReader {
                     .withTimeout(15, TimeUnit.SECONDS);
     }
 
-    private void disconnectAndClose(final Expect expect) throws IOException, InterruptedException {
+    private void disconnectAndClose(final Process process, final Expect expect) throws IOException, InterruptedException {
         expect.sendLine("disconnect");
         TimeUnit.SECONDS.sleep(1);
 
         expect.sendLine("exit"); // Exit from gattool
         TimeUnit.SECONDS.sleep(1);
 
-        expect.sendLine("exit"); // Exit from terminal
+        // maybe gattool was not running and now the terminal was closed
+        if (process.isAlive()) {
+            expect.sendLine("exit"); // Exit from terminal
+        }
+
         expect.expect(eof());
         expect.close();
+
+        cleanup(process);
     }
 
     private void cleanup(final Process process) throws InterruptedException {
