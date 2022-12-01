@@ -36,9 +36,9 @@ class SerialSmartMeterReaderTest {
     @Test
     void givenConfigurationCompleteWhenRunThenCuProcessStarted() throws Exception {
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
-        when(smartMeterSerialPortConfiguration.getBaudRate()).thenReturn("100");
-        when(smartMeterSerialPortConfiguration.getParity()).thenReturn("even");
-        when(smartMeterSerialPortConfiguration.getPath()).thenReturn("/dev/ttyUSB0");
+        when(smartMeterSerialPortConfiguration.baudRate()).thenReturn("100");
+        when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
+        when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
         final ArgumentCaptor<String> commandCaptor = ArgumentCaptor.forClass(String.class);
 

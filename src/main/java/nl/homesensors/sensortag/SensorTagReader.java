@@ -101,7 +101,7 @@ public class SensorTagReader {
                 readAndPersistSensorValues(expect);
                 final long processingTime = System.currentTimeMillis() - start;
 
-                final long sleepDurationInMilliseconds = (sensortagConfig.getProbetimeSeconds() * 1000) - processingTime;
+                final long sleepDurationInMilliseconds = (sensortagConfig.probetimeSeconds() * 1000) - processingTime;
                 log.debug("Sleep for {} milliseconds", sleepDurationInMilliseconds);
                 TimeUnit.MILLISECONDS.sleep(sleepDurationInMilliseconds);
             }
@@ -112,7 +112,7 @@ public class SensorTagReader {
     }
 
     private void startInteractiveGattool(final Expect expect) throws IOException, SensortagException {
-        expect.sendLine("gatttool -b " + sensortagConfig.getBluetoothAddress() + " --interactive");
+        expect.sendLine("gatttool -b " + sensortagConfig.bluetoothAddress() + " --interactive");
 
         final Result startGattoolResult = expect.withTimeout(20, TimeUnit.SECONDS).expect(contains("[LE]>"));
         if (!startGattoolResult.isSuccessful()) {
@@ -133,7 +133,7 @@ public class SensorTagReader {
         final Temperature temperature = thermometer.getAmbientTemperature(expect);
         final Humidity humidity = hygrometer.getHumidity(expect);
         climatePublishers.forEach(climatePublisher ->
-                climatePublisher.publish(SensorCode.of(sensortagConfig.getClimateSensorCode()), temperature, humidity));
+                climatePublisher.publish(SensorCode.of(sensortagConfig.climateSensorCode()), temperature, humidity));
     }
 
     private void setConnectionParameters() throws IOException {

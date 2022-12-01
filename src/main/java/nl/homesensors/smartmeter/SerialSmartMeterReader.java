@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * Reads data from a serial device which is connected to the P1 port of a Smart Meter.
  * The data will be posted to home-server.
- *
+ * <br/>
  * Needs the "cu" command to be installed on the host OS.
  */
 @Slf4j
@@ -39,7 +39,7 @@ public class SerialSmartMeterReader {
 
     private void connectAndListenForData() {
         try {
-            final String command = "cu -l " + smartMeterSerialPortConfiguration.getPath() + " --speed " + smartMeterSerialPortConfiguration.getBaudRate() + " --parity=" + smartMeterSerialPortConfiguration.getParity() + " -E q";
+            final String command = "cu -l " + smartMeterSerialPortConfiguration.path() + " --speed " + smartMeterSerialPortConfiguration.baudRate() + " --parity=" + smartMeterSerialPortConfiguration.parity() + " -E q";
             final Process process = runtime.exec(command);
 
             final Thread ioThread = new Thread(() -> {

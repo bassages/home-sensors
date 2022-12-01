@@ -19,7 +19,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.inject.Provider;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
@@ -38,8 +37,6 @@ class HomeServerApiTest {
     private HomeServerApi homeServerApi;
 
     @Mock
-    private Provider<HttpClientBuilder> httpClientBuilderProvider;
-    @Mock
     private HttpClientBuilder httpClientBuilder;
     @Mock
     private HomeServerApiConfig homeServerApiConfig;
@@ -56,15 +53,14 @@ class HomeServerApiTest {
 
     @BeforeEach
     public void setUp() {
-        when(httpClientBuilderProvider.get()).thenReturn(httpClientBuilder);
         when(httpClientBuilder.build()).thenReturn(closeableHttpClient);
-        when(homeServerApiConfig.getUrl()).thenReturn(HOME_SERVER_REST_API_URL);
+        when(homeServerApiConfig.url()).thenReturn(HOME_SERVER_REST_API_URL);
     }
 
     @Test
     void givenJsonToPostToPathWhenPostThenPosted() throws Exception {
-        when(homeServerApiConfig.getBasicAuthUser()).thenReturn("user_1234");
-        when(homeServerApiConfig.getBasicAuthPassword()).thenReturn("secret_password");
+        when(homeServerApiConfig.basicAuthUser()).thenReturn("user_1234");
+        when(homeServerApiConfig.basicAuthPassword()).thenReturn("secret_password");
 
         when(closeableHttpClient.execute(any())).thenReturn(closeableHttpResponse);
         when(closeableHttpResponse.getStatusLine()).thenReturn(statusLine);
