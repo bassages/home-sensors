@@ -17,7 +17,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,7 +39,7 @@ class SerialSmartMeterReaderTest {
         when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
         when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
-        final ArgumentCaptor<String> commandCaptor = ArgumentCaptor.forClass(String.class);
+        final ArgumentCaptor<String[]> commandCaptor = ArgumentCaptor.forClass(String[].class);
 
         final Process process = mock(Process.class);
         when(process.getInputStream()).thenReturn(new NullInputStream(0));
@@ -50,7 +49,7 @@ class SerialSmartMeterReaderTest {
 
         serialSmartMeterReader.run();
 
-        assertThat(commandCaptor.getValue()).isEqualTo("cu -l /dev/ttyUSB0 --speed 100 --parity=even -E q");
+        assertThat(commandCaptor.getValue()).contains("cu -l /dev/ttyUSB0 --speed 100 --parity=even -E q");
     }
 
     @Test
@@ -61,7 +60,7 @@ class SerialSmartMeterReaderTest {
         when(process.getInputStream()).thenReturn(IOUtils.toInputStream("someLine", Charset.defaultCharset().name()));
         when(process.getErrorStream()).thenReturn(new NullInputStream(0));
 
-        when(runtime.exec(anyString())).thenReturn(process);
+        when(runtime.exec(any(String[].class))).thenReturn(process);
 
         serialSmartMeterReader.run();
 
@@ -79,7 +78,7 @@ class SerialSmartMeterReaderTest {
         when(process.getInputStream()).thenReturn(new NullInputStream(0));
         when(process.getErrorStream()).thenReturn(IOUtils.toInputStream("error1\nerror2", Charset.defaultCharset().name()));
 
-        when(runtime.exec(anyString())).thenReturn(process);
+        when(runtime.exec(any(String[].class))).thenReturn(process);
 
         serialSmartMeterReader.run();
 
@@ -117,7 +116,7 @@ class SerialSmartMeterReaderTest {
         final int returnCodeIndicatingAnError = 999;
         when(process.waitFor()).thenReturn(returnCodeIndicatingAnError);
 
-        when(runtime.exec(anyString())).thenReturn(process);
+        when(runtime.exec(any(String[].class))).thenReturn(process);
 
         serialSmartMeterReader.run();
 
@@ -139,7 +138,7 @@ class SerialSmartMeterReaderTest {
 
         when(process.waitFor()).thenThrow(new InterruptedException("Interrupt!"));
 
-        when(runtime.exec(anyString())).thenReturn(process);
+        when(runtime.exec(any(String[].class))).thenReturn(process);
 
         // when
         serialSmartMeterReader.run();
