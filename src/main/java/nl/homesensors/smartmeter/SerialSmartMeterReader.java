@@ -40,7 +40,7 @@ public class SerialSmartMeterReader {
     private void connectAndListenForData() {
         try {
             final String command = "cu -l " + smartMeterSerialPortConfiguration.path() + " --speed " + smartMeterSerialPortConfiguration.baudRate() + " --parity=" + smartMeterSerialPortConfiguration.parity() + " -E q";
-            final Process process = runtime.exec(command);
+            final Process process = runtime.exec(new String[]{command});
 
             final Thread ioThread = new Thread(() -> {
                 handleInputStreamLines(process.getInputStream(), messageBuffer::addLine);
