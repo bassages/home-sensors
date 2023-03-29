@@ -219,7 +219,7 @@ public class SensorTagReader {
     }
 
     private Process createShellProcess() throws IOException {
-        return Runtime.getRuntime().exec("/bin/bash");
+        return Runtime.getRuntime().exec(new String[]{"/bin/bash"});
     }
 
     private ExpectBuilder getExpectBuilder(final Process process) {
