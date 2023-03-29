@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -39,8 +40,14 @@ public class SerialSmartMeterReader {
 
     private void connectAndListenForData() {
         try {
-            final String command = "cu -l " + smartMeterSerialPortConfiguration.path() + " --speed " + smartMeterSerialPortConfiguration.baudRate() + " --parity=" + smartMeterSerialPortConfiguration.parity() + " -E q";
-            final Process process = runtime.exec(new String[]{command});
+            final List<String> command = List.of(
+                    "cu",
+                    "-l", smartMeterSerialPortConfiguration.path(),
+                    "--speed", smartMeterSerialPortConfiguration.baudRate(),
+                    "--parity=" + smartMeterSerialPortConfiguration.parity(),
+                    "-E",
+                    "q");
+            final Process process = runtime.exec(command.toArray(new String[0]));
 
             final Thread ioThread = new Thread(() -> {
                 handleInputStreamLines(process.getInputStream(), messageBuffer::addLine);

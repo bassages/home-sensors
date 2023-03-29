@@ -49,12 +49,15 @@ class SerialSmartMeterReaderTest {
 
         serialSmartMeterReader.run();
 
-        assertThat(commandCaptor.getValue()).contains("cu -l /dev/ttyUSB0 --speed 100 --parity=even -E q");
+        assertThat(commandCaptor.getValue()).containsExactly("cu", "-l", "/dev/ttyUSB0", "--speed", "100", "--parity=even", "-E", "q");
     }
 
     @Test
     void givenConfigurationCompleteWhenRunThenOutputOfProcessWrittenToMessageBuffer() throws Exception {
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
+        when(smartMeterSerialPortConfiguration.baudRate()).thenReturn("100");
+        when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
+        when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
         final Process process = mock(Process.class);
         when(process.getInputStream()).thenReturn(IOUtils.toInputStream("someLine", Charset.defaultCharset().name()));
@@ -73,6 +76,9 @@ class SerialSmartMeterReaderTest {
             final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
+        when(smartMeterSerialPortConfiguration.baudRate()).thenReturn("100");
+        when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
+        when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
         final Process process = mock(Process.class);
         when(process.getInputStream()).thenReturn(new NullInputStream(0));
@@ -108,6 +114,9 @@ class SerialSmartMeterReaderTest {
             final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
 
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
+        when(smartMeterSerialPortConfiguration.baudRate()).thenReturn("100");
+        when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
+        when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
         final Process process = mock(Process.class);
         when(process.getInputStream()).thenReturn(new NullInputStream(0));
@@ -131,6 +140,9 @@ class SerialSmartMeterReaderTest {
 
         // given
         when(smartMeterSerialPortConfiguration.isComplete()).thenReturn(true);
+        when(smartMeterSerialPortConfiguration.baudRate()).thenReturn("100");
+        when(smartMeterSerialPortConfiguration.parity()).thenReturn("even");
+        when(smartMeterSerialPortConfiguration.path()).thenReturn("/dev/ttyUSB0");
 
         final Process process = mock(Process.class);
         when(process.getInputStream()).thenReturn(new NullInputStream(0));
