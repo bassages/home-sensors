@@ -1,13 +1,13 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.0'
+    id 'org.springframework.boot' version '3.1.1'
     id 'io.spring.dependency-management' version '1.1.0'
-    id 'com.github.ben-manes.versions' version '0.46.0'
+    id 'com.github.ben-manes.versions' version '0.47.0'
     id 'jacoco'
-    id "org.sonarqube" version '4.2.0.3129'
+    id 'org.sonarqube' version '4.2.1.3168'
 }
 
-if (System.getenv("GITHUB_TAG") != null) {
+if (System.getenv('GITHUB_TAG') != null) {
     version = System.getenv("GITHUB_TAG")
     logger.info('Creating release from GitHub action workflow. Version: ' + version)
 } else {
@@ -25,9 +25,9 @@ jacoco {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
-        csv.enabled false
-        html.enabled false
+        xml.required = true
+        csv.required = false
+        html.required = false
     }
 }
 
@@ -73,7 +73,7 @@ dependencies {
     annotationProcessor('org.projectlombok:lombok:1.18.28')
     compileOnly('org.projectlombok:lombok:1.18.28')
 
-    implementation('commons-io:commons-io:2.12.0')
+    implementation('commons-io:commons-io:2.13.0')
     implementation('org.apache.commons:commons-lang3:3.12.0')
     implementation('org.apache.httpcomponents:httpclient:4.5.14')
     implementation('net.sf.expectit:expectit-core:0.9.0')
@@ -93,5 +93,5 @@ dependencies {
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.14.2')
+    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.14.3')
 }
