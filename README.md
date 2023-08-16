@@ -9,3 +9,13 @@ Application is intended to run on a on a Raspberry PI.
 <a href="https://sonarcloud.io/dashboard?id=home-sensors" target="_blank"><img src="https://sonarcloud.io/api/project_badges/measure?project=home-sensors&metric=bugs" alt="SonarCloud"></a>
 <a href="https://sonarcloud.io/dashboard?id=home-sensors" target="_blank"><img src="https://sonarcloud.io/api/project_badges/measure?project=home-sensors&metric=vulnerabilities" alt="SonarCloud"></a>
 
+## Common development tasks
+
+### Update versions
+
+#### Gradle
+For this, you can use the following command: `gradlew wrapper --gradle-version <new version>`
+
+### Dependencies
+For this, you can use the following command: `gradlew dependencyUpdates`.
+Inspect the output of the command, update build.gradle manually and test if the application still builds and executes correctly.
