@@ -30,8 +30,7 @@ public class HomeServerApiIntegrationTest {
 
     @RegisterExtension
     static WireMockExtension wiremock = WireMockExtension.newInstance()
-            .options(wireMockConfig()
-                    .notifier(new ConsoleNotifier(true))).build();
+            .options(wireMockConfig()).build();
 
     @DynamicPropertySource
     static void registerProperties(final DynamicPropertyRegistry  registry) {
