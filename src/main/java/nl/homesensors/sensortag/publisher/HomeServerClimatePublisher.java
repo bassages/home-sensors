@@ -36,7 +36,7 @@ public class HomeServerClimatePublisher implements ClimatePublisher {
 
         try {
             final String jsonMessage = HomeServerKlimaat.of(LocalDateTime.now(clock), temperature, humidity).asJson();
-            final String path = format("klimaat/sensors/%s", sensorCode.getValue());
+            final String path = format("/klimaat/sensors/%s", sensorCode.getValue());
 
             homeServerApi.post(path, jsonMessage);
 

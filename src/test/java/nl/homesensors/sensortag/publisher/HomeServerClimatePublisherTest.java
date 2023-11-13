@@ -37,6 +37,6 @@ class HomeServerClimatePublisherTest {
 
         final String expectedBody = """
                 {"datumtijd":"2018-01-02T17:09:00","temperatuur":10.1,"luchtvochtigheid":61.7}""";
-        verify(homeServerApi).post("klimaat/sensors/GARDEN", expectedBody);
+        verify(homeServerApi).post("/klimaat/sensors/GARDEN", expectedBody);
     }
 }

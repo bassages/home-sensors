@@ -45,7 +45,7 @@ class HomeServerSmartMeterPublisherTest {
         homeServerSmartMeterPublisher.publish(message);
 
         // then
-        verify(homeServerApi).post("slimmemeter", json);
+        verify(homeServerApi).post("/slimmemeter", json);
     }
 
     @Test

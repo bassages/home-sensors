@@ -1,6 +1,7 @@
 package nl.homesensors;
 
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -29,7 +30,7 @@ public class HomeSensorsApplication {
     @Bean
 	@Scope(value = SCOPE_PROTOTYPE)
 	public HttpClientBuilder getHttpClientBuilder() {
-		return HttpClientBuilder.create();
+		return HttpClients.custom();
 	}
 
 	@Bean

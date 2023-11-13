@@ -13,7 +13,7 @@ import static java.lang.String.format;
 @Component
 @RequiredArgsConstructor
 public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher {
-    private static final String API_PATH = "slimmemeter";
+    private static final String API_PATH = "/slimmemeter";
 
     private final HomeServerSmartMeterMessageFactory homeServerSmartMeterMessageFactory;
     private final HomeServerApi homeServerApi;
