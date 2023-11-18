@@ -22,3 +22,14 @@ View service status:
 ```
 sudo systemctl status home-sensors
 ```
+
+View service status:
+```
+sudo systemctl status home-sensors
+```
+
+Reload changes made to home-sensors.service:
+```
+sudo systemctl daemon-reload
+```
+
