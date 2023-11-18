@@ -1,0 +1,13 @@
+[Unit]
+Description=Home Sensors
+After=network.target
+
+[Service]
+ExecStart=/home/pi/home-sensors/start-home-sensors.sh
+Restart=always
+WorkingDirectory=/home/pi/home-sensors
+User=pi
+Group=pi
+
+[Install]
+WantedBy=multi-user.target
