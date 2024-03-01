@@ -34,7 +34,8 @@ public class HomeServerApiIntegrationTest {
 
     @RegisterExtension
     static WireMockExtension wiremock = WireMockExtension.newInstance()
-            .options(wireMockConfig()).build();
+            .options(wireMockConfig())
+            .build();
 
     @Nested
     @DisplayName("With basic auth enabled")
