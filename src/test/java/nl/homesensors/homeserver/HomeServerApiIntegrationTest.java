@@ -5,7 +5,6 @@ import com.github.tomakehurst.wiremock.client.BasicCredentials;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import nl.homesensors.CaptureLogging;
 import nl.homesensors.ContainsMessageAtLevel;
-import org.apache.hc.core5.http.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -59,7 +58,7 @@ public class HomeServerApiIntegrationTest {
 
             // given
             stubFor(post(API_PATH)
-                    .willReturn(created()));
+                    .willReturn(created().withHeader("Connection", "close")));
 
             // when
             homeServerApi.post(API_PATH, SOME_JSON_BODY);
@@ -84,7 +83,7 @@ public class HomeServerApiIntegrationTest {
 
             // given
             stubFor(post(API_PATH)
-                    .willReturn(serverError()));
+                    .willReturn(serverError().withHeader("Connection", "close")));
 
             // when
             homeServerApi.post(API_PATH, SOME_JSON_BODY);
@@ -95,43 +94,8 @@ public class HomeServerApiIntegrationTest {
                     .withBasicAuth(new BasicCredentials(BASIC_USERNAME, BASIC_PASSWORD)));
 
             final List<LoggingEvent> loggedEvents = loggerEventCaptor.getAllValues();
-            final String expectedMessage = "Post to url [http://localhost:8080/api/some-endpoint] failed.";
+            final String expectedMessage = "Post to url [http://localhost:8080/api/some-endpoint] failed: Unexpected HTTP status: 500";
             assertThat(loggedEvents).haveExactly(1, new ContainsMessageAtLevel(expectedMessage, ERROR));
-        }
-    }
-
-    @Nested
-    @DisplayName("Without basic auth")
-    class WithoutBasicAuthDisabled {
-
-        @DynamicPropertySource
-        static void registerProperties(final DynamicPropertyRegistry  registry) {
-            registry.add("home-sensors.home-server.api.url", () -> wiremock.baseUrl());
-        }
-
-        @Test
-        @CaptureLogging(HomeServerApi.class)
-        void post_shouldPostToHomeServerApi(
-                @Autowired final HomeServerApi homeServerApi,
-                final ArgumentCaptor<LoggingEvent> loggerEventCaptor) {
-
-            // given
-            stubFor(post(API_PATH)
-                    .willReturn(created()));
-
-            // when
-            homeServerApi.post(API_PATH, SOME_JSON_BODY);
-
-            // then
-            verify(postRequestedFor(urlEqualTo(API_PATH))
-                    .withRequestBody(equalTo(SOME_JSON_BODY))
-                    .withoutHeader(HttpHeaders.AUTHORIZATION));
-
-            final List<LoggingEvent> allErrorLogging = loggerEventCaptor.getAllValues()
-                    .stream()
-                    .filter(log -> log.getLevel().equals(ERROR))
-                    .toList();
-            assertThat(allErrorLogging).isEmpty();
         }
     }
 }

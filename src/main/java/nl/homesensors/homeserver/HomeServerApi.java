@@ -2,19 +2,19 @@ package nl.homesensors.homeserver;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.http.ContentType;
-import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.HttpStatus;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.Base64;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -24,7 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class HomeServerApi {
 
     private final HomeServerApiConfig homeServerApiConfig;
-    private final HttpClientBuilder httpClientBuilder;
+    private final HttpClient.Builder httpClientBuilder;
 
     public boolean isEnabled() {
         return isNotBlank(homeServerApiConfig.url());
@@ -34,34 +34,34 @@ public class HomeServerApi {
         final String url = homeServerApiConfig.url() + path;
         log.debug("Post to url: {}. Request body: {}", url, json);
 
-        try (final CloseableHttpClient httpClient = httpClientBuilder.build()) {
-            final HttpPost request = new HttpPost(url);
-            final StringEntity params = new StringEntity(json, ContentType.APPLICATION_JSON);
+        try (final HttpClient httpClient = httpClientBuilder
+                .connectTimeout(Duration.of(20, SECONDS))
+                .build()) {
 
-            request.setEntity(params);
-            setAuthorizationHeader(request);
+            final HttpRequest.Builder postRequestBuilder = HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .headers("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .timeout(Duration.of(20, SECONDS));
+            setAuthorizationHeader(postRequestBuilder);
+            final HttpRequest httpRequest = postRequestBuilder.build();
 
-            httpClient.execute(request, response -> {
-                if (response.getCode() != HttpStatus.SC_CREATED) {
-                    throw new HttpResponseException(
-                            response.getCode(),
-                            String.format("Unexpected HTTP status: %s", response.getReasonPhrase())
-                    );
-                }
-                return null;
-            });
+            final HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 201) {
+                log.error(String.format("Post to url [%s] failed: Unexpected HTTP status: %s".formatted(url, response.statusCode())));
+            }
 
-        } catch (final Exception e) {
+        } catch (final URISyntaxException | IOException | InterruptedException e) {
             log.error(String.format("Post to url [%s] failed.", url), e);
         }
     }
 
-    private void setAuthorizationHeader(final HttpPost request) {
+    private void setAuthorizationHeader(final HttpRequest.Builder postRequestBuilder) {
         if (nonNull(homeServerApiConfig.basicAuthUser()) && nonNull(homeServerApiConfig.basicAuthPassword())) {
             final String auth = homeServerApiConfig.basicAuthUser() + ":" + homeServerApiConfig.basicAuthPassword();
             final byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(UTF_8));
             final String authorizationHeader = "Basic " + new String(encodedAuth);
-            request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
+            postRequestBuilder.header("Authorization", authorizationHeader);
         }
     }
 }

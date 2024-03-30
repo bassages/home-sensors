@@ -1,7 +1,5 @@
 package nl.homesensors;
 
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -9,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.EnableAsync;
 
+import java.net.http.HttpClient;
 import java.time.Clock;
 
 import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
@@ -29,8 +28,8 @@ public class HomeSensorsApplication {
 
     @Bean
 	@Scope(value = SCOPE_PROTOTYPE)
-	public HttpClientBuilder getHttpClientBuilder() {
-		return HttpClients.custom();
+	public HttpClient.Builder getHttpClientBuilder() {
+		return HttpClient.newBuilder();
 	}
 
 	@Bean

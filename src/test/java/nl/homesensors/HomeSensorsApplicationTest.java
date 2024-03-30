@@ -1,11 +1,11 @@
 package nl.homesensors;
 
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.net.http.HttpClient;
 import java.time.Clock;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -34,7 +34,7 @@ class HomeSensorsApplicationTest {
 
     @Test
     void whenGetHttpClientBuilderThenReturned() {
-        final HttpClientBuilder httpClientBuilder = homeSensorsApplication.getHttpClientBuilder();
+        final HttpClient.Builder httpClientBuilder = homeSensorsApplication.getHttpClientBuilder();
         assertThat(httpClientBuilder).isNotNull();
     }
 }
