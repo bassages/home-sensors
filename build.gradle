@@ -73,7 +73,7 @@ dependencies {
     annotationProcessor('org.projectlombok:lombok:1.18.32')
     compileOnly('org.projectlombok:lombok:1.18.32')
 
-    implementation('commons-io:commons-io:2.15.1')
+    implementation('commons-io:commons-io:2.16.0')
     implementation('org.apache.commons:commons-lang3:3.14.0')
     implementation('net.sf.expectit:expectit-core:0.9.0')
     implementation('com.jcraft:jsch:0.1.55')
