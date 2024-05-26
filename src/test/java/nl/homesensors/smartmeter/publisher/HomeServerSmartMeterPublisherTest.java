@@ -69,7 +69,6 @@ class HomeServerSmartMeterPublisherTest {
         // then
         assertThat(loggerEventCaptor.getAllValues())
                 .haveExactly(1, new ContainsMessageAtLevel("Failed to map message to json. Message=", ERROR));
-
     }
 
     @Test
