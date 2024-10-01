@@ -74,7 +74,7 @@ public class SerialSmartMeterReader {
         try (final var inputStreamReader = new InputStreamReader(inputStream)) {
             final LineIterator it = IOUtils.lineIterator(inputStreamReader);
             while (it.hasNext()) {
-                lineHandler.accept(it.nextLine());
+                lineHandler.accept(it.next());
             }
         } catch (final IOException e) {
             log.error("InputStream failure", e);
