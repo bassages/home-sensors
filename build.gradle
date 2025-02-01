@@ -93,5 +93,5 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation('nl.jqno.equalsverifier:equalsverifier:3.18')
-    testImplementation('org.wiremock:wiremock-standalone:3.10.0')
+    testImplementation('org.wiremock:wiremock-standalone:3.11.0')
 }
