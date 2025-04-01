@@ -92,6 +92,6 @@ dependencies {
     implementation('com.fasterxml.jackson.datatype:jackson-datatype-jsr310')
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.19.1')
+    testImplementation('nl.jqno.equalsverifier:equalsverifier:3.19.2')
     testImplementation('org.wiremock:wiremock-standalone:3.12.1')
 }
