@@ -40,7 +40,7 @@ class MessageBufferTest {
     private MessageBuffer messageBuffer;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         messageBuffer = new MessageBuffer(dsmr422Parser, singletonList(smartMeterMessagePublisher));
     }
 
