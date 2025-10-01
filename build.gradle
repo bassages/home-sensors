@@ -70,8 +70,8 @@ repositories {
 }
 
 dependencies {
-    annotationProcessor('org.projectlombok:lombok:1.18.38')
-    compileOnly('org.projectlombok:lombok:1.18.38')
+    annotationProcessor('org.projectlombok:lombok:1.18.42')
+    compileOnly('org.projectlombok:lombok:1.18.42')
 
     implementation('commons-io:commons-io:2.20.0')
     implementation('org.apache.commons:commons-lang3:3.19.0')
