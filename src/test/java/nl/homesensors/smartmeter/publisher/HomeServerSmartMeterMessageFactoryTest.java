@@ -20,6 +20,9 @@ class HomeServerSmartMeterMessageFactoryTest {
         final SmartMeterMessage smartMeterMessage = new SmartMeterMessage();
         smartMeterMessage.setTimestamp(LocalDateTime.of(2018, MAY, 3, 13, 14, 15));
         smartMeterMessage.setActualElectricityPowerDelivered(new BigDecimal("0.64"));
+        smartMeterMessage.setVoltageL1(new BigDecimal("223.4"));
+        smartMeterMessage.setVoltageL2(new BigDecimal("225.5"));
+        smartMeterMessage.setVoltageL3(new BigDecimal("226.6"));
 
         final LongPowerFailureLogItem longPowerFailureLogItem = new LongPowerFailureLogItem();
         longPowerFailureLogItem.setFailureDurationInSeconds(12);
@@ -44,7 +47,11 @@ class HomeServerSmartMeterMessageFactoryTest {
                     "aantalStroomStoringenInAlleFases":null,
                     "aantalSpanningsDippenInFaseL1":null,
                     "aantalSpanningsDippenInFaseL2":null,
+                    "aantalSpanningsDippenInFaseL3":null,
                     "aantalLangeStroomStoringenInAlleFases":null,
+                    "voltageL1":223,
+                    "voltageL2":226,
+                    "voltageL3":227,
                     "langeStroomStoringen":[
                         {
                             "datumtijdEinde":"2016-05-23T13:12:09",

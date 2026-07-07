@@ -19,7 +19,7 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
     private final HomeServerApi homeServerApi;
 
     // Publish asynchronous,
-    // because we do not want to block the main thread which should always be able read sensor values
+    // because we do not want to block the main thread which should always be able to read sensor values
     @Async
     @Override
     public void publish(final SmartMeterMessage smartMeterMessage) {

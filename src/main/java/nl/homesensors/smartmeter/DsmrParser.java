@@ -35,7 +35,7 @@ public class DsmrParser {
     private static final Pattern METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2 = compile("1-0:2.8.2\\((?<" + GROUP_NAME + ">" + KWH_VALUE + "\\)");
     private static final Pattern TARIFF_INDICATOR_ELECTRICITY = compile("0-0:96.14.0\\((?<" + GROUP_NAME + ">\\d{4})\\)");
     private static final Pattern ACTUAL_ELECTRICITY_POWER_DELIVERED = compile("1-0:1.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
-    private static final Pattern ACTUAL_ELECTRICITY_POWER_RECIEVED = compile("1-0:2.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern ACTUAL_ELECTRICITY_POWER_RECEIVED = compile("1-0:2.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.21\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE = compile("0-0:96.7.9\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern LONG_POWER_FAILURE_EVENT_LOG_NR_OF_ITEMS = compile("1-0:99.97.0\\((?<" + GROUP_NAME + ">\\d*)\\)");
@@ -44,20 +44,25 @@ public class DsmrParser {
     private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2 = compile("1-0:32.36.0\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern TEXT_MESSAGE_CODES = compile("0-0:96.13.1\\((?<"+ GROUP_NAME +">.*?)\\)");
     private static final Pattern TEXT_MESSAGE = compile("0-0:96.13.0\\((?<"+ GROUP_NAME +">.*?)\\)");
+
     private static final Pattern VOLTAGE_L1 = compile("1-0:32.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
     private static final Pattern VOLTAGE_L2 = compile("1-0:52.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
     private static final Pattern VOLTAGE_L3 = compile("1-0:72.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
+
     private static final Pattern INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION = compile("1-0:31.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
     private static final Pattern INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION = compile("1-0:51.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
     private static final Pattern INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION = compile("1-0:71.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
-    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
-    private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L2 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+
+    // Delivered from net to house
     private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L2 = compile("1-0:41.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L3 = compile("1-0:61.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+
+    // Received by net from house
     private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L1 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L2 = compile("1-0:42.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L3 = compile("1-0:62.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+
     private static final Pattern POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN = Pattern.compile("(?<timestamp>\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})(?<dstIndicator>([SW]))\\)\\((?<duration>\\d{10})\\*s\\)");
 
     // Slave devices (minimum of 0, maximum of 4)
@@ -109,30 +114,37 @@ public class DsmrParser {
         smartMeterMessage.setTimestamp(toLocalDateTime(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
         smartMeterMessage.setTimestampDstIndicator(toDstindicator(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR, message)));
         smartMeterMessage.setEquipmentIdentifierElectricity(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message));
+
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_1, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2, message)));
+
         smartMeterMessage.setTariffIndicatorElectricity(integerFromString(extractFromMessage(TARIFF_INDICATOR_ELECTRICITY, message)));
         smartMeterMessage.setActualElectricityPowerDelivered(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
-        smartMeterMessage.setActualElectricityPowerRecieved(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECIEVED, message)));
+        smartMeterMessage.setActualElectricityPowerReceived(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECEIVED, message)));
+
         smartMeterMessage.setNumberOfPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE, message)));
         smartMeterMessage.setNumberOfLongPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE, message)));
         smartMeterMessage.setNumberOfVoltageSagsInPhaseL1(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L1, message)));
         smartMeterMessage.setNumberOfVoltageSagsInPhaseL2(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2, message)));
+//        smartMeterMessage.setNumberOfVoltageSagsInPhaseL3(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L3, message)));
+
         smartMeterMessage.setTextMessageCodes(octetStringToString(extractFromMessage(TEXT_MESSAGE_CODES, message)));
         smartMeterMessage.setTextMessage(octetStringToString(extractFromMessage(TEXT_MESSAGE, message)));
+
         smartMeterMessage.setVoltageL1(bigDecimalFromString(extractFromMessage(VOLTAGE_L1, message)));
         smartMeterMessage.setVoltageL2(bigDecimalFromString(extractFromMessage(VOLTAGE_L2, message)));
         smartMeterMessage.setVoltageL3(bigDecimalFromString(extractFromMessage(VOLTAGE_L3, message)));
+
         smartMeterMessage.setInstantaneousCurrentL1(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
         smartMeterMessage.setInstantaneousCurrentL2(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION, message)));
         smartMeterMessage.setInstantaneousCurrentL3(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION, message)));
-        smartMeterMessage.setInstantaneousActivePowerL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L1, message)));
-        smartMeterMessage.setInstantaneousActivePowerL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L2, message)));
+
         smartMeterMessage.setInstantaneousPowerDeliveredL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L1, message)));
         smartMeterMessage.setInstantaneousPowerDeliveredL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L2, message)));
         smartMeterMessage.setInstantaneousPowerDeliveredL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L3, message)));
+
         smartMeterMessage.setInstantaneousPowerReceivedL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L1, message)));
         smartMeterMessage.setInstantaneousPowerReceivedL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L2, message)));
         smartMeterMessage.setInstantaneousPowerReceivedL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L3, message)));
