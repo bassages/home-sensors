@@ -14,8 +14,9 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class Dsmr422Parser {
-    private static final String SUPPORTED_DSMR_VERSION = "42";
+public class DsmrParser {
+    private static final String SUPPORTED_DSMR_VERSION_42 = "42";
+    private static final String SUPPORTED_DSMR_VERSION_50 = "50";
     private static final String DSMR_TIMESTAMP_FORMAT = "yyMMddHHmmss";
     private static final String GROUP_NAME = "attributeValue";
 
@@ -43,9 +44,20 @@ public class Dsmr422Parser {
     private static final Pattern NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2 = compile("1-0:32.36.0\\((?<"+ GROUP_NAME + ">" + FIVE_DIGITS + ")\\)");
     private static final Pattern TEXT_MESSAGE_CODES = compile("0-0:96.13.1\\((?<"+ GROUP_NAME +">.*?)\\)");
     private static final Pattern TEXT_MESSAGE = compile("0-0:96.13.0\\((?<"+ GROUP_NAME +">.*?)\\)");
+    private static final Pattern VOLTAGE_L1 = compile("1-0:32.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
+    private static final Pattern VOLTAGE_L2 = compile("1-0:52.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
+    private static final Pattern VOLTAGE_L3 = compile("1-0:72.7.0\\((?<" + GROUP_NAME + ">\\d{3}\\.\\d)\\*V\\)");
     private static final Pattern INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION = compile("1-0:31.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
+    private static final Pattern INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION = compile("1-0:51.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
+    private static final Pattern INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION = compile("1-0:71.7.0\\((?<"+ GROUP_NAME +">\\d{3})\\*A\\)");
     private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern INSTANTANEOUS_ACTIVE_POWER_L2 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L1 = compile("1-0:21.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L2 = compile("1-0:41.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_DELIVERED_L3 = compile("1-0:61.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L1 = compile("1-0:22.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L2 = compile("1-0:42.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
+    private static final Pattern INSTANTANEOUS_POWER_RECEIVED_L3 = compile("1-0:62.7.0\\((?<" + GROUP_NAME + ">" + KW_VALUE + "\\)");
     private static final Pattern POWER_FAILURE_LOG_VALUE_TIMESTAMP_PATTERN = Pattern.compile("(?<timestamp>\\d{" + DSMR_TIMESTAMP_FORMAT.length() + "})(?<dstIndicator>([SW]))\\)\\((?<duration>\\d{10})\\*s\\)");
 
     // Slave devices (minimum of 0, maximum of 4)
@@ -80,15 +92,16 @@ public class Dsmr422Parser {
     }
 
     public SmartMeterMessage parse(final String message) throws InvalidSmartMeterMessageException, UnsupportedVersionException {
-        final String[] linesInMessage = message.split("\n|\r\n");
+        final String[] linesInMessage = message.split("\\R");
         verifyChecksum(linesInMessage);
 
         final SmartMeterMessage smartMeterMessage = new SmartMeterMessage();
 
         final String versionInformationForP1Output = extractFromMessage(VERSION_INFORMATION_FOR_P1_OUTPUT, message);
 
-        if (!SUPPORTED_DSMR_VERSION.equals(versionInformationForP1Output)) {
-            throw new UnsupportedVersionException("Unsupported DSMR version: " + versionInformationForP1Output + " (The supported version is " + SUPPORTED_DSMR_VERSION + ")");
+        if (!isSupportedVersion(versionInformationForP1Output)) {
+            throw new UnsupportedVersionException("Unsupported DSMR version: " + versionInformationForP1Output + " (The supported versions are " + SUPPORTED_DSMR_VERSION_42
+                    + " and " + SUPPORTED_DSMR_VERSION_50 + ")");
         }
 
         smartMeterMessage.setVersionInformationForP1Output(versionInformationForP1Output);
@@ -109,9 +122,20 @@ public class Dsmr422Parser {
         smartMeterMessage.setNumberOfVoltageSagsInPhaseL2(integerFromString(extractFromMessage(NUMBER_OF_VOLTAGE_SAGS_IN_PHASE_L2, message)));
         smartMeterMessage.setTextMessageCodes(octetStringToString(extractFromMessage(TEXT_MESSAGE_CODES, message)));
         smartMeterMessage.setTextMessage(octetStringToString(extractFromMessage(TEXT_MESSAGE, message)));
+        smartMeterMessage.setVoltageL1(bigDecimalFromString(extractFromMessage(VOLTAGE_L1, message)));
+        smartMeterMessage.setVoltageL2(bigDecimalFromString(extractFromMessage(VOLTAGE_L2, message)));
+        smartMeterMessage.setVoltageL3(bigDecimalFromString(extractFromMessage(VOLTAGE_L3, message)));
         smartMeterMessage.setInstantaneousCurrentL1(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousCurrentL2(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousCurrentL3(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION, message)));
         smartMeterMessage.setInstantaneousActivePowerL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L1, message)));
         smartMeterMessage.setInstantaneousActivePowerL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_ACTIVE_POWER_L2, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L1, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L2, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L3, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L1, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L2, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L3, message)));
 
         for (int i = 0; i < 4; i++) {
             final String deviceType = extractFromMessage(DEVICE_TYPE[i], message);
@@ -120,14 +144,15 @@ public class Dsmr422Parser {
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(bigDecimalFromString(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
                         toLocalDateTime(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP[i], message)));
-                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(toDstindicator(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP_DST_INDICATOR[i], message)));
+                smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator(
+                        toDstindicator(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP_DST_INDICATOR[i], message)));
             }
         }
 
         final String powerFailureEventLogNrOfItems = extractFromMessage(LONG_POWER_FAILURE_EVENT_LOG_NR_OF_ITEMS, message);
         if (StringUtils.isNotBlank(powerFailureEventLogNrOfItems)) {
             final Integer powerFailureEventLogNrOfItemsInteger = integerFromString(powerFailureEventLogNrOfItems);
-            if (powerFailureEventLogNrOfItemsInteger != null && powerFailureEventLogNrOfItemsInteger > 0) {
+            if (powerFailureEventLogNrOfItemsInteger > 0) {
                 parsePowerFailureLog(message, smartMeterMessage);
             }
         }
@@ -136,6 +161,11 @@ public class Dsmr422Parser {
 
     private BigDecimal bigDecimalFromString(final String string) {
         return string == null ? null : new BigDecimal(string) ;
+    }
+
+    private boolean isSupportedVersion(final String versionInformationForP1Output) {
+        return SUPPORTED_DSMR_VERSION_42.equals(versionInformationForP1Output)
+                || SUPPORTED_DSMR_VERSION_50.equals(versionInformationForP1Output);
     }
 
     private Integer integerFromString(final String string) {

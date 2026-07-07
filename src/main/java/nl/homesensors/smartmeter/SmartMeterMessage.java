@@ -38,9 +38,20 @@ public class SmartMeterMessage {
     private Integer numberOfVoltageSagsInPhaseL2;
     private String textMessageCodes;
     private String textMessage;
+    private BigDecimal voltageL1;
+    private BigDecimal voltageL2;
+    private BigDecimal voltageL3;
     private Integer instantaneousCurrentL1;
+    private Integer instantaneousCurrentL2;
+    private Integer instantaneousCurrentL3;
     private BigDecimal instantaneousActivePowerL1;
     private BigDecimal instantaneousActivePowerL2;
+    private BigDecimal instantaneousPowerDeliveredL1;
+    private BigDecimal instantaneousPowerDeliveredL2;
+    private BigDecimal instantaneousPowerDeliveredL3;
+    private BigDecimal instantaneousPowerReceivedL1;
+    private BigDecimal instantaneousPowerReceivedL2;
+    private BigDecimal instantaneousPowerReceivedL3;
 
     private String equipmentIdentifierGas;
     private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;

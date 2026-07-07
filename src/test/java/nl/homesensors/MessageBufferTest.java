@@ -1,7 +1,7 @@
 package nl.homesensors;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
-import nl.homesensors.smartmeter.Dsmr422Parser;
+import nl.homesensors.smartmeter.DsmrParser;
 import nl.homesensors.smartmeter.MessageBuffer;
 import nl.homesensors.smartmeter.SmartMeterMessage;
 import nl.homesensors.smartmeter.publisher.SmartMeterMessagePublisher;
@@ -32,7 +32,7 @@ class MessageBufferTest {
     @Mock
     private SmartMeterMessagePublisher smartMeterMessagePublisher;
     @Mock
-    private Dsmr422Parser dsmr422Parser;
+    private DsmrParser dsmrParser;
 
     @Mock
     private SmartMeterMessage smartMeterMessage;
@@ -41,13 +41,13 @@ class MessageBufferTest {
 
     @BeforeEach
     void setup() {
-        messageBuffer = new MessageBuffer(dsmr422Parser, singletonList(smartMeterMessagePublisher));
+        messageBuffer = new MessageBuffer(dsmrParser, singletonList(smartMeterMessagePublisher));
     }
 
     @Test
     void shouldParseSingleMessage() throws Exception {
         when(smartMeterMessagePublisher.isEnabled()).thenReturn(true);
-        when(dsmr422Parser.parse(anyString())).thenReturn(smartMeterMessage);
+        when(dsmrParser.parse(anyString())).thenReturn(smartMeterMessage);
 
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
@@ -61,7 +61,7 @@ class MessageBufferTest {
     void shouldParseMultipleMessages() throws Exception {
         // given
         when(smartMeterMessagePublisher.isEnabled()).thenReturn(true);
-        when(dsmr422Parser.parse(anyString())).thenReturn(smartMeterMessage);
+        when(dsmrParser.parse(anyString())).thenReturn(smartMeterMessage);
 
         try (final Stream<String> lines = Files.lines(Paths.get(this.getClass().getResource("message-4.2.2-1.txt").toURI()), defaultCharset())) {
             lines.forEach(line -> messageBuffer.addLine(line));
@@ -77,7 +77,7 @@ class MessageBufferTest {
         assertThat(messageBuffer.getBufferedLinesSize()).isZero();
 
         verify(smartMeterMessagePublisher, times(2)).publish(any(SmartMeterMessage.class));
-        verify(dsmr422Parser, times(2)).parse(anyString());
+        verify(dsmrParser, times(2)).parse(anyString());
     }
 
     @Test
@@ -85,7 +85,7 @@ class MessageBufferTest {
     void whenMessageIsInvalidThenItsLoggedAndIgnored(
             final ArgumentCaptor<LoggingEvent> loggerEventCaptor) throws Exception {
         // when
-        when(dsmr422Parser.parse(anyString())).thenThrow(new Dsmr422Parser.InvalidSmartMeterMessageException("Noooooo!"));
+        when(dsmrParser.parse(anyString())).thenThrow(new DsmrParser.InvalidSmartMeterMessageException("Noooooo!"));
 
         messageBuffer.addLine("/bullSh#tLine1"); // Because line starts with "/", it's considered to be the first line of a message
         messageBuffer.addLine("bullSh#tLine2");

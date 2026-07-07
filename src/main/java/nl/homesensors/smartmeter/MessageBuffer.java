@@ -11,13 +11,13 @@ import java.util.List;
 @Slf4j
 @Component
 public class MessageBuffer {
-    private final Dsmr422Parser dsmr422Parser;
+    private final DsmrParser dsmrParser;
     private final Collection<SmartMeterMessagePublisher> smartMeterMessagePublishers;
 
     private final List<String> bufferedLines = new ArrayList<>();
 
-    public MessageBuffer(final Dsmr422Parser dsmr422Parser, final List<SmartMeterMessagePublisher> smartMeterMessagePublishers) {
-        this.dsmr422Parser = dsmr422Parser;
+    public MessageBuffer(final DsmrParser dsmrParser, final List<SmartMeterMessagePublisher> smartMeterMessagePublishers) {
+        this.dsmrParser = dsmrParser;
         this.smartMeterMessagePublishers = smartMeterMessagePublishers;
         log.debug("Number of SmartMeter publishers: {}", smartMeterMessagePublishers.size());
     }
@@ -34,11 +34,11 @@ public class MessageBuffer {
         if (isLastLineOfP1Message(line)) {
             final String message = String.join("\n", bufferedLines);
             try {
-                final SmartMeterMessage smartMeterMessage = dsmr422Parser.parse(message);
+                final SmartMeterMessage smartMeterMessage = dsmrParser.parse(message);
                 smartMeterMessagePublishers.stream()
                                            .filter(SmartMeterMessagePublisher::isEnabled)
                                            .forEach(publisher -> publisher.publish(smartMeterMessage));
-            } catch (final Dsmr422Parser.InvalidSmartMeterMessageException | Dsmr422Parser.UnsupportedVersionException e) {
+            } catch (final DsmrParser.InvalidSmartMeterMessageException | DsmrParser.UnsupportedVersionException e) {
                 log.error("Ignoring invalid message: {}", message);
             }
             bufferedLines.clear();
