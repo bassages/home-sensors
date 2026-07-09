@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import static java.lang.String.format;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,7 +25,9 @@ public class HomeServerSmartMeterPublisher implements SmartMeterMessagePublisher
     @Override
     public void publish(final SmartMeterMessage smartMeterMessage) {
         try {
-            homeServerApi.post(API_PATH, homeServerSmartMeterMessageFactory.create(smartMeterMessage));
+            final String json = homeServerSmartMeterMessageFactory.create(smartMeterMessage);
+            log.debug("{}", json);
+            homeServerApi.post(API_PATH, json);
         } catch (final JsonProcessingException e) {
             log.error(format("Failed to map message to json. Message=%s", smartMeterMessage), e);
         }

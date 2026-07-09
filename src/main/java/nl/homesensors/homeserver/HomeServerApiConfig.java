@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 record HomeServerApiConfig(
         String url,
         String basicAuthUser,
-        String basicAuthPassword
+        String basicAuthPassword,
+        boolean logOnly
 ) { }
