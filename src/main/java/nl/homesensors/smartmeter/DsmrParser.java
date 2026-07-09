@@ -113,7 +113,7 @@ public class DsmrParser {
         smartMeterMessage.setHeader(extractFromMessage(HEADER, message));
         smartMeterMessage.setTimestamp(toLocalDateTime(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE, message)));
         smartMeterMessage.setTimestampDstIndicator(toDstindicator(extractFromMessage(DATETIMESTAMP_OF_THE_P1_MESSAGE_DST_INDICATOR, message)));
-        smartMeterMessage.setEquipmentIdentifierElectricity(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message));
+        smartMeterMessage.setEquipmentIdentifierElectricity(octetStringToString(extractFromMessage(EQUIPMENT_IDENTIFIER_ELECTRICITY, message)));
 
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff1(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_1, message)));
         smartMeterMessage.setMeterReadingElectricityDeliveredToClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_TO_CLIENT_TARIFF_2, message)));
@@ -152,7 +152,7 @@ public class DsmrParser {
         for (int i = 0; i < 4; i++) {
             final String deviceType = extractFromMessage(DEVICE_TYPE[i], message);
             if (DeviceType.GAS.getDeviceTypeIdentifier().equals(deviceType)) {
-                smartMeterMessage.setEquipmentIdentifierGas(extractFromMessage(DEVICE_EQUIPMENT_IDENTIFIER[i], message));
+                smartMeterMessage.setEquipmentIdentifierGas(octetStringToString(extractFromMessage(DEVICE_EQUIPMENT_IDENTIFIER[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClient(bigDecimalFromString(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_DELIVERED_TO_CLIENT[i], message)));
                 smartMeterMessage.setLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp(
                         toLocalDateTime(extractFromMessage(DEVICE_LAST_HOURLY_VALUE_CAPTURE_TIMESTAMP[i], message)));

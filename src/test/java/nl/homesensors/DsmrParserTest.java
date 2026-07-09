@@ -38,7 +38,10 @@ class DsmrParserTest {
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("42");
         assertThat(smartMeterMessage.getTimestamp()).isEqualTo(LocalDateTime.of(2017, 2, 24, 19, 31,18));
         assertThat(smartMeterMessage.getTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
-        assertThat(smartMeterMessage.getEquipmentIdentifierElectricity()).isEqualTo("4530303235303030303738363130313136");
+
+        assertThat(smartMeterMessage.getEquipmentIdentifierElectricity()).isEqualTo("E0025000078610116");
+        assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("G0025003502969317");
+
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1()).isEqualTo(new BigDecimal("1.628"));
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2()).isEqualTo(new BigDecimal("5.573"));
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(new BigDecimal("1.301"));
@@ -54,7 +57,6 @@ class DsmrParserTest {
         assertThat(smartMeterMessage.getTextMessageCodes()).isNull();
         assertThat(smartMeterMessage.getTextMessage()).isNull();
         assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isZero();
-        assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("4730303235303033353032393639333137");
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).isEqualTo(LocalDateTime.of(2017, 2, 24, 19, 0,0));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
@@ -98,6 +100,8 @@ class DsmrParserTest {
         final SmartMeterMessage smartMeterMessage = dsmrParser.parse(message);
 
         assertThat(smartMeterMessage.getVersionInformationForP1Output()).isEqualTo("50");
+        assertThat(smartMeterMessage.getEquipmentIdentifierElectricity()).isEqualTo("E0097000000162225");
+        assertThat(smartMeterMessage.getEquipmentIdentifierGas()).isEqualTo("G0102002412453224");
         assertThat(smartMeterMessage.getVoltageL1()).isEqualTo(new BigDecimal("223.0"));
         assertThat(smartMeterMessage.getVoltageL2()).isEqualTo(new BigDecimal("225.0"));
         assertThat(smartMeterMessage.getVoltageL3()).isEqualTo(new BigDecimal("223.0"));
