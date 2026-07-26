@@ -71,6 +71,9 @@ class HomeServerSmartMeterMessageFactory {
     }
 
     private Integer kwToWatt(final BigDecimal kw) {
+        if (kw == null) {
+            return null;
+        }
         return kw.multiply(BigDecimal.valueOf(1000)).intValue();
     }
 
