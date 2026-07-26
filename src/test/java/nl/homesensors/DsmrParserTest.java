@@ -47,8 +47,8 @@ class DsmrParserTest {
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff1()).isEqualTo(new BigDecimal("1.301"));
         assertThat(smartMeterMessage.getMeterReadingElectricityDeliveredByClientTariff2()).isEqualTo(new BigDecimal("2.050"));
         assertThat(smartMeterMessage.getTariffIndicatorElectricity()).isEqualTo(2);
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.042"));
-        assertThat(smartMeterMessage.getActualElectricityPowerReceived()).isEqualTo(new BigDecimal("0.000"));
+        assertThat(smartMeterMessage.getActualElectricityPowerDeliveredKw()).isEqualTo(new BigDecimal("0.042"));
+        assertThat(smartMeterMessage.getActualElectricityPowerReceivedKw()).isEqualTo(new BigDecimal("0.000"));
         assertThat(smartMeterMessage.getNumberOfPowerFailuresInAnyPhase()).isEqualTo(1);
         assertThat(smartMeterMessage.getNumberOfLongPowerFailuresInAnyPhase()).isEqualTo(1);
         assertThat(smartMeterMessage.getNumberOfVoltageSagsInPhaseL1()).isEqualTo(10);
@@ -56,7 +56,7 @@ class DsmrParserTest {
         assertThat(smartMeterMessage.getNumberOfVoltageSagsInPhaseL3()).isNull();
         assertThat(smartMeterMessage.getTextMessageCodes()).isNull();
         assertThat(smartMeterMessage.getTextMessage()).isNull();
-        assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isZero();
+        assertThat(smartMeterMessage.getInstantaneousCurrentL1Ampere()).isZero();
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClient()).isEqualTo(new BigDecimal("13.027"));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestamp()).isEqualTo(LocalDateTime.of(2017, 2, 24, 19, 0,0));
         assertThat(smartMeterMessage.getLastHourlyValueOfTemperatureConvertedGasDeliveredToClientCaptureTimestampDstIndicator()).isEqualTo(SmartMeterMessage.DstIndicator.WINTER);
@@ -81,7 +81,7 @@ class DsmrParserTest {
 
         final SmartMeterMessage smartMeterMessage = dsmrParser.parse(message);
 
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.453"));
+        assertThat(smartMeterMessage.getActualElectricityPowerDeliveredKw()).isEqualTo(new BigDecimal("0.453"));
     }
 
     @Test
@@ -90,7 +90,7 @@ class DsmrParserTest {
 
         final SmartMeterMessage smartMeterMessage = dsmrParser.parse(message);
 
-        assertThat(smartMeterMessage.getActualElectricityPowerDelivered()).isEqualTo(new BigDecimal("0.454"));
+        assertThat(smartMeterMessage.getActualElectricityPowerDeliveredKw()).isEqualTo(new BigDecimal("0.454"));
     }
 
     @Test
@@ -105,15 +105,15 @@ class DsmrParserTest {
         assertThat(smartMeterMessage.getVoltageL1()).isEqualTo(new BigDecimal("223.0"));
         assertThat(smartMeterMessage.getVoltageL2()).isEqualTo(new BigDecimal("225.0"));
         assertThat(smartMeterMessage.getVoltageL3()).isEqualTo(new BigDecimal("223.0"));
-        assertThat(smartMeterMessage.getInstantaneousCurrentL1()).isZero();
-        assertThat(smartMeterMessage.getInstantaneousCurrentL2()).isZero();
-        assertThat(smartMeterMessage.getInstantaneousCurrentL3()).isZero();
-        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL1()).isEqualTo(new BigDecimal("0.062"));
-        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL2()).isEqualTo(new BigDecimal("0.000"));
-        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL3()).isEqualTo(new BigDecimal("0.010"));
-        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL1()).isEqualTo(new BigDecimal("0.000"));
-        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL2()).isEqualTo(new BigDecimal("0.000"));
-        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL3()).isEqualTo(new BigDecimal("0.000"));
+        assertThat(smartMeterMessage.getInstantaneousCurrentL1Ampere()).isZero();
+        assertThat(smartMeterMessage.getInstantaneousCurrentL2Ampere()).isZero();
+        assertThat(smartMeterMessage.getInstantaneousCurrentL3Ampere()).isZero();
+        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL1Kw()).isEqualTo(new BigDecimal("0.062"));
+        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL2Kw()).isEqualTo(new BigDecimal("0.000"));
+        assertThat(smartMeterMessage.getInstantaneousPowerDeliveredL3Kw()).isEqualTo(new BigDecimal("0.010"));
+        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL1Kw()).isEqualTo(new BigDecimal("0.000"));
+        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL2Kw()).isEqualTo(new BigDecimal("0.000"));
+        assertThat(smartMeterMessage.getInstantaneousPowerReceivedL3Kw()).isEqualTo(new BigDecimal("0.000"));
     }
 
     private String normalizeTelegramForChecksum(final String message) {

@@ -36,7 +36,7 @@ class HomeServerSmartMeterMessageFactory {
     private HomeServerMeterstand mapToHomeServerMeterstand(final SmartMeterMessage smartMeterMessage) {
         return HomeServerMeterstand.builder()
                 .datumtijd(smartMeterMessage.getTimestamp())
-                .stroomOpgenomenVermogenInWatt(smartMeterMessage.getActualElectricityPowerDelivered().multiply(BigDecimal.valueOf(1000)).intValue())
+                .stroomOpgenomenVermogenInWatt(kwToWatt(smartMeterMessage.getActualElectricityPowerDeliveredKw()))
                 .stroomTariefIndicator(smartMeterMessage.getTariffIndicatorElectricity())
                 .stroomTarief1(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff1())
                 .stroomTarief2(smartMeterMessage.getMeterReadingElectricityDeliveredToClientTariff2())
@@ -44,6 +44,12 @@ class HomeServerSmartMeterMessageFactory {
                 .voltageL1(toRoundedInteger(smartMeterMessage.getVoltageL1()))
                 .voltageL2(toRoundedInteger(smartMeterMessage.getVoltageL2()))
                 .voltageL3(toRoundedInteger(smartMeterMessage.getVoltageL3()))
+                .directGeleverdVermogenL1InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL1Kw()))
+                .directGeleverdVermogenL2InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL2Kw()))
+                .directGeleverdVermogenL3InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL3Kw()))
+                .directTeruggeleverdVermogenL1InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerReceivedL1Kw()))
+                .directTeruggeleverdVermogenL3InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerReceivedL3Kw()))
+                .directTeruggeleverdVermogenL2InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerReceivedL2Kw()))
                 .aantalSpanningsDippenInFaseL1(smartMeterMessage.getNumberOfVoltageSagsInPhaseL1())
                 .aantalSpanningsDippenInFaseL2(smartMeterMessage.getNumberOfVoltageSagsInPhaseL2())
                 .aantalSpanningsDippenInFaseL3(smartMeterMessage.getNumberOfVoltageSagsInPhaseL3())
@@ -62,6 +68,10 @@ class HomeServerSmartMeterMessageFactory {
                                 .toList()
                 )
                 .build();
+    }
+
+    private Integer kwToWatt(final BigDecimal kw) {
+        return kw.multiply(BigDecimal.valueOf(1000)).intValue();
     }
 
     private Integer toRoundedInteger(final BigDecimal value) {
@@ -99,6 +109,14 @@ class HomeServerSmartMeterMessageFactory {
         private Integer voltageL1;
         private Integer voltageL2;
         private Integer voltageL3;
+
+        private Integer directGeleverdVermogenL1InWatt;
+        private Integer directGeleverdVermogenL2InWatt;
+        private Integer directGeleverdVermogenL3InWatt;
+
+        private Integer directTeruggeleverdVermogenL1InWatt;
+        private Integer directTeruggeleverdVermogenL2InWatt;
+        private Integer directTeruggeleverdVermogenL3InWatt;
 
         private Integer aantalLangeStroomStoringenInAlleFases;
         private List<LangeStroomStoring> langeStroomStoringen;

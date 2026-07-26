@@ -121,8 +121,8 @@ public class DsmrParser {
         smartMeterMessage.setMeterReadingElectricityDeliveredByClientTariff2(bigDecimalFromString(extractFromMessage(METER_READING_ELECTRICITY_DELIVERED_BY_CLIENT_TARIFF_2, message)));
 
         smartMeterMessage.setTariffIndicatorElectricity(integerFromString(extractFromMessage(TARIFF_INDICATOR_ELECTRICITY, message)));
-        smartMeterMessage.setActualElectricityPowerDelivered(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
-        smartMeterMessage.setActualElectricityPowerReceived(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECEIVED, message)));
+        smartMeterMessage.setActualElectricityPowerDeliveredKw(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_DELIVERED, message)));
+        smartMeterMessage.setActualElectricityPowerReceivedKw(bigDecimalFromString(extractFromMessage(ACTUAL_ELECTRICITY_POWER_RECEIVED, message)));
 
         smartMeterMessage.setNumberOfPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_POWER_FAILURES_IN_ANY_PHASE, message)));
         smartMeterMessage.setNumberOfLongPowerFailuresInAnyPhase(integerFromString(extractFromMessage(NUMBER_OF_LONG_POWER_FAILURES_IN_ANY_PHASE, message)));
@@ -137,17 +137,17 @@ public class DsmrParser {
         smartMeterMessage.setVoltageL2(bigDecimalFromString(extractFromMessage(VOLTAGE_L2, message)));
         smartMeterMessage.setVoltageL3(bigDecimalFromString(extractFromMessage(VOLTAGE_L3, message)));
 
-        smartMeterMessage.setInstantaneousCurrentL1(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
-        smartMeterMessage.setInstantaneousCurrentL2(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION, message)));
-        smartMeterMessage.setInstantaneousCurrentL3(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousCurrentL1Ampere(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L1_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousCurrentL2Ampere(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L2_IN_A_RESOLUTION, message)));
+        smartMeterMessage.setInstantaneousCurrentL3Ampere(integerFromString(extractFromMessage(INSTANTANEOUS_CURRENT_L3_IN_A_RESOLUTION, message)));
 
-        smartMeterMessage.setInstantaneousPowerDeliveredL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L1, message)));
-        smartMeterMessage.setInstantaneousPowerDeliveredL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L2, message)));
-        smartMeterMessage.setInstantaneousPowerDeliveredL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L3, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL1Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L1, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL2Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L2, message)));
+        smartMeterMessage.setInstantaneousPowerDeliveredL3Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_DELIVERED_L3, message)));
 
-        smartMeterMessage.setInstantaneousPowerReceivedL1(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L1, message)));
-        smartMeterMessage.setInstantaneousPowerReceivedL2(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L2, message)));
-        smartMeterMessage.setInstantaneousPowerReceivedL3(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L3, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL1Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L1, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL2Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L2, message)));
+        smartMeterMessage.setInstantaneousPowerReceivedL3Kw(bigDecimalFromString(extractFromMessage(INSTANTANEOUS_POWER_RECEIVED_L3, message)));
 
         for (int i = 0; i < 4; i++) {
             final String deviceType = extractFromMessage(DEVICE_TYPE[i], message);

@@ -29,8 +29,8 @@ public class SmartMeterMessage {
     private BigDecimal meterReadingElectricityDeliveredByClientTariff1;
     private BigDecimal meterReadingElectricityDeliveredByClientTariff2;
     private Integer tariffIndicatorElectricity;
-    private BigDecimal actualElectricityPowerDelivered;
-    private BigDecimal actualElectricityPowerReceived;
+    private BigDecimal actualElectricityPowerDeliveredKw;
+    private BigDecimal actualElectricityPowerReceivedKw;
     private Integer numberOfPowerFailuresInAnyPhase;
     private Integer numberOfLongPowerFailuresInAnyPhase;
     private final List<LongPowerFailureLogItem> longPowerFailureLog = new ArrayList<>();
@@ -46,19 +46,19 @@ public class SmartMeterMessage {
     private BigDecimal voltageL3;
 
     // Stroomsterkte. Unit: Ampere
-    private Integer instantaneousCurrentL1;
-    private Integer instantaneousCurrentL2;
-    private Integer instantaneousCurrentL3;
+    private Integer instantaneousCurrentL1Ampere;
+    private Integer instantaneousCurrentL2Ampere;
+    private Integer instantaneousCurrentL3Ampere;
 
     // Actueel verbruik per fase. Unit: kW
-    private BigDecimal instantaneousPowerDeliveredL1;
-    private BigDecimal instantaneousPowerDeliveredL2;
-    private BigDecimal instantaneousPowerDeliveredL3;
+    private BigDecimal instantaneousPowerDeliveredL1Kw;
+    private BigDecimal instantaneousPowerDeliveredL2Kw;
+    private BigDecimal instantaneousPowerDeliveredL3Kw;
 
     // Actuele teruglevering per fase. Unit: kW
-    private BigDecimal instantaneousPowerReceivedL1;
-    private BigDecimal instantaneousPowerReceivedL2;
-    private BigDecimal instantaneousPowerReceivedL3;
+    private BigDecimal instantaneousPowerReceivedL1Kw;
+    private BigDecimal instantaneousPowerReceivedL2Kw;
+    private BigDecimal instantaneousPowerReceivedL3Kw;
 
     private String equipmentIdentifierGas;
     private BigDecimal lastHourlyValueOfTemperatureConvertedGasDeliveredToClient;
