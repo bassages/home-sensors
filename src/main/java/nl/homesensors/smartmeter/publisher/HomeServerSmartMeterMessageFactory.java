@@ -44,6 +44,9 @@ class HomeServerSmartMeterMessageFactory {
                 .voltageL1(toRoundedInteger(smartMeterMessage.getVoltageL1()))
                 .voltageL2(toRoundedInteger(smartMeterMessage.getVoltageL2()))
                 .voltageL3(toRoundedInteger(smartMeterMessage.getVoltageL3()))
+                .instantaneousCurrentL1Ampere(smartMeterMessage.getInstantaneousCurrentL1Ampere())
+                .instantaneousCurrentL2Ampere(smartMeterMessage.getInstantaneousCurrentL2Ampere())
+                .instantaneousCurrentL3Ampere(smartMeterMessage.getInstantaneousCurrentL3Ampere())
                 .directGeleverdVermogenL1InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL1Kw()))
                 .directGeleverdVermogenL2InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL2Kw()))
                 .directGeleverdVermogenL3InWatt(kwToWatt(smartMeterMessage.getInstantaneousPowerDeliveredL3Kw()))
@@ -112,6 +115,10 @@ class HomeServerSmartMeterMessageFactory {
         private Integer voltageL1;
         private Integer voltageL2;
         private Integer voltageL3;
+
+        private Integer instantaneousCurrentL1Ampere;
+        private Integer instantaneousCurrentL2Ampere;
+        private Integer instantaneousCurrentL3Ampere;
 
         private Integer directGeleverdVermogenL1InWatt;
         private Integer directGeleverdVermogenL2InWatt;

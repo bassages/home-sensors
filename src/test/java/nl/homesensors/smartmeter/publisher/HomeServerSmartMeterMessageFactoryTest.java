@@ -23,6 +23,9 @@ class HomeServerSmartMeterMessageFactoryTest {
         smartMeterMessage.setVoltageL1(new BigDecimal("223.4"));
         smartMeterMessage.setVoltageL2(new BigDecimal("225.5"));
         smartMeterMessage.setVoltageL3(new BigDecimal("226.6"));
+        smartMeterMessage.setInstantaneousCurrentL1Ampere(1);
+        smartMeterMessage.setInstantaneousCurrentL2Ampere(2);
+        smartMeterMessage.setInstantaneousCurrentL3Ampere(3);
 
         final LongPowerFailureLogItem longPowerFailureLogItem = new LongPowerFailureLogItem();
         longPowerFailureLogItem.setFailureDurationInSeconds(12);
@@ -49,6 +52,9 @@ class HomeServerSmartMeterMessageFactoryTest {
                     "aantalSpanningsDippenInFaseL2":null,
                     "aantalSpanningsDippenInFaseL3":null,
                     "aantalLangeStroomStoringenInAlleFases":null,
+                    "instantaneousCurrentL1Ampere":1,
+                    "instantaneousCurrentL2Ampere":2,
+                    "instantaneousCurrentL3Ampere":3,
                     "directGeleverdVermogenL1InWatt":null,
                     "directGeleverdVermogenL2InWatt":null,
                     "directGeleverdVermogenL3InWatt":null,
